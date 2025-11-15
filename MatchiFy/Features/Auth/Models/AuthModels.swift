@@ -6,7 +6,7 @@ struct LoginRequest: Codable {
     let password: String
 }
 
-// MARK: - LOGIN User Model
+// MARK: - User Model (used everywhere)
 struct UserModel: Codable {
     let id: String?            // Sometimes backend uses "id"
     let _id: String?           // MongoDB uses "_id"
@@ -17,6 +17,8 @@ struct UserModel: Codable {
     let profileImage: String?
     let location: String?
     let talent: String?
+    let createdAt: String?
+    let updatedAt: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -28,7 +30,24 @@ struct UserModel: Codable {
         case profileImage
         case location
         case talent
+        case createdAt
+        case updatedAt
     }
+    
+    /// URL complète de la photo de profil (ton backend renvoie un chemin relatif type "uploads/profile/xxx.jpg")
+    var profileImageURL: URL? {
+        guard var path = profileImage else { return nil }
+
+        // Si le backend ne renvoie PAS de slash, on l'ajoute
+        if !path.hasPrefix("/") {
+            path = "/" + path
+        }
+
+        // Ton IP locale ici :
+        let base = "http://192.168.1.102:3000"
+
+        return URL(string: base + path)
+    }   
 }
 
 // MARK: - Login Response
@@ -71,12 +90,11 @@ struct RecruiterSignupResponse: Codable {
     let token: String
 }
 
-// MARK: - Forgot Password Request
+// MARK: - Forgot Password
 struct ForgotPasswordRequest: Codable {
     let email: String
 }
 
-// MARK: - Forgot Password Response
 struct ForgotPasswordResponse: Codable {
     let message: String
     let expiresIn: String?
@@ -100,4 +118,10 @@ struct ResetPasswordRequest: Codable {
 
 struct ResetPasswordResponse: Codable {
     let message: String
+}
+
+// MARK: - Update Recruiter Profile Response
+struct UpdateRecruiterProfileResponse: Codable {
+    let message: String
+    let user: UserModel
 }

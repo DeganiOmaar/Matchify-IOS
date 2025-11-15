@@ -6,6 +6,7 @@ final class AuthManager: ObservableObject {
     static let shared = AuthManager()
     private init() {}
 
+    // MARK: - Published properties
     @Published var token: String? = nil
     @Published var user: UserModel? = nil
     @Published var isLoggedIn: Bool = false
@@ -15,11 +16,11 @@ final class AuthManager: ObservableObject {
     private let keychainService = "com.matchify.app"
     private let tokenAccount = "auth_token"
 
-    // MARK: - Keychain helpers
+    // MARK: - Keychain Save
     private func keychainSaveToken(_ token: String) {
         let tokenData = Data(token.utf8)
 
-        // Delete any existing item first
+        // Delete any existing token
         keychainDeleteToken()
 
         let query: [String: Any] = [
@@ -29,9 +30,11 @@ final class AuthManager: ObservableObject {
             kSecValueData as String: tokenData,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
         ]
+
         SecItemAdd(query as CFDictionary, nil)
     }
 
+    // MARK: - Keychain Load
     private func keychainLoadToken() -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -43,46 +46,51 @@ final class AuthManager: ObservableObject {
 
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
+
         guard status == errSecSuccess,
               let data = item as? Data,
               let token = String(data: data, encoding: .utf8) else {
             return nil
         }
+
         return token
     }
 
+    // MARK: - Keychain Delete
     private func keychainDeleteToken() {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,
             kSecAttrAccount as String: tokenAccount
         ]
+
         SecItemDelete(query as CFDictionary)
     }
 
-    // MARK: - Save login session (with rememberMe)
+    // MARK: - Save Login Session
     func saveLoginSession(from response: LoginResponse, rememberMe: Bool) {
-        // Always set in-memory state
+        // In-memory
         token = response.token
         user = response.user
         role = response.role
         isLoggedIn = true
 
         if rememberMe {
-            // Persist to Keychain + UserDefaults
+            // Persist token -> Keychain
             keychainSaveToken(response.token)
 
+            // Persist user -> UserDefaults
             if let encoded = try? JSONEncoder().encode(response.user) {
                 UserDefaults.standard.set(encoded, forKey: "current_user")
             }
         } else {
-            // Do NOT persist anything for this session
+            // Delete any stored session
             keychainDeleteToken()
             UserDefaults.standard.removeObject(forKey: "current_user")
         }
     }
 
-    // MARK: - Restore session on app launch
+    // MARK: - Restore Session (on app launch)
     func restoreSession() {
         let storedToken = keychainLoadToken()
         token = storedToken
@@ -96,7 +104,7 @@ final class AuthManager: ObservableObject {
             role = nil
         }
 
-        // Logged in only if we have both token & user persisted
+        // User is logged in only if both token + user exist
         isLoggedIn = (token != nil && user != nil)
     }
 
@@ -109,5 +117,15 @@ final class AuthManager: ObservableObject {
 
         keychainDeleteToken()
         UserDefaults.standard.removeObject(forKey: "current_user")
+    }
+}
+
+// MARK: - Update user after profile changes
+extension AuthManager {
+    func persistUpdatedUser(_ user: UserModel) {
+        self.user = user
+        if let encoded = try? JSONEncoder().encode(user) {
+            UserDefaults.standard.set(encoded, forKey: "current_user")
+        }
     }
 }
