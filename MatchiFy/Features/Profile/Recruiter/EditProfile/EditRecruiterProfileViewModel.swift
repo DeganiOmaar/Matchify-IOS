@@ -9,6 +9,7 @@ final class EditRecruiterProfileViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var phone: String = ""
     @Published var location: String = ""
+    @Published var description: String = ""
     @Published var selectedImage: UIImage? = nil
 
     @Published var isSaving: Bool = false
@@ -26,6 +27,7 @@ final class EditRecruiterProfileViewModel: ObservableObject {
             self.email = user.email
             self.phone = user.phone ?? ""
             self.location = user.location ?? ""
+            self.description = user.description ?? ""
         }
     }
 
@@ -41,7 +43,8 @@ final class EditRecruiterProfileViewModel: ObservableObject {
                     email: email,
                     phone: phone,
                     location: location,
-                    profileImage: selectedImage
+                    profileImage: selectedImage,
+                    description: description
                 )
 
                 // Mise à jour locale dans AuthManager

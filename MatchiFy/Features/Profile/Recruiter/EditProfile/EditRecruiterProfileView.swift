@@ -35,6 +35,7 @@ struct EditRecruiterProfileView: View {
             
             // MARK: - Personal Info
             Section(header: Text("Personal Info")) {
+                
                 TextField("Full Name", text: $vm.name)
                 
                 TextField("Email", text: $vm.email)
@@ -45,6 +46,10 @@ struct EditRecruiterProfileView: View {
                     .keyboardType(.phonePad)
                 
                 TextField("Location", text: $vm.location)
+                
+                // MARK: - Description
+                TextField("Description", text: $vm.description, axis: .vertical)
+                    .lineLimit(3...6)
             }
             
             // MARK: - Error

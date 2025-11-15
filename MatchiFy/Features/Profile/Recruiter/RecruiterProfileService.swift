@@ -12,7 +12,8 @@ final class RecruiterProfileService {
         email: String?,
         phone: String?,
         location: String?,
-        profileImage: UIImage?
+        profileImage: UIImage?,
+        description: String?
     ) async throws -> UpdateRecruiterProfileResponse {
 
         guard let token = AuthManager.shared.token else {
@@ -35,7 +36,8 @@ final class RecruiterProfileService {
             email: email,
             phone: phone,
             location: location,
-            profileImage: profileImage
+            profileImage: profileImage,
+            description: description
         )
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -57,7 +59,8 @@ final class RecruiterProfileService {
         email: String?,
         phone: String?,
         location: String?,
-        profileImage: UIImage?
+        profileImage: UIImage?,
+        description: String?
     ) throws -> Data {
 
         var body = Data()
@@ -70,11 +73,12 @@ final class RecruiterProfileService {
             body.append("Content-Disposition: form-data; name=\"\(name)\"\(line)\(line)")
             body.append("\(value)\(line)")
         }
-
+            
         addField("fullName", fullName)
         addField("email", email)
         addField("phone", phone)
         addField("location", location)
+        addField("description", description)   
 
         if let image = profileImage,
            let data = image.jpegData(compressionQuality: 0.85) {

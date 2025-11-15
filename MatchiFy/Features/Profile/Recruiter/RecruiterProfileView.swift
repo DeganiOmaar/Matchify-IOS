@@ -19,7 +19,7 @@ struct RecruiterProfileView: View {
                         .clipped()
                         .ignoresSafeArea(edges: .top)
                     
-                    // MARK: - Avatar (local OU distant)
+                    // MARK: - Avatar (local or remote)
                     avatarView
                         .offset(y: -60)
                         .padding(.bottom, -60)
@@ -46,13 +46,17 @@ struct RecruiterProfileView: View {
                     }
                     .padding(.top, 10)
                     
-                    // MARK: - Description
+                    // MARK: - Description (Dynamic)
                     VStack {
-                        Text("CEO System D, Because your satisfaction is everything & Standing out from the rest, and that’s what we want you to be as well.")
-                            .font(.system(size: 15))
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.center)
-                            .padding()
+                        Text(
+                            vm.user?.description?.isEmpty == false
+                            ? (vm.user?.description ?? "")
+                            : "You can add a description about your self."
+                        )
+                        .font(.system(size: 15))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding()
                     }
                     .frame(maxWidth: .infinity)
                     .background(Color.white)

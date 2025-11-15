@@ -19,6 +19,7 @@ struct UserModel: Codable {
     let talent: String?
     let createdAt: String?
     let updatedAt: String?
+    let description: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -32,6 +33,7 @@ struct UserModel: Codable {
         case talent
         case createdAt
         case updatedAt
+        case description
     }
     
     /// URL complète de la photo de profil (ton backend renvoie un chemin relatif type "uploads/profile/xxx.jpg")
