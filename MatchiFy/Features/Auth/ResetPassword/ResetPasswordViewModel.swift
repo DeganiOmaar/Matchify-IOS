@@ -19,8 +19,19 @@ final class ResetPasswordViewModel: ObservableObject {
     func resetPassword() {
         errorMessage = nil
         
+        // Validation
+        if newPassword.isEmpty || confirmPassword.isEmpty {
+            errorMessage = "Veuillez remplir tous les champs."
+            return
+        }
+        
         guard newPassword == confirmPassword else {
-            errorMessage = "Passwords do not match."
+            errorMessage = "Les mots de passe ne correspondent pas."
+            return
+        }
+        
+        if newPassword.count < 6 {
+            errorMessage = "Le mot de passe doit contenir au moins 6 caractères."
             return
         }
         
@@ -40,13 +51,8 @@ final class ResetPasswordViewModel: ObservableObject {
 
             } catch {
                 isLoading = false
-                errorMessage = extractError(error)
+                errorMessage = ErrorHandler.getErrorMessage(from: error, context: .passwordReset)
             }
         }
-    }
-    
-    private func extractError(_ error: Error) -> String {
-        if case ApiError.server(let msg) = error { return msg }
-        return error.localizedDescription
     }
 }

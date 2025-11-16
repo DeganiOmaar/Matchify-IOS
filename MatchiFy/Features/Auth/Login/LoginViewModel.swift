@@ -15,8 +15,15 @@ final class LoginViewModel: ObservableObject {
     // 🔥 UPDATED: now requires rememberMe
     @MainActor
     func login(rememberMe: Bool, completion: @escaping (LoginResponse?) -> Void) {
-        isLoading = true
         error = nil
+        
+        // Validation
+        if email.isEmpty || password.isEmpty {
+            error = "Veuillez remplir tous les champs."
+            return
+        }
+        
+        isLoading = true
 
         Task {
             do {
@@ -43,9 +50,6 @@ final class LoginViewModel: ObservableObject {
     }
 
     private func extractError(_ error: Error) -> String {
-        if case ApiError.server(let msg) = error {
-            return msg
-        }
-        return error.localizedDescription
+        return ErrorHandler.getErrorMessage(from: error, context: .login)
     }
 }

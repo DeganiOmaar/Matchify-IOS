@@ -21,6 +21,24 @@ final class RecruiterSignupViewModel: ObservableObject {
     }
 
     func signUp() {
+        error = nil
+        
+        // Validation
+        if fullName.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty {
+            error = "Veuillez remplir tous les champs requis."
+            return
+        }
+        
+        if password != confirmPassword {
+            error = "Les mots de passe ne correspondent pas."
+            return
+        }
+        
+        if password.count < 6 {
+            error = "Le mot de passe doit contenir au moins 6 caractères."
+            return
+        }
+        
         let body = RecruiterSignupRequest(
             fullName: fullName,
             email: email,
@@ -30,7 +48,6 @@ final class RecruiterSignupViewModel: ObservableObject {
 
         Task { @MainActor in
             isLoading = true
-            error = nil
             
             do {
                 let response = try await AuthService.shared.signupRecruiter(body)
@@ -49,9 +66,6 @@ final class RecruiterSignupViewModel: ObservableObject {
     }
 
     private func extractError(_ error: Error) -> String {
-        if case ApiError.server(let msg) = error {
-            return msg
-        }
-        return error.localizedDescription
+        return ErrorHandler.getErrorMessage(from: error, context: .signup)
     }
 }

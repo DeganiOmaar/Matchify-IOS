@@ -17,9 +17,15 @@ final class VerificationCodeViewModel: ObservableObject {
     }
     
     func verifyCode() {
+        errorMessage = nil
+        
+        if code.count != 6 {
+            errorMessage = "Le code doit contenir 6 chiffres."
+            return
+        }
+        
         Task { @MainActor in
             isLoading = true
-            errorMessage = nil
             
             do {
                 let response = try await AuthService.shared.verifyResetCode(code: code)
@@ -30,13 +36,8 @@ final class VerificationCodeViewModel: ObservableObject {
 
             } catch {
                 isLoading = false
-                errorMessage = extractError(error)
+                errorMessage = ErrorHandler.getErrorMessage(from: error, context: .verifyCode)
             }
         }
-    }
-    
-    private func extractError(_ error: Error) -> String {
-        if case ApiError.server(let msg) = error { return msg }
-        return error.localizedDescription
     }
 }

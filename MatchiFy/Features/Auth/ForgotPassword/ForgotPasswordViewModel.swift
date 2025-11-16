@@ -12,9 +12,16 @@ final class ForgotPasswordViewModel: ObservableObject {
     }
     
     func sendCode() {
+        errorMessage = nil
+        
+        // Validation
+        if email.trimmingCharacters(in: .whitespaces).isEmpty {
+            errorMessage = "Veuillez entrer votre adresse email."
+            return
+        }
+        
         Task { @MainActor in
             isLoading = true
-            errorMessage = nil
             
             do {
                 let response = try await AuthService.shared.forgotPassword(email: email)
@@ -25,13 +32,8 @@ final class ForgotPasswordViewModel: ObservableObject {
                 
             } catch {
                 isLoading = false
-                errorMessage = extractError(error)
+                errorMessage = ErrorHandler.getErrorMessage(from: error, context: .forgotPassword)
             }
         }
-    }
-
-    private func extractError(_ error: Error) -> String {
-        if case ApiError.server(let msg) = error { return msg }
-        return error.localizedDescription
     }
 }
