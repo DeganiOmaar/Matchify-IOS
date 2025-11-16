@@ -68,8 +68,16 @@ final class TalentSignupViewModel: ObservableObject {
                 print("🎉 Talent created:", response.user.fullName)
                 print("🔐 Token:", response.token)
                 
+                // Save session in AuthManager (same as login)
+                AuthManager.shared.saveSignupSession(
+                    token: response.token,
+                    user: response.user,
+                    rememberMe: true  // Always remember after signup
+                )
+                
                 isLoading = false
-                goToHome = true
+                // Navigation will be handled automatically by AppEntryView
+                // when isLoggedIn changes to true
                 
             } catch {
                 isLoading = false

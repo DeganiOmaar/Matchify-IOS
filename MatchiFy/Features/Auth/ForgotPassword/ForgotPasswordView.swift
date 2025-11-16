@@ -84,7 +84,7 @@ struct ForgotPasswordView: View {
             }
             .padding(.horizontal, 24)
             .navigationDestination(isPresented: $viewModel.goNext) {
-                VerificationCodeView()
+                VerificationCodeView(email: viewModel.email)
             }
         }
     }

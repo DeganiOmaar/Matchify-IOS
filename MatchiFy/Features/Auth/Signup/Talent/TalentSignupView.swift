@@ -117,10 +117,11 @@ struct TalentSignupView: View {
             }
             .padding(.horizontal, 24)
         }
-        .navigationDestination(isPresented: $viewModel.goToHome) {
-            HomeView()
-        }
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: AuthManager.shared.isLoggedIn) { oldValue, newValue in
+            // When signup succeeds, AppEntryView will automatically show MainTabView
+            // No manual navigation needed
+        }
     }
     
     

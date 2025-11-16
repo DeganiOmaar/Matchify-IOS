@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct VerificationCodeView: View {
+    let email: String
     @StateObject private var viewModel = VerificationCodeViewModel()
     @FocusState private var isKeyboardActive: Bool
     
@@ -86,15 +87,15 @@ struct VerificationCodeView: View {
     
     // MARK: - OTP Text Message
     private func buildOTPMessage() -> AttributedString {
-        var full = AttributedString("We have an OTP code to your email and ")
+        var full = AttributedString("A verification code has been sent to: ")
         
-        var email = AttributedString("amroush123@gmail.com")
-        email.foregroundColor = .blue
-        email.font = .system(size: 15, weight: .semibold)
+        var emailText = AttributedString(email)
+        emailText.foregroundColor = .blue
+        emailText.font = .system(size: 15, weight: .semibold)
         
         let end = AttributedString(" Enter the OTP code below to verify")
         
-        full.append(email)
+        full.append(emailText)
         full.append(end)
         
         return full
@@ -132,5 +133,5 @@ struct VerificationCodeView: View {
 }
 
 #Preview {
-    VerificationCodeView()
+    VerificationCodeView(email: "user@example.com")
 }

@@ -123,14 +123,18 @@ struct RecruiterSignupRequest: Codable {
 
 // MARK: - Talent Signup Response
 struct TalentSignupResponse: Codable {
+    let message: String?
     let user: UserModel
     let token: String
+    let role: String?  // Optional for backward compatibility
 }
 
 // MARK: - Recruiter Signup Response
 struct RecruiterSignupResponse: Codable {
+    let message: String?
     let user: UserModel
     let token: String
+    let role: String?  // Optional for backward compatibility
 }
 
 // MARK: - Forgot Password

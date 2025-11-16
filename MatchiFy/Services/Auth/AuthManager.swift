@@ -90,6 +90,29 @@ final class AuthManager: ObservableObject {
         }
     }
 
+    // MARK: - Save Signup Session (for Talent and Recruiter signup)
+    func saveSignupSession(token: String, user: UserModel, rememberMe: Bool) {
+        // In-memory
+        self.token = token
+        self.user = user
+        self.role = user.role  // Extract role from user
+        self.isLoggedIn = true
+
+        if rememberMe {
+            // Persist token -> Keychain
+            keychainSaveToken(token)
+
+            // Persist user -> UserDefaults
+            if let encoded = try? JSONEncoder().encode(user) {
+                UserDefaults.standard.set(encoded, forKey: "current_user")
+            }
+        } else {
+            // Delete any stored session
+            keychainDeleteToken()
+            UserDefaults.standard.removeObject(forKey: "current_user")
+        }
+    }
+
     // MARK: - Restore Session (on app launch)
     func restoreSession() {
         let storedToken = keychainLoadToken()
