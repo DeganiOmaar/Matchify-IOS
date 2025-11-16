@@ -173,6 +173,21 @@ final class ApiClient {
     }
     
     private func decodeError<R>(_ data: String) throws -> R {
+        // Try to parse JSON error response
+        if let jsonData = data.data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+            // Try common error message fields
+            if let message = json["message"] as? String {
+                throw ApiError.server(message)
+            }
+            if let error = json["error"] as? String {
+                throw ApiError.server(error)
+            }
+            if let msg = json["msg"] as? String {
+                throw ApiError.server(msg)
+            }
+        }
+        // Fallback to raw message
         throw ApiError.server(data)
     }
 }

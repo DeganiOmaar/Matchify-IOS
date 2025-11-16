@@ -60,14 +60,14 @@ final class MissionEditViewModel: ObservableObject {
     @MainActor
     func updateMission() {
         guard isFormValid else {
-            errorMessage = "Veuillez remplir tous les champs requis"
+            errorMessage = "Veuillez remplir tous les champs requis."
             return
         }
         
         // Filter and validate budget
         let filteredBudget = budget.filter { $0.isNumber }
         guard !filteredBudget.isEmpty, let budgetValue = Int(filteredBudget) else {
-            errorMessage = "Le budget doit être un nombre valide"
+            errorMessage = "Le budget doit être un nombre valide."
             return
         }
         
@@ -98,10 +98,7 @@ final class MissionEditViewModel: ObservableObject {
     
     // MARK: - Error Extraction
     private func extractError(_ error: Error) -> String {
-        if case ApiError.server(let msg) = error {
-            return msg
-        }
-        return error.localizedDescription
+        return ErrorHandler.getErrorMessage(from: error, context: .missionUpdate)
     }
 }
 

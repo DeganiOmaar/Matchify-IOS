@@ -34,6 +34,13 @@ final class EditRecruiterProfileViewModel: ObservableObject {
     // MARK: - Update profile
     func updateProfile() {
         errorMessage = nil
+        
+        // Validation
+        if name.isEmpty || email.isEmpty {
+            errorMessage = "Le nom et l'email sont requis."
+            return
+        }
+        
         isSaving = true
 
         Task { @MainActor in
@@ -55,7 +62,7 @@ final class EditRecruiterProfileViewModel: ObservableObject {
 
             } catch {
                 isSaving = false
-                errorMessage = error.localizedDescription
+                errorMessage = ErrorHandler.getErrorMessage(from: error, context: .profileUpdate)
             }
         }
     }

@@ -25,7 +25,7 @@ final class MissionListViewModel: ObservableObject {
                 self.isLoading = false
             } catch {
                 self.isLoading = false
-                self.errorMessage = extractError(error)
+                self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
             }
         }
     }
@@ -39,7 +39,7 @@ final class MissionListViewModel: ObservableObject {
                 // Remove from local array
                 missions.removeAll { $0.missionId == mission.missionId }
             } catch {
-                errorMessage = extractError(error)
+                errorMessage = ErrorHandler.getErrorMessage(from: error, context: .missionDelete)
             }
         }
     }
@@ -56,7 +56,7 @@ final class MissionListViewModel: ObservableObject {
             self.isLoading = false
         } catch {
             self.isLoading = false
-            self.errorMessage = extractError(error)
+            self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
         }
     }
     
@@ -66,14 +66,6 @@ final class MissionListViewModel: ObservableObject {
             return false
         }
         return mission.recruiterId == currentUserId
-    }
-    
-    // MARK: - Error Extraction
-    private func extractError(_ error: Error) -> String {
-        if case ApiError.server(let msg) = error {
-            return msg
-        }
-        return error.localizedDescription
     }
 }
 

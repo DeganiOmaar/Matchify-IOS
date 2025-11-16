@@ -29,6 +29,24 @@ final class TalentSignupViewModel: ObservableObject {
     }
 
     func signUp() {
+        errorMessage = nil
+        
+        // Validation
+        if fullName.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty {
+            errorMessage = "Veuillez remplir tous les champs requis."
+            return
+        }
+        
+        if password != confirmPassword {
+            errorMessage = "Les mots de passe ne correspondent pas."
+            return
+        }
+        
+        if password.count < 6 {
+            errorMessage = "Le mot de passe doit contenir au moins 6 caractères."
+            return
+        }
+        
         let body = TalentSignupRequest(
             fullName: fullName,
             email: email,
@@ -42,7 +60,6 @@ final class TalentSignupViewModel: ObservableObject {
 
         Task { @MainActor in
             isLoading = true
-            errorMessage = nil
             
             do {
                 let response = try await AuthService.shared.signupTalent(body)
@@ -61,9 +78,6 @@ final class TalentSignupViewModel: ObservableObject {
     }
 
     private func extractError(_ error: Error) -> String {
-        if case ApiError.server(let msg) = error {
-            return msg
-        }
-        return error.localizedDescription
+        return ErrorHandler.getErrorMessage(from: error, context: .signup)
     }
 }
