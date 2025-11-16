@@ -1,7 +1,9 @@
 import Foundation
 
 struct Endpoints {
-    static let base = "http://localhost:3000/auth"
+    static let baseURL = "http://192.168.1.102:3000"
+    static let base = baseURL + "/auth"
+    static let apiBase = baseURL
 
     static let login = base + "/login"
     static let signupTalent = base + "/signup/talent"
@@ -10,4 +12,11 @@ struct Endpoints {
     static let forgotPassword = base + "/password/forgot"
     static let verifyResetCode = base + "/password/verify"
     static let resetPassword = base + "/password/reset"
+    
+    // Missions endpoints
+    static let missions = apiBase + "/missions"
+    static let allMissions = apiBase + "/missions/all"
+    static func mission(id: String) -> String {
+        return apiBase + "/missions/\(id)"
+    }
 }

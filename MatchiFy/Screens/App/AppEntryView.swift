@@ -7,7 +7,8 @@ struct AppEntryView: View {
         Group {
             if auth.isLoggedIn {
                 // ✅ User has a persisted session (remember me)
-                RecruiterProfileView()
+                // Show MainTabView with Missions and Profile tabs
+                MainTabView()
             } else {
                 // ✅ No session → show Login
                 LoginView()
