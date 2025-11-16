@@ -5,7 +5,6 @@ struct LoginView: View {
     @State private var rememberMe: Bool = false
     @State private var goToForgotPassword = false
     @State private var goToChooseRole = false
-    @State private var goToHome = false   // navigate to home after success
 
     var body: some View {
         NavigationStack {
@@ -85,7 +84,8 @@ struct LoginView: View {
                     Button {
                         viewModel.login(rememberMe: rememberMe) { response in
                             if response != nil {
-                                goToHome = true
+                                // Navigation handled by AppEntryView based on role
+                                // No need to navigate manually
                             }
                         }
                     } label: {
@@ -132,10 +132,11 @@ struct LoginView: View {
             .navigationDestination(isPresented: $goToChooseRole) {
                 ChooseRoleView()
             }
-            .navigationDestination(isPresented: $goToHome) {
-                HomeView()   // Successful login → go home
-            }
             .navigationBarHidden(true)
+            .onChange(of: AuthManager.shared.isLoggedIn) { oldValue, newValue in
+                // When login succeeds, AppEntryView will automatically show MainTabView
+                // No manual navigation needed
+            }
         }
     }
 

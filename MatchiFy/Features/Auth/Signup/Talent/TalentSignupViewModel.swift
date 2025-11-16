@@ -47,13 +47,14 @@ final class TalentSignupViewModel: ObservableObject {
             return
         }
         
+        // Only include profileImage if it's not empty
         let body = TalentSignupRequest(
             fullName: fullName,
             email: email,
             password: password,
             confirmPassword: confirmPassword,
             phone: phone,
-            profileImage: profileImage,
+            profileImage: profileImage.isEmpty ? nil : profileImage,
             location: location,
             talent: talent
         )
