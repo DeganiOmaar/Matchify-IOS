@@ -38,17 +38,26 @@ struct UserModel: Codable {
     
     /// URL complète de la photo de profil (ton backend renvoie un chemin relatif type "uploads/profile/xxx.jpg")
     var profileImageURL: URL? {
-        guard var path = profileImage else { return nil }
+        // Return nil if profileImage is nil, empty, or blank
+        guard var path = profileImage?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !path.isEmpty else {
+            return nil
+        }
 
         // Si le backend ne renvoie PAS de slash, on l'ajoute
+        // Example: "uploads/profile/image.jpg" -> "/uploads/profile/image.jpg"
         if !path.hasPrefix("/") {
             path = "/" + path
         }
 
-        // Ton IP locale ici :
+        // IP locale Mac
         let base = "http://192.168.1.102:3000"
+        let fullUrlString = base + path
+        
+        // Debug log
+        print("📸 Profile image URL: \(fullUrlString) (from path: \(profileImage ?? "nil"))")
 
-        return URL(string: base + path)
+        return URL(string: fullUrlString)
     }   
 }
 

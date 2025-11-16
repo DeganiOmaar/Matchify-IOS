@@ -16,7 +16,49 @@ struct EditRecruiterProfileView: View {
                     Spacer()
                     
                     ZStack(alignment: .bottomTrailing) {
-                        avatarPreview
+                        // Avatar preview
+                        if let img = vm.selectedImage {
+                            Image(uiImage: img)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 110, height: 110)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.gray.opacity(0.3), lineWidth: 3))
+                        } else if let user = AuthManager.shared.user,
+                                  let profileImage = user.profileImage,
+                                  !profileImage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                                  let url = user.profileImageURL {
+                            AsyncImage(url: url) { phase in
+                                switch phase {
+                                case .success(let image): 
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                case .failure:
+                                    Image("avatar")
+                                        .resizable()
+                                        .scaledToFill()
+                                case .empty:
+                                    Image("avatar")
+                                        .resizable()
+                                        .scaledToFill()
+                                @unknown default:
+                                    Image("avatar")
+                                        .resizable()
+                                        .scaledToFill()
+                                }
+                            }
+                            .frame(width: 110, height: 110)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.gray.opacity(0.3), lineWidth: 3))
+                        } else {
+                            Image("avatar")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 110, height: 110)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.gray.opacity(0.3), lineWidth: 3))
+                        }
                         
                         Button {
                             showImagePicker = true
@@ -88,34 +130,6 @@ struct EditRecruiterProfileView: View {
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(image: $vm.selectedImage)
         }
-    }
-    
-    
-    // MARK: - Avatar Preview
-    private var avatarPreview: some View {
-        Group {
-            if let img = vm.selectedImage {
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFill()
-                
-            } else if let url = AuthManager.shared.user?.profileImageURL {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let image): image.resizable().scaledToFill()
-                    default:
-                        Image("avatar").resizable().scaledToFill()
-                    }
-                }
-            } else {
-                Image("avatar")
-                    .resizable()
-                    .scaledToFill()
-            }
-        }
-        .frame(width: 110, height: 110)
-        .clipShape(Circle())
-        .overlay(Circle().stroke(Color.gray.opacity(0.3), lineWidth: 3))
     }
 }
 

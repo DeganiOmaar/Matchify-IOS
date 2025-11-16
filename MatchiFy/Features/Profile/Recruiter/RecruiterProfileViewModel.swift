@@ -7,11 +7,15 @@ final class RecruiterProfileViewModel: ObservableObject {
     @Published var joinedText: String = ""
 
     private var cancellables = Set<AnyCancellable>()
+    private let service = RecruiterProfileService.shared
 
     init(authManager: AuthManager = .shared) {
-
+        // Load from local first
         self.user = authManager.user
         updateJoinedText()
+
+        // Then load from backend
+        loadProfile()
 
         authManager.$user
             .receive(on: DispatchQueue.main)
@@ -20,6 +24,20 @@ final class RecruiterProfileViewModel: ObservableObject {
                 self?.updateJoinedText()
             }
             .store(in: &cancellables)
+    }
+
+    func loadProfile() {
+        Task { @MainActor in
+            do {
+                let response = try await service.getRecruiterProfile()
+                self.user = response.user
+                AuthManager.shared.persistUpdatedUser(response.user)
+                updateJoinedText()
+            } catch {
+                // Silently fail - keep using local data
+                print("Failed to load profile from backend: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func updateJoinedText() {

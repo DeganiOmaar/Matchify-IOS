@@ -7,6 +7,31 @@ final class RecruiterProfileService {
 
     private let baseURL = URL(string: "http://192.168.1.102:3000")!
 
+    func getRecruiterProfile() async throws -> UpdateRecruiterProfileResponse {
+        guard let token = AuthManager.shared.token else {
+            throw NSError(domain: "", code: 401,
+                          userInfo: [NSLocalizedDescriptionKey: "Missing token"])
+        }
+
+        let url = baseURL.appendingPathComponent("recruiter/profile")
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        if let http = response as? HTTPURLResponse,
+           !(200...299).contains(http.statusCode) {
+            let serverMessage = String(data: data, encoding: .utf8) ?? "Unknown server error"
+            throw NSError(domain: "", code: http.statusCode,
+                          userInfo: [NSLocalizedDescriptionKey: serverMessage])
+        }
+
+        return try JSONDecoder().decode(UpdateRecruiterProfileResponse.self, from: data)
+    }
+
     func updateRecruiterProfile(
         fullName: String?,
         email: String?,

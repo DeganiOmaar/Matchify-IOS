@@ -86,12 +86,25 @@ struct RecruiterProfileView: View {
     // MARK: - Avatar View
     private var avatarView: some View {
         Group {
-            if let url = vm.user?.profileImageURL {
+            // Check if profileImage exists and is not empty, then try to get URL
+            if let profileImage = vm.user?.profileImage,
+               !profileImage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+               let url = vm.user?.profileImageURL {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let img):
-                        img.resizable().scaledToFill()
-                    default:
+                        img
+                            .resizable()
+                            .scaledToFill()
+                    case .failure:
+                        Image("avatar")
+                            .resizable()
+                            .scaledToFill()
+                    case .empty:
+                        Image("avatar")
+                            .resizable()
+                            .scaledToFill()
+                    @unknown default:
                         Image("avatar")
                             .resizable()
                             .scaledToFill()
