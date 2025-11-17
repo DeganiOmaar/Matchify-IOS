@@ -5,6 +5,7 @@ struct TalentProfileView: View {
     @StateObject private var vm = TalentProfileViewModel()
     @State private var showMoreSheet = false
     @State private var showEditProfile = false
+    @State private var showSettings = false
     
     var body: some View {
         NavigationStack {
@@ -106,6 +107,9 @@ struct TalentProfileView: View {
             .sheet(isPresented: $showMoreSheet) { moreSheet }
             .navigationDestination(isPresented: $showEditProfile) {
                 EditTalentProfileView()
+            }
+            .navigationDestination(isPresented: $showSettings) {
+                SettingsView()
             }
         }
     }
@@ -225,7 +229,12 @@ struct TalentProfileView: View {
                     Label("Edit Profile", systemImage: "pencil")
                 }
                 
-                Label("Settings", systemImage: "gearshape")
+                Button {
+                    showMoreSheet = false
+                    showSettings = true
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
             }
             .navigationTitle("More")
             .navigationBarTitleDisplayMode(.inline)

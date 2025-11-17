@@ -16,6 +16,7 @@ struct Endpoints {
     // Missions endpoints
     static let missions = apiBase + "/missions"
     static let allMissions = apiBase + "/missions/all"
+    static let missionStream = apiBase + "/missions/stream"
     static func mission(id: String) -> String {
         return apiBase + "/missions/\(id)"
     }

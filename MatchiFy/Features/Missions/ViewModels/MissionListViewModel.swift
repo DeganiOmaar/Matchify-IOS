@@ -7,9 +7,16 @@ final class MissionListViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     
     private let service: MissionService
+    private let realtimeService: MissionRealtimeService
+    private var cancellables = Set<AnyCancellable>()
     
-    init(service: MissionService = .shared) {
+    init(
+        service: MissionService = .shared,
+        realtimeService: MissionRealtimeService = .shared
+    ) {
         self.service = service
+        self.realtimeService = realtimeService
+        observeRealtime()
     }
     
     // MARK: - Load Missions
@@ -66,6 +73,31 @@ final class MissionListViewModel: ObservableObject {
             return false
         }
         return mission.recruiterId == currentUserId
+    }
+    
+    private func observeRealtime() {
+        realtimeService.publisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .created(let mission):
+                    self.missions.removeAll { $0.missionId == mission.missionId }
+                    self.missions.insert(mission, at: 0)
+                case .updated(let mission):
+                    self.missions = self.missions.map { existing in
+                        if existing.missionId == mission.missionId {
+                            return mission
+                        }
+                        return existing
+                    }
+                case .deleted(let missionId):
+                    self.missions.removeAll { $0.missionId == missionId }
+                }
+            }
+            .store(in: &cancellables)
+        
+        realtimeService.connect()
     }
 }
 

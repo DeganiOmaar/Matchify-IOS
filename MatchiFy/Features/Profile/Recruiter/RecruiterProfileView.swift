@@ -5,6 +5,7 @@ struct RecruiterProfileView: View {
     @StateObject private var vm = RecruiterProfileViewModel()
     @State private var showMoreSheet = false
     @State private var showEditProfile = false
+    @State private var showSettings = false
     
     var body: some View {
         NavigationStack {
@@ -79,6 +80,9 @@ struct RecruiterProfileView: View {
             .sheet(isPresented: $showMoreSheet) { moreSheet }
             .navigationDestination(isPresented: $showEditProfile) {
                 EditRecruiterProfileView()
+            }
+            .navigationDestination(isPresented: $showSettings) {
+                SettingsView()
             }
         }
     }
@@ -159,7 +163,12 @@ struct RecruiterProfileView: View {
                     Label("Edit Profile", systemImage: "pencil")
                 }
                 
-                Label("Settings", systemImage: "gearshape")
+                Button {
+                    showMoreSheet = false
+                    showSettings = true
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
             }
             .navigationTitle("More")
             .navigationBarTitleDisplayMode(.inline)

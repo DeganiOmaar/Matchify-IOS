@@ -2,33 +2,41 @@ import SwiftUI
 
 struct AppEntryView: View {
     @StateObject private var auth = AuthManager.shared
-    @State private var hasSeenOnboarding = OnboardingViewModel.hasSeenOnboarding()
-    @State private var showLogin = false
+    @State private var hasCompletedOnboarding = false
+    @State private var shouldShowLogin = false
 
     var body: some View {
         Group {
             if auth.isLoggedIn {
-                // ✅ User has a persisted session (remember me)
-                // MainTabView will show appropriate tabs based on role
                 MainTabView()
-            } else if showLogin {
-                // ✅ Show Login after onboarding
+            } else if shouldShowLogin {
                 LoginView()
             } else {
-                // ✅ User is not logged in → always show onboarding
                 OnboardingView(
-                    hasCompletedOnboarding: $hasSeenOnboarding,
+                    hasCompletedOnboarding: $hasCompletedOnboarding,
                     onStart: {
-                        // Navigate to Login when Start button is clicked
-                        showLogin = true
+                        hasCompletedOnboarding = true
+                        shouldShowLogin = true
                     }
                 )
             }
         }
         .onAppear {
-            // Check if there is a remembered session
             auth.restoreSession()
+            if !auth.isLoggedIn {
+                resetOnboardingFlow()
+            }
         }
+        .onChange(of: auth.isLoggedIn) { _, newValue in
+            if !newValue {
+                resetOnboardingFlow()
+            }
+        }
+    }
+
+    private func resetOnboardingFlow() {
+        hasCompletedOnboarding = false
+        shouldShowLogin = false
     }
 }
 

@@ -81,7 +81,7 @@ struct MissionListView: View {
     private var missionsList: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                ForEach(vm.missions) { mission in
+                ForEach(vm.missions, id: \.missionId) { mission in
                     MissionCardView(
                         mission: mission,
                         isOwner: vm.isMissionOwner(mission) && isRecruiter, // Only show actions if owner AND recruiter

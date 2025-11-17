@@ -28,7 +28,10 @@ struct MissionModel: Codable, Identifiable {
     
     /// Get the mission ID (handles both id and _id)
     var missionId: String {
-        return id ?? _id ?? ""
+        if let cleanId = id, !cleanId.isEmpty { return cleanId }
+        if let cleanMongoId = _id, !cleanMongoId.isEmpty { return cleanMongoId }
+        if let createdAt = createdAt, !createdAt.isEmpty { return createdAt }
+        return UUID().uuidString
     }
     
     /// Formatted date string for display

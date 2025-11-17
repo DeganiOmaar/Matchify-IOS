@@ -134,6 +134,7 @@ final class AuthManager: ObservableObject {
     }
 
     // MARK: - Logout
+    @MainActor
     func logout() {
         token = nil
         user = nil
@@ -142,6 +143,7 @@ final class AuthManager: ObservableObject {
 
         keychainDeleteToken()
         UserDefaults.standard.removeObject(forKey: "current_user")
+        UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
     }
 }
 
