@@ -5,15 +5,16 @@ final class TalentProfileService {
     static let shared = TalentProfileService()
     private init() {}
 
-    private let baseURL = URL(string: "http://192.168.1.102:3000")!
-
     func getTalentProfile() async throws -> UpdateTalentProfileResponse {
         guard let token = AuthManager.shared.token else {
             throw NSError(domain: "", code: 401,
                           userInfo: [NSLocalizedDescriptionKey: "Missing token"])
         }
 
-        let url = baseURL.appendingPathComponent("talent/profile")
+        guard let url = URL(string: Endpoints.talentProfile) else {
+            throw NSError(domain: "", code: 500,
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -49,7 +50,10 @@ final class TalentProfileService {
                           userInfo: [NSLocalizedDescriptionKey: "Missing token"])
         }
 
-        let url = baseURL.appendingPathComponent("talent/profile")
+        guard let url = URL(string: Endpoints.talentProfile) else {
+            throw NSError(domain: "", code: 500,
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"

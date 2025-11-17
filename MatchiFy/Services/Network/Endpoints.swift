@@ -20,4 +20,8 @@ struct Endpoints {
     static func mission(id: String) -> String {
         return apiBase + "/missions/\(id)"
     }
+    
+    // Profile endpoints
+    static let recruiterProfile = apiBase + "/recruiter/profile"
+    static let talentProfile = apiBase + "/talent/profile"
 }

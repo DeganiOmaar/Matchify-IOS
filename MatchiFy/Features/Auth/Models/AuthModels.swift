@@ -54,9 +54,8 @@ struct UserModel: Codable {
             path = "/" + path
         }
 
-        // IP locale Mac
-        let base = "http://192.168.1.102:3000"
-        let fullUrlString = base + path
+        // Use Endpoints.baseURL for dynamic base URL
+        let fullUrlString = Endpoints.baseURL + path
         
         // Debug log
         print("📸 Profile image URL: \(fullUrlString) (from path: \(profileImage ?? "nil"))")

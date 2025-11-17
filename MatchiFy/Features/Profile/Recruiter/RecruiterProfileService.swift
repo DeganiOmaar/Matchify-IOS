@@ -5,15 +5,16 @@ final class RecruiterProfileService {
     static let shared = RecruiterProfileService()
     private init() {}
 
-    private let baseURL = URL(string: "http://192.168.1.102:3000")!
-
     func getRecruiterProfile() async throws -> UpdateRecruiterProfileResponse {
         guard let token = AuthManager.shared.token else {
             throw NSError(domain: "", code: 401,
                           userInfo: [NSLocalizedDescriptionKey: "Missing token"])
         }
 
-        let url = baseURL.appendingPathComponent("recruiter/profile")
+        guard let url = URL(string: Endpoints.recruiterProfile) else {
+            throw NSError(domain: "", code: 500,
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -46,7 +47,10 @@ final class RecruiterProfileService {
                           userInfo: [NSLocalizedDescriptionKey: "Missing token"])
         }
 
-        let url = baseURL.appendingPathComponent("recruiter/profile")
+        guard let url = URL(string: Endpoints.recruiterProfile) else {
+            throw NSError(domain: "", code: 500,
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
