@@ -2,11 +2,16 @@ import SwiftUI
 
 struct MissionListView: View {
     @StateObject private var vm = MissionListViewModel()
+    @StateObject private var auth = AuthManager.shared
     @State private var showAddMission = false
     @State private var selectedMission: MissionModel? = nil
     @State private var showEditMission = false
     @State private var showDeleteAlert = false
     @State private var missionToDelete: MissionModel? = nil
+    
+    private var isRecruiter: Bool {
+        auth.role == "recruiter"
+    }
     
     var body: some View {
         NavigationStack {
@@ -26,13 +31,16 @@ struct MissionListView: View {
             .navigationTitle("Missions")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showAddMission = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.black)
+                // Only show add button for Recruiters
+                if isRecruiter {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            showAddMission = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.black)
+                        }
                     }
                 }
             }
@@ -76,7 +84,7 @@ struct MissionListView: View {
                 ForEach(vm.missions) { mission in
                     MissionCardView(
                         mission: mission,
-                        isOwner: vm.isMissionOwner(mission),
+                        isOwner: vm.isMissionOwner(mission) && isRecruiter, // Only show actions if owner AND recruiter
                         onEdit: {
                             selectedMission = mission
                             showEditMission = true
@@ -110,18 +118,21 @@ struct MissionListView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
-            Button {
-                showAddMission = true
-            } label: {
-                Text("Create Mission")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(Color.black)
-                    .cornerRadius(14)
+            // Only show button for Recruiters
+            if isRecruiter {
+                Button {
+                    showAddMission = true
+                } label: {
+                    Text("Create Mission")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(Color.black)
+                        .cornerRadius(14)
+                }
+                .padding(.top, 10)
             }
-            .padding(.top, 10)
         }
     }
 }

@@ -25,15 +25,15 @@ final class LoginViewModel: ObservableObject {
         
         isLoading = true
 
-        Task {
+        Task { @MainActor in
             do {
                 let response = try await AuthService.shared.login(
                     email: email,
                     password: password
                 )
 
-                // 🔥 Save session with or without persistence
-                AuthManager.shared.saveLoginSession(
+                // 🔥 Save session with or without persistence (must be on main thread)
+                await AuthManager.shared.saveLoginSession(
                     from: response,
                     rememberMe: rememberMe
                 )

@@ -68,6 +68,7 @@ final class AuthManager: ObservableObject {
     }
 
     // MARK: - Save Login Session
+    @MainActor
     func saveLoginSession(from response: LoginResponse, rememberMe: Bool) {
         // In-memory
         token = response.token
@@ -91,6 +92,7 @@ final class AuthManager: ObservableObject {
     }
 
     // MARK: - Save Signup Session (for Talent and Recruiter signup)
+    @MainActor
     func saveSignupSession(token: String, user: UserModel, rememberMe: Bool) {
         // In-memory
         self.token = token

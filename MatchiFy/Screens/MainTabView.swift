@@ -6,27 +6,25 @@ struct MainTabView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            // MARK: - Conditional Tabs based on role
+            // MARK: - Both Talent and Recruiter see Missions + Profile
+            MissionListView()
+                .tabItem {
+                    Label("Missions", systemImage: "briefcase.fill")
+                }
+                .tag(0)
+            
             if auth.role == "recruiter" {
-                // Recruiter sees Missions + Profile
-                MissionListView()
-                    .tabItem {
-                        Label("Missions", systemImage: "briefcase.fill")
-                    }
-                    .tag(0)
-                
                 RecruiterProfileView()
                     .tabItem {
                         Label("Profile", systemImage: "person.fill")
                     }
                     .tag(1)
             } else {
-                // Talent sees only Profile
                 TalentProfileView()
                     .tabItem {
                         Label("Profile", systemImage: "person.fill")
                     }
-                    .tag(0)
+                    .tag(1)
             }
         }
         .accentColor(.black)

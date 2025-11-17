@@ -154,6 +154,8 @@ struct LoginView: View {
             )
             .keyboardType(.emailAddress)
             .textInputAutocapitalization(.none)
+            .autocorrectionDisabled()
+            .submitLabel(.next)
         }
         .padding()
         .background(
@@ -177,12 +179,16 @@ struct LoginView: View {
                             .foregroundColor(.black.opacity(0.7))
                             .font(.system(size: 14))
                     )
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
                 } else {
                     SecureField("", text: text, prompt:
                         Text(placeholder)
                             .foregroundColor(.black.opacity(0.7))
                             .font(.system(size: 14))
                     )
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
                 }
             }
 
