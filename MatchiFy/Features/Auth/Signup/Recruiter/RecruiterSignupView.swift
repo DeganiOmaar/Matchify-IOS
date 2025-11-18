@@ -16,7 +16,7 @@ struct RecruiterSignupView: View {
                     
                     Text("Create your recruiter profile")
                         .font(.system(size: 15))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                 }
                 
                 
@@ -65,15 +65,15 @@ struct RecruiterSignupView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
-                            .background(Color.blue.opacity(0.5))
+                            .background(AppTheme.Colors.primary.opacity(0.5))
                             .cornerRadius(30)
                     } else {
                         Text("Sign Up")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(AppTheme.Colors.buttonText)
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
-                            .background(viewModel.isSignUpDisabled ? Color.blue.opacity(0.4) : Color.blue)
+                            .background(viewModel.isSignUpDisabled ? AppTheme.Colors.primary.opacity(0.4) : AppTheme.Colors.primary)
                             .cornerRadius(30)
                     }
                 }
@@ -83,12 +83,12 @@ struct RecruiterSignupView: View {
                 // MARK: - Already have account?
                 HStack(alignment: .center ,spacing: 5) {
                     Text("Already have an account?")
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                     
                     NavigationLink("Login") {
                         LoginView()
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(AppTheme.Colors.primary)
                     .fontWeight(.medium)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -112,12 +112,12 @@ struct RecruiterSignupView: View {
     private func textFieldWithIcon(icon: String, placeholder: String, text: Binding<String>) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(.gray)
+                .foregroundColor(AppTheme.Colors.iconSecondary)
                 .font(.system(size: 18))
             
             TextField("", text: text, prompt:
                         Text(placeholder)
-                            .foregroundColor(.black.opacity(0.7))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
                             .font(.system(size: 14))
             )
             .autocapitalization(.none)
@@ -125,7 +125,7 @@ struct RecruiterSignupView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 35)
-                .stroke(Color.gray.opacity(0.35), lineWidth: 1)
+                .stroke(AppTheme.Colors.border, lineWidth: 1)
         )
     }
     
@@ -134,20 +134,20 @@ struct RecruiterSignupView: View {
     private func passwordField(placeholder: String, text: Binding<String>, show: Binding<Bool>) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "lock")
-                .foregroundColor(.gray)
+                .foregroundColor(AppTheme.Colors.iconSecondary)
                 .font(.system(size: 18))
             
             Group {
                 if show.wrappedValue {
                     TextField("", text: text, prompt:
                                 Text(placeholder)
-                                    .foregroundColor(.black.opacity(0.7))
+                                    .foregroundColor(AppTheme.Colors.textSecondary)
                                     .font(.system(size: 14))
                     )
                 } else {
                     SecureField("", text: text, prompt:
                                     Text(placeholder)
-                                        .foregroundColor(.black.opacity(0.7))
+                                        .foregroundColor(AppTheme.Colors.textSecondary)
                                         .font(.system(size: 14))
                     )
                 }
@@ -157,13 +157,13 @@ struct RecruiterSignupView: View {
                 show.wrappedValue.toggle()
             } label: {
                 Image(systemName: show.wrappedValue ? "eye.slash" : "eye")
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppTheme.Colors.iconSecondary)
             }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 35)
-                .stroke(Color.gray.opacity(0.35), lineWidth: 1)
+                .stroke(AppTheme.Colors.border, lineWidth: 1)
         )
     }
 }

@@ -31,7 +31,7 @@ struct RecruiterProfileView: View {
                     
                     // MARK: - Email
                     Text(vm.user?.email ?? "-")
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                         .font(.system(size: 16))
                     
                     // MARK: - Buttons
@@ -55,14 +55,14 @@ struct RecruiterProfileView: View {
                             : "You can add a description about your self."
                         )
                         .font(.system(size: 15))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding()
                     }
                     .frame(maxWidth: .infinity)
-                    .background(Color.white)
+                    .background(AppTheme.Colors.cardBackground)
                     .cornerRadius(20)
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 3)
+                    .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
                     .padding(.horizontal, 20)
                     
                     // MARK: - Information Card
@@ -73,7 +73,7 @@ struct RecruiterProfileView: View {
                 }
                 .padding(.top, 10)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(AppTheme.Colors.groupedBackground)
             .ignoresSafeArea(edges: .top)
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
@@ -131,6 +131,7 @@ struct RecruiterProfileView: View {
             
             Text("Information")
                 .font(.system(size: 22, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.textPrimary)
             
             infoRow(icon: "envelope",
                     title: "Email",
@@ -147,9 +148,9 @@ struct RecruiterProfileView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
+        .background(AppTheme.Colors.cardBackground)
         .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 3)
+        .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
     }
     
     // MARK: - More sheet
@@ -187,17 +188,17 @@ func infoRow(icon: String, title: String, value: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(Color.gray.opacity(0.8))
+                .foregroundColor(AppTheme.Colors.iconSecondary)
             
             Text(title)
                 .font(.system(size: 17))
-                .foregroundColor(Color.gray.opacity(0.9))
+                .foregroundColor(AppTheme.Colors.textSecondary)
         }
         .frame(width: 120, alignment: .leading)
         
         Text(value)
             .font(.system(size: 16))
-            .foregroundColor(.black)
+            .foregroundColor(AppTheme.Colors.textPrimary)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -207,17 +208,17 @@ func profileButton(icon: String, title: String) -> some View {
     HStack(spacing: 6) {
         Image(systemName: icon)
             .font(.system(size: 18))
-            .foregroundColor(.black)
+            .foregroundColor(AppTheme.Colors.iconPrimary)
         
         Text(title)
             .font(.system(size: 16))
-            .foregroundColor(.black)
+            .foregroundColor(AppTheme.Colors.textPrimary)
     }
     .padding(.horizontal, 18)
     .padding(.vertical, 10)
     .background(
         RoundedRectangle(cornerRadius: 14)
-            .stroke(Color(.systemGray4), lineWidth: 1)
+            .stroke(AppTheme.Colors.border, lineWidth: 1)
     )
 }
 

@@ -32,7 +32,7 @@ struct TalentProfileView: View {
                     
                     // MARK: - Email
                     Text(vm.user?.email ?? "-")
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                         .font(.system(size: 16))
                     
                     // MARK: - Talent Categories
@@ -41,10 +41,10 @@ struct TalentProfileView: View {
                             ForEach(talents, id: \.self) { talent in
                                 Text(talent)
                                     .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(AppTheme.Colors.primary)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                                    .background(Color.blue.opacity(0.1))
+                                    .background(AppTheme.Colors.primary.opacity(0.1))
                                     .cornerRadius(12)
                             }
                         }
@@ -72,14 +72,14 @@ struct TalentProfileView: View {
                             : "You can add a description about yourself."
                         )
                         .font(.system(size: 15))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding()
                     }
                     .frame(maxWidth: .infinity)
-                    .background(Color.white)
+                    .background(AppTheme.Colors.cardBackground)
                     .cornerRadius(20)
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 3)
+                    .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
                     .padding(.horizontal, 20)
                     
                     // MARK: - Skills Card
@@ -96,7 +96,7 @@ struct TalentProfileView: View {
                 }
                 .padding(.top, 10)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(AppTheme.Colors.groupedBackground)
             .ignoresSafeArea(edges: .top)
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
@@ -106,7 +106,7 @@ struct TalentProfileView: View {
                         showEditProfile = true
                     } label: {
                         Image(systemName: "pencil")
-                            .foregroundColor(.blue)
+                            .foregroundColor(AppTheme.Colors.primary)
                     }
                 }
             }
@@ -171,19 +171,19 @@ struct TalentProfileView: View {
                 ForEach(skills, id: \.self) { skill in
                     Text(skill)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppTheme.Colors.primary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.blue.opacity(0.1))
+                        .background(AppTheme.Colors.primary.opacity(0.1))
                         .cornerRadius(16)
                 }
             }
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
+        .background(AppTheme.Colors.cardBackground)
         .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 3)
+        .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
     }
     
     // MARK: - Info Card
@@ -192,6 +192,7 @@ struct TalentProfileView: View {
             
             Text("Information")
                 .font(.system(size: 22, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.textPrimary)
             
             infoRow(icon: "envelope",
                     title: "Email",
@@ -222,9 +223,9 @@ struct TalentProfileView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
+        .background(AppTheme.Colors.cardBackground)
         .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 3)
+        .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
     }
     
     // MARK: - More sheet

@@ -7,7 +7,7 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            Color.white
+            AppTheme.Colors.background
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -43,11 +43,11 @@ struct OnboardingView: View {
                     HStack(spacing: 8) {
                         ForEach(0..<3) { index in
                             Circle()
-                                .fill(index == viewModel.currentPage ? Color.blue : Color.clear)
+                                .fill(index == viewModel.currentPage ? AppTheme.Colors.primary : Color.clear)
                                 .frame(width: 10, height: 10)
                                 .overlay(
                                     Circle()
-                                        .stroke(Color.blue, lineWidth: index == viewModel.currentPage ? 0 : 1.5)
+                                        .stroke(AppTheme.Colors.primary, lineWidth: index == viewModel.currentPage ? 0 : 1.5)
                                 )
                         }
                     }
@@ -61,10 +61,10 @@ struct OnboardingView: View {
                         }) {
                             Text("Next")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(AppTheme.Colors.buttonText)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 55)
-                                .background(Color.blue)
+                                .background(AppTheme.Colors.primary)
                                 .cornerRadius(30)
                         }
                         .padding(.horizontal, 24)
@@ -78,13 +78,13 @@ struct OnboardingView: View {
                             }) {
                                 Text("Previous")
                                     .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(Color.gray)
+                                    .foregroundColor(AppTheme.Colors.textSecondary)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 55)
-                                    .background(Color.white)
+                                    .background(AppTheme.Colors.cardBackground)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 30)
-                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                            .stroke(AppTheme.Colors.border, lineWidth: 1)
                                     )
                                     .cornerRadius(30)
                             }
@@ -102,10 +102,10 @@ struct OnboardingView: View {
                             }) {
                                 Text(viewModel.isLastPage ? "Start" : "Next")
                                     .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(AppTheme.Colors.buttonText)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 55)
-                                    .background(Color.blue)
+                                    .background(AppTheme.Colors.primary)
                                     .cornerRadius(30)
                             }
                         }
@@ -113,7 +113,7 @@ struct OnboardingView: View {
                         .padding(.bottom, 40)
                     }
                 }
-                .background(Color.white)
+                .background(AppTheme.Colors.background)
             }
         }
     }
@@ -136,14 +136,14 @@ struct OnboardingPageView: View {
             // Title
             Text(title)
                 .font(.system(size: 24, weight: .semibold))
-                .foregroundColor(.black)
+                .foregroundColor(AppTheme.Colors.textPrimary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
                 .padding(.top, 40)
                 .padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        .background(AppTheme.Colors.background)
     }
 }
 

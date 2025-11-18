@@ -26,7 +26,7 @@ struct LoginView: View {
 
                         Text("Please sign in to continue")
                             .font(.system(size: 15))
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppTheme.Colors.textSecondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 24)
@@ -60,10 +60,10 @@ struct LoginView: View {
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: rememberMe ? "checkmark.square.fill" : "square")
-                                    .foregroundColor(rememberMe ? .blue : .gray)
+                                    .foregroundColor(rememberMe ? AppTheme.Colors.primary : AppTheme.Colors.textSecondary)
 
                                 Text("Remember Me")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(AppTheme.Colors.textSecondary)
                                     .font(.system(size: 14))
                             }
                         }
@@ -74,7 +74,7 @@ struct LoginView: View {
                             goToForgotPassword = true
                         } label: {
                             Text("Reset Password")
-                                .foregroundColor(.blue)
+                                .foregroundColor(AppTheme.Colors.primary)
                                 .font(.system(size: 14, weight: .medium))
                         }
                     }
@@ -93,15 +93,15 @@ struct LoginView: View {
                             ProgressView()
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 55)
-                                .background(Color.blue.opacity(0.5))
+                                .background(AppTheme.Colors.primary.opacity(0.5))
                                 .cornerRadius(30)
                         } else {
                             Text("Login")
                                 .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(AppTheme.Colors.buttonText)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 55)
-                                .background(viewModel.isLoginButtonDisabled ? Color.blue.opacity(0.4) : Color.blue)
+                                .background(viewModel.isLoginButtonDisabled ? AppTheme.Colors.primary.opacity(0.4) : AppTheme.Colors.primary)
                                 .cornerRadius(30)
                         }
                     }
@@ -110,14 +110,14 @@ struct LoginView: View {
 
                     // MARK: - Sign Up Footer
                     HStack(spacing: 5) {
-                        Text("Don’t have an account?")
-                            .foregroundColor(.gray)
+                        Text("Don't have an account?")
+                            .foregroundColor(AppTheme.Colors.textSecondary)
 
                         Button {
                             goToChooseRole = true
                         } label: {
                             Text("Sign Up")
-                                .foregroundColor(.blue)
+                                .foregroundColor(AppTheme.Colors.primary)
                                 .fontWeight(.medium)
                         }
                     }
@@ -144,12 +144,12 @@ struct LoginView: View {
     private func textFieldWithIcon(icon: String, placeholder: String, text: Binding<String>) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(.gray)
+                .foregroundColor(AppTheme.Colors.iconSecondary)
                 .font(.system(size: 18))
 
             TextField("", text: text, prompt:
                 Text(placeholder)
-                    .foregroundColor(.black.opacity(0.7))
+                    .foregroundColor(AppTheme.Colors.textSecondary)
                     .font(.system(size: 14))
             )
             .keyboardType(.emailAddress)
@@ -160,7 +160,7 @@ struct LoginView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 35)
-                .stroke(Color.gray.opacity(0.35), lineWidth: 1)
+                .stroke(AppTheme.Colors.border, lineWidth: 1)
         )
         .padding(.horizontal, 24)
     }
@@ -169,14 +169,14 @@ struct LoginView: View {
     private func passwordField(placeholder: String, text: Binding<String>, show: Binding<Bool>) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "lock")
-                .foregroundColor(.gray)
+                .foregroundColor(AppTheme.Colors.iconSecondary)
                 .font(.system(size: 18))
 
             Group {
                 if show.wrappedValue {
                     TextField("", text: text, prompt:
                         Text(placeholder)
-                            .foregroundColor(.black.opacity(0.7))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
                             .font(.system(size: 14))
                     )
                     .autocorrectionDisabled()
@@ -184,7 +184,7 @@ struct LoginView: View {
                 } else {
                     SecureField("", text: text, prompt:
                         Text(placeholder)
-                            .foregroundColor(.black.opacity(0.7))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
                             .font(.system(size: 14))
                     )
                     .autocorrectionDisabled()
@@ -196,13 +196,13 @@ struct LoginView: View {
                 show.wrappedValue.toggle()
             } label: {
                 Image(systemName: show.wrappedValue ? "eye.slash" : "eye")
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppTheme.Colors.iconSecondary)
             }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 35)
-                .stroke(Color.gray.opacity(0.35), lineWidth: 1)
+                .stroke(AppTheme.Colors.border, lineWidth: 1)
         )
         .padding(.horizontal, 24)
     }

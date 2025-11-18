@@ -17,14 +17,14 @@ struct ResetPasswordView: View {
                     // MARK: - Subtitle
                     Text("Create your new password. If you forget it, then you have to do forgot password")
                         .font(.system(size: 15))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                         .padding(.trailing, 20)
                     
                     
                     // MARK: - New Password Label
                     Text("New Password")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                         .padding(.top, 16)
                     
                     // MARK: - New Password Field
@@ -38,7 +38,7 @@ struct ResetPasswordView: View {
                     // MARK: - Confirm Password Label
                     Text("Confirm New Password")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.textSecondary)
                         .padding(.top, 16)
                     
                     // MARK: - Confirm Password Field
@@ -74,9 +74,9 @@ struct ResetPasswordView: View {
                                     .frame(maxWidth: .infinity)
                             }
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(AppTheme.Colors.buttonText)
                         .frame(height: 55)
-                        .background(viewModel.isButtonDisabled ? Color.blue.opacity(0.4) : Color.blue)
+                        .background(viewModel.isButtonDisabled ? AppTheme.Colors.primary.opacity(0.4) : AppTheme.Colors.primary)
                         .cornerRadius(30)
                     }
                     .disabled(viewModel.isButtonDisabled || viewModel.isLoading)
@@ -98,20 +98,20 @@ struct ResetPasswordView: View {
     ) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "lock")
-                .foregroundColor(.gray)
+                .foregroundColor(AppTheme.Colors.iconSecondary)
                 .font(.system(size: 18))
             
             Group {
                 if show.wrappedValue {
                     TextField("", text: text, prompt:
                                 Text(placeholder)
-                                    .foregroundColor(.black.opacity(0.7))
+                                    .foregroundColor(AppTheme.Colors.textSecondary)
                                     .font(.system(size: 14))
                     )
                 } else {
                     SecureField("", text: text, prompt:
                                     Text(placeholder)
-                                        .foregroundColor(.black.opacity(0.7))
+                                        .foregroundColor(AppTheme.Colors.textSecondary)
                                         .font(.system(size: 14))
                     )
                 }
@@ -121,13 +121,13 @@ struct ResetPasswordView: View {
                 show.wrappedValue.toggle()
             } label: {
                 Image(systemName: show.wrappedValue ? "eye.slash" : "eye")
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppTheme.Colors.iconSecondary)
             }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 35)
-                .stroke(Color.gray.opacity(0.35), lineWidth: 1)
+                .stroke(AppTheme.Colors.border, lineWidth: 1)
         )
     }
 }

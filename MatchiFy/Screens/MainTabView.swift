@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @StateObject private var auth = AuthManager.shared
+    @EnvironmentObject private var themeManager: ThemeManager
     @State private var selectedTab = 0
     
     var body: some View {
@@ -27,7 +28,7 @@ struct MainTabView: View {
                     .tag(1)
             }
         }
-        .accentColor(.black)
+        .accentColor(AppTheme.Colors.primary)
     }
 }
 

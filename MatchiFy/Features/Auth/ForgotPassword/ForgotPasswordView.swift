@@ -16,24 +16,24 @@ struct ForgotPasswordView: View {
                 // MARK: - Subtitle
                 Text("Please enter your email and we will send an OTP code in the next step to reset your password")
                     .font(.system(size: 15))
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppTheme.Colors.textSecondary)
                     .padding(.trailing, 20)
                 
                 // MARK: - Email Label
                 Text("Email Address")
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppTheme.Colors.textSecondary)
                     .padding(.top, 10)
                 
                 // MARK: - Email TextField
                 HStack(spacing: 12) {
                     Image(systemName: "envelope")
-                        .foregroundColor(.black)
+                        .foregroundColor(AppTheme.Colors.iconSecondary)
                         .font(.system(size: 18))
                     
                     TextField("", text: $viewModel.email, prompt:
                         Text("Enter your email")
-                            .foregroundColor(.black.opacity(0.7))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
                             .font(.system(size: 14))
                     )
                     .keyboardType(.emailAddress)
@@ -42,7 +42,7 @@ struct ForgotPasswordView: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 35)
-                        .stroke(Color.gray.opacity(0.35), lineWidth: 1)
+                        .stroke(AppTheme.Colors.border, lineWidth: 1)
                 )
                 
                 
@@ -65,15 +65,15 @@ struct ForgotPasswordView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
-                            .background(Color.blue)
+                            .background(AppTheme.Colors.primary)
                             .cornerRadius(30)
                     } else {
                         Text("Continue")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(AppTheme.Colors.buttonText)
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
-                            .background(Color.blue)
+                            .background(AppTheme.Colors.primary)
                             .cornerRadius(30)
                     }
                 }

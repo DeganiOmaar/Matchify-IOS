@@ -18,7 +18,7 @@ struct VerificationCodeView: View {
                 // MARK: - Description
                 Text(buildOTPMessage())
                     .font(.system(size: 15))
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppTheme.Colors.textSecondary)
                     .multilineTextAlignment(.leading)
                 
                 // MARK: - OTP Boxes
@@ -56,15 +56,15 @@ struct VerificationCodeView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
-                            .background(Color.blue)
+                            .background(AppTheme.Colors.primary)
                             .cornerRadius(30)
                     } else {
                         Text("Continue")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(AppTheme.Colors.buttonText)
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
-                            .background(viewModel.isButtonDisabled ? Color.blue.opacity(0.3) : Color.blue)
+                            .background(viewModel.isButtonDisabled ? AppTheme.Colors.primary.opacity(0.3) : AppTheme.Colors.primary)
                             .cornerRadius(30)
                     }
                     
@@ -78,7 +78,8 @@ struct VerificationCodeView: View {
                 ResetPasswordView()
             }
             .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                // Focus immediately when view appears to show cursor
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     isKeyboardActive = true
                 }
             }
@@ -90,7 +91,7 @@ struct VerificationCodeView: View {
         var full = AttributedString("A verification code has been sent to: ")
         
         var emailText = AttributedString(email)
-        emailText.foregroundColor = .blue
+        emailText.foregroundColor = AppTheme.Colors.primary
         emailText.font = .system(size: 15, weight: .semibold)
         
         let end = AttributedString(" Enter the OTP code below to verify")
@@ -105,16 +106,16 @@ struct VerificationCodeView: View {
     private func otpBox(_ index: Int) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.secondarySystemBackground))
+                .fill(AppTheme.Colors.secondaryBackground)
                 .frame(width: 48, height: 55)
             
             RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.gray.opacity(0.25), lineWidth: 1)
+                .stroke(AppTheme.Colors.border, lineWidth: 1)
                 .frame(width: 48, height: 55)
             
             Text(currentDigit(at: index))
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.black)
+                .foregroundColor(AppTheme.Colors.textPrimary)
         }
     }
     

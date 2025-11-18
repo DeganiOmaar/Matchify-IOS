@@ -28,10 +28,10 @@ struct ProjectCardView: View {
                                         .scaledToFill()
                                 case .failure, .empty:
                                     Rectangle()
-                                        .fill(Color.gray.opacity(0.2))
+                                        .fill(AppTheme.Colors.textSecondary.opacity(0.2))
                                 @unknown default:
                                     Rectangle()
-                                        .fill(Color.gray.opacity(0.2))
+                                        .fill(AppTheme.Colors.textSecondary.opacity(0.2))
                                 }
                             }
                             .frame(height: 200)
@@ -50,8 +50,8 @@ struct ProjectCardView: View {
                         .fill(
                             LinearGradient(
                                 gradient: Gradient(colors: [
-                                    Color.blue.opacity(0.6),
-                                    Color.purple.opacity(0.5)
+                                    AppTheme.Colors.primary.opacity(0.6),
+                                    AppTheme.Colors.primary.opacity(0.4)
                                 ]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -72,13 +72,13 @@ struct ProjectCardView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(project.title)
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
+                                .foregroundColor(AppTheme.Colors.textPrimary)
                                 .lineLimit(2)
                             
                             if let role = project.role, !role.isEmpty {
                                 Text(role)
                                     .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(AppTheme.Colors.primary)
                             }
                         }
                         
@@ -90,11 +90,11 @@ struct ProjectCardView: View {
                         } label: {
                             Image(systemName: "ellipsis")
                                 .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .foregroundColor(AppTheme.Colors.textSecondary)
                                 .padding(8)
                                 .background(
                                     Circle()
-                                        .fill(Color.gray.opacity(0.1))
+                                        .fill(AppTheme.Colors.textSecondary.opacity(0.1))
                                 )
                         }
                         .confirmationDialog("Actions", isPresented: $showMenu) {
@@ -112,7 +112,7 @@ struct ProjectCardView: View {
                     if let description = project.description, !description.isEmpty {
                         Text(description)
                             .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppTheme.Colors.textSecondary)
                             .lineLimit(3)
                     }
                     
@@ -123,12 +123,12 @@ struct ProjectCardView: View {
                                 ForEach(project.skills, id: \.self) { skill in
                                     Text(skill)
                                         .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(AppTheme.Colors.primary)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
                                         .background(
                                             RoundedRectangle(cornerRadius: 12)
-                                                .fill(Color.blue.opacity(0.1))
+                                                .fill(AppTheme.Colors.primary.opacity(0.1))
                                         )
                                 }
                             }
@@ -136,14 +136,14 @@ struct ProjectCardView: View {
                     }
                 }
                 .padding(20)
-                .background(Color.white)
+                .background(AppTheme.Colors.cardBackground)
             }
-            .background(Color.white)
+            .background(AppTheme.Colors.cardBackground)
             .cornerRadius(20)
-            .shadow(color: Color.black.opacity(0.1), radius: 12, x: 0, y: 4)
+            .shadow(color: AppTheme.Colors.cardShadow, radius: 12, x: 0, y: 4)
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                    .stroke(AppTheme.Colors.border, lineWidth: 1)
             )
         }
         .buttonStyle(PlainButtonStyle())

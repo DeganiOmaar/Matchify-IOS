@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AppEntryView: View {
     @StateObject private var auth = AuthManager.shared
+    @EnvironmentObject private var themeManager: ThemeManager
     @State private var hasCompletedOnboarding = false
     @State private var shouldShowLogin = false
 
@@ -22,6 +23,8 @@ struct AppEntryView: View {
             }
         }
         .onAppear {
+            // Load theme immediately at app launch
+            _ = themeManager.currentTheme
             auth.restoreSession()
             if !auth.isLoggedIn {
                 resetOnboardingFlow()

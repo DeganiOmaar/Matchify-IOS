@@ -16,7 +16,7 @@ struct MissionListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGroupedBackground)
+                AppTheme.Colors.groupedBackground
                     .ignoresSafeArea()
                 
                 if vm.isLoading && vm.missions.isEmpty {
@@ -39,7 +39,7 @@ struct MissionListView: View {
                         } label: {
                             Image(systemName: "plus")
                                 .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.black)
+                                .foregroundColor(AppTheme.Colors.primary)
                         }
                     }
                 }
@@ -106,15 +106,15 @@ struct MissionListView: View {
         VStack(spacing: 20) {
             Image(systemName: "briefcase")
                 .font(.system(size: 60))
-                .foregroundColor(.gray.opacity(0.5))
+                .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.5))
             
             Text("No missions yet")
                 .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(.gray)
+                .foregroundColor(AppTheme.Colors.textSecondary)
             
             Text("Create your first mission offer to get started")
                 .font(.system(size: 16))
-                .foregroundColor(.gray.opacity(0.8))
+                .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -125,10 +125,10 @@ struct MissionListView: View {
                 } label: {
                     Text("Create Mission")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(AppTheme.Colors.buttonText)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 12)
-                        .background(Color.black)
+                        .background(AppTheme.Colors.primary)
                         .cornerRadius(14)
                 }
                 .padding(.top, 10)

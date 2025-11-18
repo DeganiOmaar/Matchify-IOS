@@ -12,7 +12,7 @@ struct PortfolioListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGroupedBackground)
+                AppTheme.Colors.groupedBackground
                     .ignoresSafeArea()
                 
                 if vm.isLoading && vm.projects.isEmpty {
@@ -54,7 +54,7 @@ struct PortfolioListView: View {
                         showAddProject = true
                     } label: {
                         Image(systemName: "plus")
-                            .foregroundColor(.blue)
+                            .foregroundColor(AppTheme.Colors.primary)
                             .font(.system(size: 18, weight: .semibold))
                     }
                 }
@@ -95,15 +95,15 @@ struct PortfolioListView: View {
         VStack(spacing: 20) {
             Image(systemName: "folder.badge.plus")
                 .font(.system(size: 60))
-                .foregroundColor(.gray.opacity(0.5))
+                .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.5))
             
             Text("No Projects Yet")
                 .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(.gray)
+                .foregroundColor(AppTheme.Colors.textSecondary)
             
             Text("Start building your portfolio by adding your first project")
                 .font(.system(size: 15))
-                .foregroundColor(.gray.opacity(0.8))
+                .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -112,10 +112,10 @@ struct PortfolioListView: View {
             } label: {
                 Text("Add Your First Project")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(AppTheme.Colors.buttonText)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(Color.blue)
+                    .background(AppTheme.Colors.primary)
                     .cornerRadius(25)
             }
             .padding(.horizontal, 40)
