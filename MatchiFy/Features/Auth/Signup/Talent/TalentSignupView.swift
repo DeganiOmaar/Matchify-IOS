@@ -41,18 +41,6 @@ struct TalentSignupView: View {
                         text: $viewModel.phone
                     )
                     
-                    textFieldWithIcon(
-                        icon: "mappin.and.ellipse",
-                        placeholder: "Location",
-                        text: $viewModel.location
-                    )
-                    
-                    textFieldWithIcon(
-                        icon: "star",
-                        placeholder: "Talent (e.g. Photographer, Singer…)",
-                        text: $viewModel.talent
-                    )
-                    
                     passwordField(
                         placeholder: "Password",
                         text: $viewModel.password,

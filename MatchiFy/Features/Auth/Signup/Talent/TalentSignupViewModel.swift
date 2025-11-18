@@ -5,8 +5,6 @@ final class TalentSignupViewModel: ObservableObject {
     @Published var fullName = ""
     @Published var email = ""
     @Published var phone = ""
-    @Published var location = ""
-    @Published var talent = ""
     @Published var profileImage = ""
     @Published var password = ""
     @Published var confirmPassword = ""
@@ -22,8 +20,6 @@ final class TalentSignupViewModel: ObservableObject {
         fullName.isEmpty ||
         email.isEmpty ||
         phone.isEmpty ||
-        location.isEmpty ||
-        talent.isEmpty ||
         password.isEmpty ||
         confirmPassword.isEmpty
     }
@@ -54,9 +50,7 @@ final class TalentSignupViewModel: ObservableObject {
             password: password,
             confirmPassword: confirmPassword,
             phone: phone,
-            profileImage: profileImage.isEmpty ? nil : profileImage,
-            location: location,
-            talent: talent
+            profileImage: profileImage.isEmpty ? nil : profileImage
         )
 
         Task { @MainActor in

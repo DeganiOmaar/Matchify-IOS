@@ -38,7 +38,7 @@ final class TalentProfileService {
         email: String?,
         phone: String?,
         location: String?,
-        talent: String?,
+        talent: [String]?,
         skills: [String]?,
         description: String?,
         portfolioLink: String?,
@@ -94,7 +94,7 @@ final class TalentProfileService {
         email: String?,
         phone: String?,
         location: String?,
-        talent: String?,
+        talent: [String]?,
         skills: [String]?,
         description: String?,
         portfolioLink: String?,
@@ -116,9 +116,16 @@ final class TalentProfileService {
         addField("email", email)
         addField("phone", phone)
         addField("location", location)
-        addField("talent", talent)
         addField("description", description)
         addField("portfolioLink", portfolioLink)
+        
+        // Add talent as JSON array string
+        if let talent = talent, !talent.isEmpty {
+            if let talentJSON = try? JSONEncoder().encode(talent),
+               let talentString = String(data: talentJSON, encoding: .utf8) {
+                addField("talent", talentString)
+            }
+        }
         
         // Add skills as JSON array string
         if let skills = skills, !skills.isEmpty {

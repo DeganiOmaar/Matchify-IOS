@@ -15,6 +15,10 @@ enum ErrorHandler {
         case passwordReset
         case forgotPassword
         case verifyCode
+        case portfolioCreate
+        case portfolioUpdate
+        case portfolioDelete
+        case network
     }
     
     /// Extracts user-friendly error message from error
@@ -124,6 +128,8 @@ enum ErrorHandler {
             return "Votre session a expiré. Veuillez vous reconnecter."
         case .missionCreate, .missionUpdate, .missionDelete:
             return "Vous devez être connecté pour effectuer cette action."
+        case .portfolioCreate, .portfolioUpdate, .portfolioDelete:
+            return "Vous devez être connecté pour gérer votre portfolio."
         case .passwordReset:
             return "Le code de vérification est incorrect ou a expiré."
         default:

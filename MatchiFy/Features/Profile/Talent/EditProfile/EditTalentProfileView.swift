@@ -88,16 +88,46 @@ struct EditTalentProfileView: View {
                     .keyboardType(.phonePad)
                 
                 TextField("Location", text: $vm.location)
-                
-                TextField("Talent Category", text: $vm.talent)
-                    .placeholder(when: vm.talent.isEmpty) {
-                        Text("e.g., Singer, Designer, Actor")
-                            .foregroundColor(.gray.opacity(0.6))
+            }
+            
+            // MARK: - Talents
+            Section(header: Text("Talents")) {
+                // Add talent input
+                HStack {
+                    TextField("Add a talent (e.g., Developer, Photographer)", text: $vm.talentInput)
+                        .onSubmit {
+                            vm.addTalent()
+                        }
+                    
+                    Button {
+                        vm.addTalent()
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.blue)
+                            .font(.system(size: 24))
                     }
+                    .disabled(vm.talentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                
+                // Talents list
+                if !vm.talents.isEmpty {
+                    ForEach(vm.talents, id: \.self) { talent in
+                        HStack {
+                            Text(talent)
+                            Spacer()
+                            Button {
+                                vm.removeTalent(talent)
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                }
             }
             
             // MARK: - Skills
-            Section(header: Text("Skills (Max 10)")) {
+            Section(header: Text("Skills")) {
                 // Add skill input
                 HStack {
                     TextField("Add a skill", text: $vm.skillInput)
@@ -112,7 +142,7 @@ struct EditTalentProfileView: View {
                             .foregroundColor(.blue)
                             .font(.system(size: 24))
                     }
-                    .disabled(vm.skillInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || vm.skills.count >= 10)
+                    .disabled(vm.skillInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
                 
                 // Skills list
@@ -129,12 +159,6 @@ struct EditTalentProfileView: View {
                             }
                         }
                     }
-                }
-                
-                if vm.skills.count >= 10 {
-                    Text("Maximum 10 skills reached")
-                        .font(.caption)
-                        .foregroundColor(.orange)
                 }
             }
             

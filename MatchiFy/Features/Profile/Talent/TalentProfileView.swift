@@ -6,6 +6,7 @@ struct TalentProfileView: View {
     @State private var showMoreSheet = false
     @State private var showEditProfile = false
     @State private var showSettings = false
+    @State private var showPortfolio = false
     
     var body: some View {
         NavigationStack {
@@ -34,15 +35,20 @@ struct TalentProfileView: View {
                         .foregroundColor(.gray)
                         .font(.system(size: 16))
                     
-                    // MARK: - Talent Category
-                    if let talent = vm.user?.talent, !talent.isEmpty {
-                        Text(talent)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.blue)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 6)
-                            .background(Color.blue.opacity(0.1))
-                            .cornerRadius(12)
+                    // MARK: - Talent Categories
+                    if let talents = vm.user?.talent, !talents.isEmpty {
+                        FlowLayout(spacing: 8) {
+                            ForEach(talents, id: \.self) { talent in
+                                Text(talent)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.blue)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.blue.opacity(0.1))
+                                    .cornerRadius(12)
+                            }
+                        }
+                        .padding(.horizontal, 20)
                     }
                     
                     // MARK: - Buttons
@@ -107,6 +113,9 @@ struct TalentProfileView: View {
             .sheet(isPresented: $showMoreSheet) { moreSheet }
             .navigationDestination(isPresented: $showEditProfile) {
                 EditTalentProfileView()
+            }
+            .navigationDestination(isPresented: $showPortfolio) {
+                PortfolioListView()
             }
             .navigationDestination(isPresented: $showSettings) {
                 SettingsView()
@@ -231,6 +240,13 @@ struct TalentProfileView: View {
                 
                 Button {
                     showMoreSheet = false
+                    showPortfolio = true
+                } label: {
+                    Label("Portfolio", systemImage: "folder.fill")
+                }
+                
+                Button {
+                    showMoreSheet = false
                     showSettings = true
                 } label: {
                     Label("Settings", systemImage: "gearshape")
@@ -239,7 +255,7 @@ struct TalentProfileView: View {
             .navigationTitle("More")
             .navigationBarTitleDisplayMode(.inline)
         }
-        .presentationDetents([.height(180), .medium])
+        .presentationDetents([.height(240), .medium])
     }
 }
 

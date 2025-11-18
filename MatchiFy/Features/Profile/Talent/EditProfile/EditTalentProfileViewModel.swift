@@ -9,7 +9,8 @@ final class EditTalentProfileViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var phone: String = ""
     @Published var location: String = ""
-    @Published var talent: String = ""
+    @Published var talentInput: String = ""
+    @Published var talents: [String] = []
     @Published var description: String = ""
     @Published var portfolioLink: String = ""
     @Published var skillInput: String = ""
@@ -31,17 +32,32 @@ final class EditTalentProfileViewModel: ObservableObject {
             self.email = user.email
             self.phone = user.phone ?? ""
             self.location = user.location ?? ""
-            self.talent = user.talent ?? ""
+            self.talents = user.talent ?? []
             self.description = user.description ?? ""
             self.portfolioLink = user.portfolioLink ?? ""
             self.skills = user.skills ?? []
         }
     }
     
+    // MARK: - Talents Management
+    func addTalent() {
+        let trimmed = talentInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        
+        if !talents.contains(trimmed) {
+            talents.append(trimmed)
+            talentInput = ""
+        }
+    }
+    
+    func removeTalent(_ talent: String) {
+        talents.removeAll { $0 == talent }
+    }
+    
     // MARK: - Skills Management
     func addSkill() {
         let trimmed = skillInput.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, skills.count < 10 else { return }
+        guard !trimmed.isEmpty else { return }
         
         if !skills.contains(trimmed) {
             skills.append(trimmed)
@@ -63,11 +79,6 @@ final class EditTalentProfileViewModel: ObservableObject {
             return
         }
         
-        if skills.count > 10 {
-            errorMessage = "Vous ne pouvez pas avoir plus de 10 compétences."
-            return
-        }
-        
         if !portfolioLink.isEmpty {
             guard URL(string: portfolioLink) != nil else {
                 errorMessage = "Veuillez fournir une URL de portfolio valide."
@@ -84,7 +95,7 @@ final class EditTalentProfileViewModel: ObservableObject {
                     email: email,
                     phone: phone.isEmpty ? nil : phone,
                     location: location.isEmpty ? nil : location,
-                    talent: talent.isEmpty ? nil : talent,
+                    talent: talents.isEmpty ? nil : talents,
                     skills: skills.isEmpty ? nil : skills,
                     description: description.isEmpty ? nil : description,
                     portfolioLink: portfolioLink.isEmpty ? nil : portfolioLink,
