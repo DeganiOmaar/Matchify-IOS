@@ -1,5 +1,6 @@
 import SwiftUI
 import AVKit
+import PDFKit
 
 struct ProjectCardView: View {
     let project: ProjectModel
@@ -13,13 +14,36 @@ struct ProjectCardView: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 0) {
                 // MARK: - Media Preview
-                if let mediaURL = project.firstMediaURL {
+                if let mediaURL = project.firstMediaURL, let firstMedia = project.firstMediaItem {
                     ZStack {
-                        if project.firstMediaItem?.isVideo == true {
+                        if firstMedia.isVideo {
                             VideoPlayer(player: AVPlayer(url: mediaURL))
                                 .frame(height: 200)
                                 .clipped()
+                        } else if firstMedia.isPdf {
+                            PDFThumbnailView(url: mediaURL)
+                                .frame(height: 200)
+                                .clipped()
+                                .overlay(
+                                    // PDF indicator
+                                    VStack {
+                                        Spacer()
+                                        HStack {
+                                            Spacer()
+                                            Image(systemName: "doc.fill")
+                                                .font(.system(size: 20))
+                                                .foregroundColor(.white)
+                                                .padding(8)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .fill(Color.black.opacity(0.6))
+                                                )
+                                                .padding(8)
+                                        }
+                                    }
+                                )
                         } else {
+                            // Image
                             AsyncImage(url: mediaURL) { phase in
                                 switch phase {
                                 case .success(let image):
@@ -39,7 +63,7 @@ struct ProjectCardView: View {
                         }
                         
                         // Play button overlay for videos
-                        if project.firstMediaItem?.isVideo == true {
+                        if firstMedia.isVideo {
                             Image(systemName: "play.circle.fill")
                                 .font(.system(size: 50))
                                 .foregroundColor(.white.opacity(0.9))

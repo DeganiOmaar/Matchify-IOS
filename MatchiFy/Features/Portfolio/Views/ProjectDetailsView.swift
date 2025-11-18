@@ -1,5 +1,6 @@
 import SwiftUI
 import AVKit
+import PDFKit
 
 struct ProjectDetailsView: View {
     let project: ProjectModel
@@ -19,13 +20,13 @@ struct ProjectDetailsView: View {
                     // Title
                     Text(project.title)
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(AppTheme.Colors.textPrimary)
                     
                     // Role
                     if let role = project.role, !role.isEmpty {
                         Text(role)
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.blue)
+                            .foregroundColor(AppTheme.Colors.primary)
                     }
                     
                     // Description (full text, no truncation)
@@ -33,11 +34,11 @@ struct ProjectDetailsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Description")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .foregroundColor(AppTheme.Colors.textSecondary)
                             
                             Text(description)
                                 .font(.system(size: 15))
-                                .foregroundColor(.black)
+                                .foregroundColor(AppTheme.Colors.textPrimary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -47,16 +48,16 @@ struct ProjectDetailsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Skills")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .foregroundColor(AppTheme.Colors.textSecondary)
                             
                             FlowLayout(spacing: 8) {
                                 ForEach(project.skills, id: \.self) { skill in
                                     Text(skill)
                                         .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(AppTheme.Colors.primary)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
-                                        .background(Color.blue.opacity(0.1))
+                                        .background(AppTheme.Colors.primary.opacity(0.1))
                                         .cornerRadius(12)
                                 }
                             }
@@ -68,22 +69,22 @@ struct ProjectDetailsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Project Link")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .foregroundColor(AppTheme.Colors.textSecondary)
                             
                             Link(destination: URL(string: projectLink)!) {
                                 HStack {
                                     Text(projectLink)
                                         .font(.system(size: 15))
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(AppTheme.Colors.primary)
                                         .lineLimit(1)
                                     
                                     Spacer()
                                     
                                     Image(systemName: "arrow.up.right.square")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(AppTheme.Colors.primary)
                                 }
                                 .padding()
-                                .background(Color.blue.opacity(0.1))
+                                .background(AppTheme.Colors.primary.opacity(0.1))
                                 .cornerRadius(12)
                             }
                         }
@@ -101,7 +102,7 @@ struct ProjectDetailsView: View {
                     showEditProject = true
                 } label: {
                     Text("Edit")
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppTheme.Colors.primary)
                         .font(.system(size: 16, weight: .semibold))
                 }
             }
@@ -116,6 +117,7 @@ struct ProjectDetailsView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Media")
                 .font(.system(size: 20, weight: .bold))
+                .foregroundColor(AppTheme.Colors.textPrimary)
                 .padding(.horizontal, 20)
             
             // Images
@@ -132,10 +134,10 @@ struct ProjectDetailsView: View {
                                             .scaledToFill()
                                     case .failure, .empty:
                                         Rectangle()
-                                            .fill(Color.gray.opacity(0.2))
+                                            .fill(AppTheme.Colors.textSecondary.opacity(0.2))
                                     @unknown default:
                                         Rectangle()
-                                            .fill(Color.gray.opacity(0.2))
+                                            .fill(AppTheme.Colors.textSecondary.opacity(0.2))
                                     }
                                 }
                                 .frame(width: 300, height: 200)
@@ -166,8 +168,11 @@ struct ProjectDetailsView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     ForEach(project.pdfs) { mediaItem in
                         if let url = mediaItem.mediaURL {
-                            PDFViewer(url: url, title: mediaItem.title ?? "PDF Document")
-                                .padding(.horizontal, 20)
+                            PDFCardView(
+                                url: url,
+                                title: mediaItem.title ?? "PDF Document"
+                            )
+                            .padding(.horizontal, 20)
                         }
                     }
                 }
@@ -184,21 +189,21 @@ struct ProjectDetailsView: View {
                                         if let title = mediaItem.title {
                                             Text(title)
                                                 .font(.system(size: 16, weight: .semibold))
-                                                .foregroundColor(.black)
+                                                .foregroundColor(AppTheme.Colors.textPrimary)
                                         }
                                         Text(link)
                                             .font(.system(size: 14))
-                                            .foregroundColor(.gray)
+                                            .foregroundColor(AppTheme.Colors.textSecondary)
                                             .lineLimit(1)
                                     }
                                     
                                     Spacer()
                                     
                                     Image(systemName: "arrow.up.right.square")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(AppTheme.Colors.primary)
                                 }
                                 .padding()
-                                .background(Color.gray.opacity(0.1))
+                                .background(AppTheme.Colors.secondaryBackground)
                                 .cornerRadius(12)
                             }
                             .padding(.horizontal, 20)
@@ -210,42 +215,61 @@ struct ProjectDetailsView: View {
     }
 }
 
-// MARK: - PDF Viewer
-struct PDFViewer: View {
+// MARK: - PDF Card View
+struct PDFCardView: View {
     let url: URL
     let title: String
-    @State private var showShareSheet = false
+    @State private var showPDFViewer = false
     
     var body: some View {
         Button {
-            showShareSheet = true
+            showPDFViewer = true
         } label: {
-            HStack {
-                Image(systemName: "doc.fill")
-                    .font(.system(size: 24))
-                    .foregroundColor(.red)
+            HStack(spacing: 16) {
+                // PDF Thumbnail
+                PDFThumbnailView(url: url)
+                    .frame(width: 80, height: 100)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(AppTheme.Colors.border, lineWidth: 1)
+                    )
                 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(title)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(AppTheme.Colors.textPrimary)
+                        .lineLimit(2)
                     
-                    Text("Tap to open")
+                    HStack(spacing: 8) {
+                        Image(systemName: "doc.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(AppTheme.Colors.primary)
+                        
+                        Text("PDF Document")
+                            .font(.system(size: 14))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
+                    }
+                    
+                    Text("Tap to view")
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppTheme.Colors.primary)
                 }
                 
                 Spacer()
                 
-                Image(systemName: "square.and.arrow.up")
-                    .foregroundColor(.blue)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(AppTheme.Colors.textSecondary)
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(AppTheme.Colors.cardBackground)
             .cornerRadius(12)
+            .shadow(color: AppTheme.Colors.cardShadow, radius: 4, x: 0, y: 2)
         }
-        .sheet(isPresented: $showShareSheet) {
-            ShareSheet(items: [url])
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showPDFViewer) {
+            PDFViewerView(url: url, title: title)
         }
     }
 }
