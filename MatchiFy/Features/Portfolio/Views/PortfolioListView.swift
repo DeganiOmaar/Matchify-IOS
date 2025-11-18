@@ -5,6 +5,7 @@ struct PortfolioListView: View {
     @State private var showAddProject = false
     @State private var selectedProject: ProjectModel? = nil
     @State private var showEditProject = false
+    @State private var showProjectDetails = false
     @State private var projectToDelete: ProjectModel? = nil
     @State private var showDeleteAlert = false
     
@@ -32,6 +33,10 @@ struct PortfolioListView: View {
                                     onDelete: {
                                         projectToDelete = project
                                         showDeleteAlert = true
+                                    },
+                                    onTap: {
+                                        selectedProject = project
+                                        showProjectDetails = true
                                     }
                                 )
                                 .padding(.horizontal, 20)
@@ -62,6 +67,11 @@ struct PortfolioListView: View {
             }
             .navigationDestination(isPresented: $showAddProject) {
                 AddEditProjectView()
+            }
+            .navigationDestination(isPresented: $showProjectDetails) {
+                if let project = selectedProject {
+                    ProjectDetailsView(project: project)
+                }
             }
             .navigationDestination(isPresented: $showEditProject) {
                 if let project = selectedProject {

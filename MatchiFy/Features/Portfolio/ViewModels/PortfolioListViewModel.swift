@@ -18,10 +18,17 @@ final class PortfolioListViewModel: ObservableObject {
         
         Task { @MainActor in
             do {
+                print("🔄 Loading portfolio projects...")
                 let response = try await service.getAllProjects()
+                print("📊 Received \(response.projects.count) projects")
                 self.projects = response.projects
+                print("✅ Projects loaded: \(self.projects.count)")
+                for (index, project) in self.projects.enumerated() {
+                    print("   Project \(index + 1): \(project.title) - Media count: \(project.media.count)")
+                }
                 self.isLoading = false
             } catch {
+                print("❌ Error loading projects: \(error)")
                 self.isLoading = false
                 self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
             }

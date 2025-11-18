@@ -28,11 +28,39 @@ final class PortfolioService {
         if let http = response as? HTTPURLResponse,
            !(200...299).contains(http.statusCode) {
             let serverMessage = String(data: data, encoding: .utf8) ?? "Unknown server error"
+            print("❌ Portfolio GET Error: \(http.statusCode) - \(serverMessage)")
             throw NSError(domain: "", code: http.statusCode,
                           userInfo: [NSLocalizedDescriptionKey: serverMessage])
         }
         
-        return try JSONDecoder().decode(ProjectsResponse.self, from: data)
+        // Debug: print raw response
+        if let jsonString = String(data: data, encoding: .utf8) {
+            print("📦 Portfolio Response: \(jsonString.prefix(500))")
+        }
+        
+        do {
+            let decoded = try JSONDecoder().decode(ProjectsResponse.self, from: data)
+            print("✅ Portfolio decoded successfully: \(decoded.projects.count) projects")
+            return decoded
+        } catch {
+            print("❌ Portfolio decode error: \(error)")
+            print("   Error details: \(error.localizedDescription)")
+            if let decodingError = error as? DecodingError {
+                switch decodingError {
+                case .keyNotFound(let key, let context):
+                    print("   Missing key: \(key.stringValue) in \(context.debugDescription)")
+                case .typeMismatch(let type, let context):
+                    print("   Type mismatch: expected \(type) in \(context.debugDescription)")
+                case .valueNotFound(let type, let context):
+                    print("   Value not found: \(type) in \(context.debugDescription)")
+                case .dataCorrupted(let context):
+                    print("   Data corrupted: \(context.debugDescription)")
+                @unknown default:
+                    print("   Unknown decoding error")
+                }
+            }
+            throw error
+        }
     }
     
     // MARK: - Get Single Project
@@ -70,7 +98,9 @@ final class PortfolioService {
         role: String?,
         skills: [String]?,
         description: String?,
-        media: MediaItem?
+        projectLink: String?,
+        mediaItems: [ProjectMediaItem],
+        existingMediaItems: [MediaItemModel] = []
     ) async throws -> ProjectResponse {
         guard let token = AuthManager.shared.token else {
             throw NSError(domain: "", code: 401,
@@ -95,7 +125,9 @@ final class PortfolioService {
             role: role,
             skills: skills,
             description: description,
-            media: media
+            projectLink: projectLink,
+            mediaItems: mediaItems,
+            existingMediaItems: existingMediaItems
         )
         
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -117,7 +149,9 @@ final class PortfolioService {
         role: String?,
         skills: [String]?,
         description: String?,
-        media: MediaItem?
+        projectLink: String?,
+        mediaItems: [ProjectMediaItem],
+        existingMediaItems: [MediaItemModel] = []
     ) async throws -> ProjectResponse {
         guard let token = AuthManager.shared.token else {
             throw NSError(domain: "", code: 401,
@@ -142,7 +176,9 @@ final class PortfolioService {
             role: role,
             skills: skills,
             description: description,
-            media: media
+            projectLink: projectLink,
+            mediaItems: mediaItems,
+            existingMediaItems: existingMediaItems
         )
         
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -189,7 +225,9 @@ final class PortfolioService {
         role: String?,
         skills: [String]?,
         description: String?,
-        media: MediaItem?
+        projectLink: String?,
+        mediaItems: [ProjectMediaItem],
+        existingMediaItems: [MediaItemModel]
     ) throws -> Data {
         var body = Data()
         let line = "\r\n"
@@ -207,6 +245,7 @@ final class PortfolioService {
         
         addField("role", role)
         addField("description", description)
+        addField("projectLink", projectLink)
         
         // Add skills as JSON array string
         if let skills = skills, !skills.isEmpty {
@@ -216,45 +255,37 @@ final class PortfolioService {
             }
         }
         
-        // Add media file
-        if let media = media {
-            let fileData: Data
-            let filename: String
-            let mimeType: String
-            
-            switch media {
-            case .image(let image):
-                guard let jpegData = image.jpegData(compressionQuality: 0.85) else {
-                    throw NSError(domain: "", code: 400,
-                                  userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to data"])
-                }
-                fileData = jpegData
-                filename = "portfolio-image-\(UUID().uuidString).jpg"
-                mimeType = "image/jpeg"
-                
-            case .video(let url):
-                fileData = try Data(contentsOf: url)
-                let ext = url.pathExtension.lowercased()
-                filename = "portfolio-video-\(UUID().uuidString).\(ext)"
-                mimeType = ext == "mp4" ? "video/mp4" : "video/quicktime"
-            }
+        // Add uploaded media files
+        for mediaItem in mediaItems {
+            guard let fileData = mediaItem.fileData else { continue }
             
             body.append("--\(boundary)\(line)")
-            body.append("Content-Disposition: form-data; name=\"media\"; filename=\"\(filename)\"\(line)")
-            body.append("Content-Type: \(mimeType)\(line)\(line)")
+            body.append("Content-Disposition: form-data; name=\"media\"; filename=\"\(mediaItem.filename)\"\(line)")
+            body.append("Content-Type: \(mediaItem.mimeType)\(line)\(line)")
             body.append(fileData)
             body.append(line)
+        }
+        
+        // Add existing media items (for external links or to preserve existing media)
+        if !existingMediaItems.isEmpty {
+            let mediaItemsArray = existingMediaItems.map { item in
+                [
+                    "type": item.type,
+                    "url": item.url ?? "",
+                    "title": item.title ?? "",
+                    "externalLink": item.externalLink ?? ""
+                ]
+            }
+            
+            if let mediaItemsJSON = try? JSONSerialization.data(withJSONObject: mediaItemsArray),
+               let mediaItemsString = String(data: mediaItemsJSON, encoding: .utf8) {
+                addField("mediaItems", mediaItemsString)
+            }
         }
         
         body.append("--\(boundary)--\(line)")
         return body
     }
-}
-
-// MARK: - Media Item Enum
-enum MediaItem {
-    case image(UIImage)
-    case video(URL)
 }
 
 // MARK: - Data Extension
