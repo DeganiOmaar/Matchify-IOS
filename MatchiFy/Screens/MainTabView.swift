@@ -7,26 +7,19 @@ struct MainTabView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            // MARK: - Both Talent and Recruiter see Missions + Profile
+            // MARK: - Missions Tab
             MissionListView()
                 .tabItem {
                     Label("Missions", systemImage: "briefcase.fill")
                 }
                 .tag(0)
             
-            if auth.role == "recruiter" {
-                RecruiterProfileView()
-                    .tabItem {
-                        Label("Profile", systemImage: "person.fill")
-                    }
-                    .tag(1)
-            } else {
-                TalentProfileView()
-                    .tabItem {
-                        Label("Profile", systemImage: "person.fill")
-                    }
-                    .tag(1)
-            }
+            // MARK: - Messages Tab
+            MessagesView()
+                .tabItem {
+                    Label("Messages", systemImage: "message.fill")
+                }
+                .tag(1)
         }
         .accentColor(AppTheme.Colors.primary)
     }
