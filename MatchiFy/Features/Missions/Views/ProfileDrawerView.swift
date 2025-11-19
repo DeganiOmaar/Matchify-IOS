@@ -4,9 +4,14 @@ import SwiftUI
 struct ProfileDrawerView: View {
     @ObservedObject var viewModel: MissionListViewModel
     @StateObject private var drawerViewModel = DrawerViewModel()
+    let onItemSelected: (DrawerMenuItem.MenuItemType) -> Void
     
-    init(viewModel: MissionListViewModel) {
+    init(
+        viewModel: MissionListViewModel,
+        onItemSelected: @escaping (DrawerMenuItem.MenuItemType) -> Void
+    ) {
         self.viewModel = viewModel
+        self.onItemSelected = onItemSelected
     }
     
     var body: some View {
@@ -108,23 +113,27 @@ struct ProfileDrawerView: View {
     
     // MARK: - Menu Item Row
     private func menuItemRow(item: DrawerMenuItem) -> some View {
-        HStack(spacing: 16) {
-            // Icon
-            Image(systemName: item.iconName)
-                .font(.system(size: 20))
-                .foregroundColor(AppTheme.Colors.iconPrimary)
-                .frame(width: 24, height: 24)
-            
-            // Label
-            Text(item.title)
-                .font(.system(size: 17))
-                .foregroundColor(AppTheme.Colors.textPrimary)
-            
-            Spacer()
+        Button {
+            onItemSelected(item.type)
+        } label: {
+            HStack(spacing: 16) {
+                // Icon
+                Image(systemName: item.iconName)
+                    .font(.system(size: 20))
+                    .foregroundColor(AppTheme.Colors.iconPrimary)
+                    .frame(width: 24, height: 24)
+                
+                // Label
+                Text(item.title)
+                    .font(.system(size: 17))
+                    .foregroundColor(AppTheme.Colors.textPrimary)
+                
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .contentShape(Rectangle())
+        .buttonStyle(.plain)
     }
 }
 

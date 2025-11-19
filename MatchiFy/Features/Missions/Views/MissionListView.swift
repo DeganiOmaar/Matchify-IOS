@@ -8,6 +8,7 @@ struct MissionListView: View {
     @State private var showEditMission = false
     @State private var showDeleteAlert = false
     @State private var missionToDelete: MissionModel? = nil
+    @State private var showStats = false
     
     private var isRecruiter: Bool {
         auth.role == "recruiter"
@@ -74,6 +75,9 @@ struct MissionListView: View {
                     })
                 }
             }
+            .navigationDestination(isPresented: $showStats) {
+                StatsView()
+            }
             .alert("Delete Mission", isPresented: $showDeleteAlert) {
                 Button("Cancel", role: .cancel) {
                     missionToDelete = nil
@@ -103,12 +107,31 @@ struct MissionListView: View {
                 }
             
             // Drawer content sliding from left
-            ProfileDrawerView(viewModel: vm)
-                .frame(width: UIScreen.main.bounds.width * 0.75)
-                .frame(maxHeight: .infinity, alignment: .leading)
-                .background(AppTheme.Colors.groupedBackground)
-                .cornerRadius(20, corners: [.topRight, .bottomRight])
-                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 5, y: 0)
+            ProfileDrawerView(
+                viewModel: vm,
+                onItemSelected: { itemType in
+                    // Fermer le drawer d'abord
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        vm.showProfileDrawer = false
+                    }
+                    
+                    // Naviguer après un court délai pour une meilleure UX
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        switch itemType {
+                        case .myStats:
+                            showStats = true
+                        case .profile, .chatBot, .settings, .theme, .logOut:
+                            // TODO: Implémenter les autres navigations plus tard
+                            break
+                        }
+                    }
+                }
+            )
+            .frame(width: UIScreen.main.bounds.width * 0.75)
+            .frame(maxHeight: .infinity, alignment: .leading)
+            .background(AppTheme.Colors.groupedBackground)
+            .cornerRadius(20, corners: [.topRight, .bottomRight])
+            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 5, y: 0)
         }
     }
     
