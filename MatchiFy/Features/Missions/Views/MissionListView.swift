@@ -9,9 +9,21 @@ struct MissionListView: View {
     @State private var showDeleteAlert = false
     @State private var missionToDelete: MissionModel? = nil
     @State private var showStats = false
+    @State private var showProfile = false
+    @State private var showSettings = false
+    @State private var showTheme = false
     
     private var isRecruiter: Bool {
         auth.role == "recruiter"
+    }
+    
+    @ViewBuilder
+    private var profileView: some View {
+        if isRecruiter {
+            RecruiterProfileView()
+        } else {
+            TalentProfileView()
+        }
     }
     
     var body: some View {
@@ -78,6 +90,16 @@ struct MissionListView: View {
             .navigationDestination(isPresented: $showStats) {
                 StatsView()
             }
+            .navigationDestination(isPresented: $showProfile) {
+                profileView
+            }
+            .navigationDestination(isPresented: $showSettings) {
+                SettingsView()
+            }
+            .sheet(isPresented: $showTheme) {
+                ThemeView()
+                    .presentationDetents([.medium])
+            }
             .alert("Delete Mission", isPresented: $showDeleteAlert) {
                 Button("Cancel", role: .cancel) {
                     missionToDelete = nil
@@ -120,8 +142,14 @@ struct MissionListView: View {
                         switch itemType {
                         case .myStats:
                             showStats = true
-                        case .profile, .chatBot, .settings, .theme, .logOut:
-                            // TODO: Implémenter les autres navigations plus tard
+                        case .profile:
+                            showProfile = true
+                        case .settings:
+                            showSettings = true
+                        case .theme:
+                            showTheme = true
+                        case .chatBot, .logOut:
+                            // TODO: Implémenter les autres actions plus tard
                             break
                         }
                     }
