@@ -7,6 +7,8 @@ struct TalentProfileView: View {
     @State private var showEditProfile = false
     @State private var showSettings = false
     @State private var showPortfolio = false
+    @State private var selectedProject: ProjectModel? = nil
+    @State private var showProjectDetails = false
     
     var body: some View {
         NavigationStack {
@@ -88,11 +90,19 @@ struct TalentProfileView: View {
                             .padding(.horizontal, 20)
                     }
                     
-                    // MARK: - Information Card
-                    infoCard
-                        .padding(.horizontal, 20)
-                    
-                    Spacer()
+                    // MARK: - Portfolio Section
+                    PortfolioSectionView(
+                        projects: vm.projects,
+                        onProjectTap: { project in
+                            selectedProject = project
+                            showProjectDetails = true
+                        },
+                        onAddProject: {
+                            showPortfolio = true
+                        }
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20) // Extra padding for tab bar
                 }
                 .padding(.top, 10)
             }
@@ -117,8 +127,16 @@ struct TalentProfileView: View {
             .navigationDestination(isPresented: $showPortfolio) {
                 PortfolioListView()
             }
+            .navigationDestination(isPresented: $showProjectDetails) {
+                if let project = selectedProject {
+                    ProjectDetailsView(project: project)
+                }
+            }
             .navigationDestination(isPresented: $showSettings) {
                 SettingsView()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("PortfolioDidUpdate"))) { _ in
+                vm.loadProjects()
             }
         }
     }
@@ -186,47 +204,6 @@ struct TalentProfileView: View {
         .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
     }
     
-    // MARK: - Info Card
-    private var infoCard: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            
-            Text("Information")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(AppTheme.Colors.textPrimary)
-            
-            infoRow(icon: "envelope",
-                    title: "Email",
-                    value: vm.user?.email ?? "-")
-            
-            if let phone = vm.user?.phone, !phone.isEmpty {
-                infoRow(icon: "phone",
-                        title: "Phone",
-                        value: phone)
-            }
-            
-            if let location = vm.user?.location, !location.isEmpty {
-                infoRow(icon: "location",
-                        title: "Location",
-                        value: location)
-            }
-            
-            if let portfolioLink = vm.user?.portfolioLink, !portfolioLink.isEmpty {
-                infoRow(icon: "link",
-                        title: "Portfolio",
-                        value: portfolioLink)
-            }
-            
-            infoRow(icon: "calendar",
-                    title: "Joined",
-                    value: vm.joinedText)
-            
-        }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(AppTheme.Colors.cardBackground)
-        .cornerRadius(20)
-        .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
-    }
     
     // MARK: - More sheet
     private var moreSheet: some View {

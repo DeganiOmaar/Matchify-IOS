@@ -5,9 +5,12 @@ final class TalentProfileViewModel: ObservableObject {
 
     @Published var user: UserModel?
     @Published var joinedText: String = ""
+    @Published var projects: [ProjectModel] = []
+    @Published var isLoadingProjects: Bool = false
 
     private var cancellables = Set<AnyCancellable>()
     private let service = TalentProfileService.shared
+    private let portfolioService = PortfolioService.shared
 
     init(authManager: AuthManager = .shared) {
         // Load from local first
@@ -16,6 +19,7 @@ final class TalentProfileViewModel: ObservableObject {
 
         // Then load from backend
         loadProfile()
+        loadProjects()
 
         authManager.$user
             .receive(on: DispatchQueue.main)
@@ -36,6 +40,22 @@ final class TalentProfileViewModel: ObservableObject {
             } catch {
                 // Silently fail - keep using local data
                 print("Failed to load profile from backend: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func loadProjects() {
+        isLoadingProjects = true
+        
+        Task { @MainActor in
+            do {
+                let response = try await portfolioService.getAllProjects()
+                self.projects = response.projects
+                self.isLoadingProjects = false
+            } catch {
+                print("Failed to load portfolio projects: \(error.localizedDescription)")
+                self.isLoadingProjects = false
+                // Silently fail - projects will remain empty
             }
         }
     }

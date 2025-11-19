@@ -13,62 +13,12 @@ struct ProjectCardView: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 0) {
-                // MARK: - Media Preview
-                if let mediaURL = project.firstMediaURL, let firstMedia = project.firstMediaItem {
-                    ZStack {
-                        if firstMedia.isVideo {
-                            VideoPlayer(player: AVPlayer(url: mediaURL))
-                                .frame(height: 200)
-                                .clipped()
-                        } else if firstMedia.isPdf {
-                            PDFThumbnailView(url: mediaURL)
-                                .frame(height: 200)
-                                .clipped()
-                                .overlay(
-                                    // PDF indicator
-                                    VStack {
-                                        Spacer()
-                                        HStack {
-                                            Spacer()
-                                            Image(systemName: "doc.fill")
-                                                .font(.system(size: 20))
-                                                .foregroundColor(.white)
-                                                .padding(8)
-                                                .background(
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .fill(Color.black.opacity(0.6))
-                                                )
-                                                .padding(8)
-                                        }
-                                    }
-                                )
-                        } else {
-                            // Image
-                            AsyncImage(url: mediaURL) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .scaledToFill()
-                                case .failure, .empty:
-                                    Rectangle()
-                                        .fill(AppTheme.Colors.textSecondary.opacity(0.2))
-                                @unknown default:
-                                    Rectangle()
-                                        .fill(AppTheme.Colors.textSecondary.opacity(0.2))
-                                }
-                            }
-                            .frame(height: 200)
-                            .clipped()
-                        }
-                        
-                        // Play button overlay for videos
-                        if firstMedia.isVideo {
-                            Image(systemName: "play.circle.fill")
-                                .font(.system(size: 50))
-                                .foregroundColor(.white.opacity(0.9))
-                        }
-                    }
+                // MARK: - Media Thumbnail (List View)
+                if let firstMedia = project.firstMediaItem {
+                    MediaThumbnailView(
+                        mediaItem: firstMedia,
+                        size: CGSize(width: UIScreen.main.bounds.width - 40, height: 200)
+                    )
                 } else {
                     Rectangle()
                         .fill(

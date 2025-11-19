@@ -1,7 +1,7 @@
 import Foundation
 
 struct Endpoints {
-    static let baseURL = "http://192.168.1.102:3000"
+    static let baseURL = "http://10.86.128.201:3000"
     static let base = baseURL + "/auth"
     static let apiBase = baseURL
 

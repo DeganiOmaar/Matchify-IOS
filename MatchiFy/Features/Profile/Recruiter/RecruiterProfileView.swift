@@ -6,6 +6,8 @@ struct RecruiterProfileView: View {
     @State private var showMoreSheet = false
     @State private var showEditProfile = false
     @State private var showSettings = false
+    @State private var selectedProject: ProjectModel? = nil
+    @State private var showProjectDetails = false
     
     var body: some View {
         NavigationStack {
@@ -65,11 +67,20 @@ struct RecruiterProfileView: View {
                     .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
                     .padding(.horizontal, 20)
                     
-                    // MARK: - Information Card
-                    infoCard
-                        .padding(.horizontal, 20)
-                    
-                    Spacer()
+                    // MARK: - Portfolio Section
+                    PortfolioSectionView(
+                        projects: vm.projects,
+                        onProjectTap: { project in
+                            selectedProject = project
+                            showProjectDetails = true
+                        },
+                        onAddProject: {
+                            // Recruiters don't have portfolio, but we keep the UI consistent
+                            // This will show empty state
+                        }
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20) // Extra padding for tab bar
                 }
                 .padding(.top, 10)
             }
@@ -80,6 +91,11 @@ struct RecruiterProfileView: View {
             .sheet(isPresented: $showMoreSheet) { moreSheet }
             .navigationDestination(isPresented: $showEditProfile) {
                 EditRecruiterProfileView()
+            }
+            .navigationDestination(isPresented: $showProjectDetails) {
+                if let project = selectedProject {
+                    ProjectDetailsView(project: project)
+                }
             }
             .navigationDestination(isPresented: $showSettings) {
                 SettingsView()
@@ -125,33 +141,6 @@ struct RecruiterProfileView: View {
         .overlay(Circle().stroke(Color.white, lineWidth: 4))
     }
     
-    // MARK: - Info Card
-    private var infoCard: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            
-            Text("Information")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(AppTheme.Colors.textPrimary)
-            
-            infoRow(icon: "envelope",
-                    title: "Email",
-                    value: vm.user?.email ?? "-")
-            
-            infoRow(icon: "phone",
-                    title: "Phone",
-                    value: vm.user?.phone ?? "-")
-            
-            infoRow(icon: "calendar",
-                    title: "Joined",
-                    value: vm.joinedText)
-            
-        }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(AppTheme.Colors.cardBackground)
-        .cornerRadius(20)
-        .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
-    }
     
     // MARK: - More sheet
     private var moreSheet: some View {
@@ -180,28 +169,6 @@ struct RecruiterProfileView: View {
 
 
 // MARK: - Components
-
-@ViewBuilder
-func infoRow(icon: String, title: String, value: String) -> some View {
-    HStack(alignment: .top) {
-        
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(AppTheme.Colors.iconSecondary)
-            
-            Text(title)
-                .font(.system(size: 17))
-                .foregroundColor(AppTheme.Colors.textSecondary)
-        }
-        .frame(width: 120, alignment: .leading)
-        
-        Text(value)
-            .font(.system(size: 16))
-            .foregroundColor(AppTheme.Colors.textPrimary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
 
 @ViewBuilder
 func profileButton(icon: String, title: String) -> some View {
