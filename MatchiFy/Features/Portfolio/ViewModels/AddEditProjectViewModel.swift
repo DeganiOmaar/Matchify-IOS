@@ -6,18 +6,19 @@ final class AddEditProjectViewModel: ObservableObject {
     @Published var title: String = ""
     @Published var role: String = ""
     @Published var description: String = ""
-    @Published var skillInput: String = ""
-    @Published var skills: [String] = []
+    @Published var selectedSkills: [SkillModel] = []
     @Published var attachedMedia: [AttachedMediaItem] = []
     @Published var projectLink: String = ""
     @Published var externalLinkInput: String = ""
     @Published var externalLinkTitle: String = ""
     
     @Published var isSaving: Bool = false
+    @Published var isLoadingSkills: Bool = false
     @Published var errorMessage: String? = nil
     @Published var saveSuccess: Bool = false
     
     private let service: PortfolioService
+    private let skillService = SkillSuggestionService.shared
     let projectId: String?
     
     init(project: ProjectModel? = nil, service: PortfolioService = .shared) {
@@ -28,25 +29,37 @@ final class AddEditProjectViewModel: ObservableObject {
             self.title = project.title
             self.role = project.role ?? ""
             self.description = project.description ?? ""
-            self.skills = project.skills
             self.projectLink = project.projectLink ?? ""
             // Convert existing media items to AttachedMediaItem
             self.attachedMedia = project.media.map { .existing($0) }
+            
+            // Load skills by IDs
+            if !project.skills.isEmpty {
+                loadSkillsByIds(project.skills)
+            }
         }
     }
     
-    func addSkill() {
-        let trimmed = skillInput.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        
-        if !skills.contains(trimmed) {
-            skills.append(trimmed)
-            skillInput = ""
+    private func loadSkillsByIds(_ ids: [String]) {
+        isLoadingSkills = true
+        Task {
+            do {
+                let skills = try await skillService.getSkillsByIds(ids)
+                await MainActor.run {
+                    selectedSkills = skills
+                    isLoadingSkills = false
+                }
+            } catch {
+                await MainActor.run {
+                    isLoadingSkills = false
+                    print("❌ Error loading skills: \(error.localizedDescription)")
+                }
+            }
         }
     }
     
-    func removeSkill(_ skill: String) {
-        skills.removeAll { $0 == skill }
+    var skillNames: [String] {
+        selectedSkills.map { $0.name }
     }
     
     func addMedia(_ media: AttachedMediaItem) {
@@ -124,7 +137,7 @@ final class AddEditProjectViewModel: ObservableObject {
                         id: projectId,
                         title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                         role: role.isEmpty ? nil : role.trimmingCharacters(in: .whitespacesAndNewlines),
-                        skills: skills.isEmpty ? nil : skills,
+                        skills: skillNames.isEmpty ? nil : skillNames,
                         description: description.isEmpty ? nil : description.trimmingCharacters(in: .whitespacesAndNewlines),
                         projectLink: projectLink.isEmpty ? nil : projectLink.trimmingCharacters(in: .whitespacesAndNewlines),
                         mediaItems: newMediaItems,
@@ -135,7 +148,7 @@ final class AddEditProjectViewModel: ObservableObject {
                     let response = try await service.createProject(
                         title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                         role: role.isEmpty ? nil : role.trimmingCharacters(in: .whitespacesAndNewlines),
-                        skills: skills.isEmpty ? nil : skills,
+                        skills: skillNames.isEmpty ? nil : skillNames,
                         description: description.isEmpty ? nil : description.trimmingCharacters(in: .whitespacesAndNewlines),
                         projectLink: projectLink.isEmpty ? nil : projectLink.trimmingCharacters(in: .whitespacesAndNewlines),
                         mediaItems: newMediaItems,

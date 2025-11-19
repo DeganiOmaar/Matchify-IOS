@@ -56,35 +56,14 @@ struct AddEditProjectView: View {
             
             // MARK: - Skills
             Section(header: Text("Skills")) {
-                HStack {
-                    TextField("Add a skill", text: $vm.skillInput)
-                        .onSubmit {
-                            vm.addSkill()
-                        }
-                    
-                    Button {
-                        vm.addSkill()
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundColor(.blue)
-                            .font(.system(size: 24))
+                if vm.isLoadingSkills {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
                     }
-                    .disabled(vm.skillInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-                
-                if !vm.skills.isEmpty {
-                    ForEach(vm.skills, id: \.self) { skill in
-                        HStack {
-                            Text(skill)
-                            Spacer()
-                            Button {
-                                vm.removeSkill(skill)
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
+                } else {
+                    SkillPickerView(selectedSkills: $vm.selectedSkills)
                 }
             }
             

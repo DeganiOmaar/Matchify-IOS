@@ -30,4 +30,11 @@ struct Endpoints {
     static func portfolioProject(id: String) -> String {
         return apiBase + "/talent/portfolio/\(id)"
     }
+    
+    // Skills endpoints
+    static let skillsSearch = apiBase + "/skills"
+    static func skillsByIds(ids: [String]) -> String {
+        let idsString = ids.joined(separator: ",")
+        return apiBase + "/skills/by-ids?ids=\(idsString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+    }
 }

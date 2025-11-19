@@ -13,15 +13,16 @@ final class EditTalentProfileViewModel: ObservableObject {
     @Published var talents: [String] = []
     @Published var description: String = ""
     @Published var portfolioLink: String = ""
-    @Published var skillInput: String = ""
-    @Published var skills: [String] = []
+    @Published var selectedSkills: [SkillModel] = []
     @Published var selectedImage: UIImage? = nil
 
     @Published var isSaving: Bool = false
+    @Published var isLoadingSkills: Bool = false
     @Published var errorMessage: String? = nil
     @Published var saveSuccess: Bool = false
 
     private let service: TalentProfileService
+    private let skillService = SkillSuggestionService.shared
 
     init(service: TalentProfileService = .shared) {
         self.service = service
@@ -35,7 +36,29 @@ final class EditTalentProfileViewModel: ObservableObject {
             self.talents = user.talent ?? []
             self.description = user.description ?? ""
             self.portfolioLink = user.portfolioLink ?? ""
-            self.skills = user.skills ?? []
+            
+            // Load skills by IDs - user.skills contains skill IDs
+            if let skillIds = user.skills, !skillIds.isEmpty {
+                loadSkillsByIds(skillIds)
+            }
+        }
+    }
+    
+    private func loadSkillsByIds(_ ids: [String]) {
+        isLoadingSkills = true
+        Task {
+            do {
+                let skills = try await skillService.getSkillsByIds(ids)
+                await MainActor.run {
+                    selectedSkills = skills
+                    isLoadingSkills = false
+                }
+            } catch {
+                await MainActor.run {
+                    isLoadingSkills = false
+                    print("❌ Error loading skills: \(error.localizedDescription)")
+                }
+            }
         }
     }
     
@@ -55,18 +78,8 @@ final class EditTalentProfileViewModel: ObservableObject {
     }
     
     // MARK: - Skills Management
-    func addSkill() {
-        let trimmed = skillInput.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        
-        if !skills.contains(trimmed) {
-            skills.append(trimmed)
-            skillInput = ""
-        }
-    }
-    
-    func removeSkill(_ skill: String) {
-        skills.removeAll { $0 == skill }
+    var skillNames: [String] {
+        selectedSkills.map { $0.name }
     }
 
     // MARK: - Update profile
@@ -96,7 +109,7 @@ final class EditTalentProfileViewModel: ObservableObject {
                     phone: phone.isEmpty ? nil : phone,
                     location: location.isEmpty ? nil : location,
                     talent: talents.isEmpty ? nil : talents,
-                    skills: skills.isEmpty ? nil : skills,
+                    skills: skillNames.isEmpty ? nil : skillNames,
                     description: description.isEmpty ? nil : description,
                     portfolioLink: portfolioLink.isEmpty ? nil : portfolioLink,
                     profileImage: selectedImage
