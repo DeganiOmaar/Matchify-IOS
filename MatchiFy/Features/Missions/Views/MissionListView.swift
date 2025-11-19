@@ -107,6 +107,7 @@ struct MissionListView: View {
                 .frame(width: UIScreen.main.bounds.width * 0.75)
                 .frame(maxHeight: .infinity, alignment: .leading)
                 .background(AppTheme.Colors.groupedBackground)
+                .cornerRadius(20, corners: [.topRight, .bottomRight])
                 .shadow(color: Color.black.opacity(0.2), radius: 10, x: 5, y: 0)
         }
     }
