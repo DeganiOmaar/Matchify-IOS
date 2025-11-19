@@ -5,6 +5,15 @@ final class MissionListViewModel: ObservableObject {
     @Published var missions: [MissionModel] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
+    @Published var searchText: String = ""
+    @Published var selectedTab: MissionTab = .mostRecent
+    @Published var favoriteMissions: Set<String> = []
+    @Published var showProfileDrawer: Bool = false
+    
+    enum MissionTab: String, CaseIterable {
+        case bestMatches = "Best Matches"
+        case mostRecent = "Most Recent"
+    }
     
     private let service: MissionService
     private let realtimeService: MissionRealtimeService
@@ -73,6 +82,50 @@ final class MissionListViewModel: ObservableObject {
             return false
         }
         return mission.recruiterId == currentUserId
+    }
+    
+    // MARK: - Filtered Missions
+    var filteredMissions: [MissionModel] {
+        var filtered = missions
+        
+        // Apply search filter
+        if !searchText.isEmpty {
+            filtered = filtered.filter { mission in
+                mission.title.localizedCaseInsensitiveContains(searchText) ||
+                mission.description.localizedCaseInsensitiveContains(searchText) ||
+                mission.skills.contains { $0.localizedCaseInsensitiveContains(searchText) }
+            }
+        }
+        
+        // For now, both tabs show the same content (sorted by most recent)
+        return filtered.sorted { mission1, mission2 in
+            guard let date1 = parseDate(mission1.createdAt),
+                  let date2 = parseDate(mission2.createdAt) else {
+                return false
+            }
+            return date1 > date2 // Most recent first
+        }
+    }
+    
+    // MARK: - Toggle Favorite
+    func toggleFavorite(_ mission: MissionModel) {
+        if favoriteMissions.contains(mission.missionId) {
+            favoriteMissions.remove(mission.missionId)
+        } else {
+            favoriteMissions.insert(mission.missionId)
+        }
+    }
+    
+    func isFavorite(_ mission: MissionModel) -> Bool {
+        favoriteMissions.contains(mission.missionId)
+    }
+    
+    // MARK: - Helper
+    private func parseDate(_ dateString: String?) -> Date? {
+        guard let dateString = dateString else { return nil }
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return iso.date(from: dateString)
     }
     
     private func observeRealtime() {

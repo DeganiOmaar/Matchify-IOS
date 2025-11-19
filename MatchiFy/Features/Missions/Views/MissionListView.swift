@@ -19,31 +19,43 @@ struct MissionListView: View {
                 AppTheme.Colors.groupedBackground
                     .ignoresSafeArea()
                 
-                if vm.isLoading && vm.missions.isEmpty {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                } else if vm.missions.isEmpty {
-                    emptyStateView
-                } else {
-                    missionsList
-                }
-            }
-            .navigationTitle("Missions")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                // Only show add button for Recruiters
-                if isRecruiter {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            showAddMission = true
-                        } label: {
-                            Image(systemName: "plus")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(AppTheme.Colors.primary)
-                        }
+                VStack(spacing: 0) {
+                    // MARK: - Profile Image Header (Left Aligned)
+                    profileImageHeader
+                        .padding(.top, 8)
+                        .padding(.horizontal, 20)
+                    
+                    // MARK: - Search Bar
+                    searchBar
+                        .padding(.horizontal, 20)
+                        .padding(.top, 16)
+                    
+                    // MARK: - Tabs
+                    tabsView
+                        .padding(.horizontal, 20)
+                        .padding(.top, 16)
+                    
+                    // MARK: - Missions List
+                    if vm.isLoading && vm.filteredMissions.isEmpty {
+                        Spacer()
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Spacer()
+                    } else if vm.filteredMissions.isEmpty {
+                        emptyStateView
+                    } else {
+                        missionsList
                     }
                 }
+                
+                // MARK: - Left Side Drawer
+                if vm.showProfileDrawer {
+                    leftDrawer
+                        .transition(.move(edge: .leading))
+                        .zIndex(1000)
+                }
             }
+            .navigationBarHidden(true)
             .refreshable {
                 await vm.refreshMissions()
             }
@@ -74,30 +86,164 @@ struct MissionListView: View {
             } message: {
                 Text("Are you sure you want to delete this mission? This action cannot be undone.")
             }
+            .animation(.easeInOut(duration: 0.3), value: vm.showProfileDrawer)
         }
+    }
+    
+    // MARK: - Left Side Drawer
+    private var leftDrawer: some View {
+        ZStack(alignment: .leading) {
+            // Background overlay
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        vm.showProfileDrawer = false
+                    }
+                }
+            
+            // Drawer content sliding from left
+            ProfileDrawerView(viewModel: vm)
+                .frame(width: UIScreen.main.bounds.width * 0.75)
+                .frame(maxHeight: .infinity, alignment: .leading)
+                .background(AppTheme.Colors.groupedBackground)
+                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 5, y: 0)
+        }
+    }
+    
+    // MARK: - Profile Image Header (Left Aligned)
+    private var profileImageHeader: some View {
+        HStack {
+            Button {
+                vm.showProfileDrawer = true
+            } label: {
+                Group {
+                    if let profileImage = auth.user?.profileImage,
+                       !profileImage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                       let url = auth.user?.profileImageURL {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let img):
+                                img
+                                    .resizable()
+                                    .scaledToFill()
+                            case .failure, .empty:
+                                Image("avatar")
+                                    .resizable()
+                                    .scaledToFill()
+                            @unknown default:
+                                Image("avatar")
+                                    .resizable()
+                                    .scaledToFill()
+                            }
+                        }
+                    } else {
+                        Image("avatar")
+                            .resizable()
+                            .scaledToFill()
+                    }
+                }
+                .frame(width: 40, height: 40)
+                .clipShape(Circle())
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            Spacer()
+            
+            // Add Mission button for Recruiters
+            if isRecruiter {
+                Button {
+                    showAddMission = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(AppTheme.Colors.primary)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Search Bar
+    private var searchBar: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 16))
+                .foregroundColor(AppTheme.Colors.textSecondary)
+            
+            TextField(text: $vm.searchText) {
+                Text("Search for jobs")
+                    .foregroundColor(AppTheme.Colors.textSecondary)
+            }
+                .font(.system(size: 15))
+                .foregroundColor(AppTheme.Colors.textPrimary)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+            
+            if !vm.searchText.isEmpty {
+                Button {
+                    vm.searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(AppTheme.Colors.textSecondary)
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(AppTheme.Colors.cardBackground)
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(AppTheme.Colors.border, lineWidth: 1)
+        )
+    }
+    
+    // MARK: - Tabs View
+    private var tabsView: some View {
+        HStack(spacing: 0) {
+            ForEach(MissionListViewModel.MissionTab.allCases, id: \.self) { tab in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        vm.selectedTab = tab
+                    }
+                } label: {
+                    VStack(spacing: 0) {
+                        Text(tab.rawValue)
+                            .font(.system(size: 15, weight: vm.selectedTab == tab ? .semibold : .regular))
+                            .foregroundColor(vm.selectedTab == tab ? AppTheme.Colors.primary : AppTheme.Colors.textSecondary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                        
+                        // Underline indicator
+                        Rectangle()
+                            .fill(vm.selectedTab == tab ? AppTheme.Colors.primary : Color.clear)
+                            .frame(height: 2)
+                    }
+                }
+            }
+        }
+        .background(AppTheme.Colors.cardBackground)
+        .cornerRadius(8)
     }
     
     // MARK: - Missions List
     private var missionsList: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                ForEach(vm.missions, id: \.missionId) { mission in
-                    MissionCardView(
+                ForEach(vm.filteredMissions, id: \.missionId) { mission in
+                    MissionCardViewNew(
                         mission: mission,
-                        isOwner: vm.isMissionOwner(mission) && isRecruiter, // Only show actions if owner AND recruiter
-                        onEdit: {
-                            selectedMission = mission
-                            showEditMission = true
-                        },
-                        onDelete: {
-                            missionToDelete = mission
-                            showDeleteAlert = true
+                        isFavorite: vm.isFavorite(mission),
+                        onFavoriteToggle: {
+                            vm.toggleFavorite(mission)
                         }
                     )
                     .padding(.horizontal, 20)
                 }
             }
             .padding(.vertical, 20)
+            .padding(.bottom, 20) // Extra padding for tab bar
         }
     }
     
@@ -134,6 +280,7 @@ struct MissionListView: View {
                 .padding(.top, 10)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
