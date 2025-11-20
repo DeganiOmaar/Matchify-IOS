@@ -33,6 +33,14 @@ struct ProfileDrawerView: View {
         .background(AppTheme.Colors.groupedBackground)
     }
     
+    private var isRecruiter: Bool {
+        drawerViewModel.user?.role.lowercased() == "recruiter"
+    }
+    
+    private var menuItems: [DrawerMenuItem] {
+        isRecruiter ? DrawerMenuItem.recruiterItems : DrawerMenuItem.talentItems
+    }
+    
     // MARK: - User Section
     private var userSection: some View {
         HStack(alignment: .center, spacing: 16) {
@@ -47,7 +55,7 @@ struct ProfileDrawerView: View {
                     .foregroundColor(AppTheme.Colors.textPrimary)
                 
                 // Talent (si existe)
-                if let talent = drawerViewModel.talent {
+                if !isRecruiter, let talent = drawerViewModel.talent {
                     Text(talent)
                         .font(.system(size: 16))
                         .foregroundColor(AppTheme.Colors.textSecondary)
@@ -97,11 +105,11 @@ struct ProfileDrawerView: View {
     private var menuItemsList: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(DrawerMenuItem.allItems.enumerated()), id: \.element.id) { index, item in
+                ForEach(Array(menuItems.enumerated()), id: \.element.id) { index, item in
                     menuItemRow(item: item)
                     
                     // Divider entre les groupes (sauf après le dernier item)
-                    if index < DrawerMenuItem.allItems.count - 1 {
+                    if index < menuItems.count - 1 {
                         Divider()
                             .background(AppTheme.Colors.border.opacity(0.3))
                             .padding(.leading, 56) // Aligné avec le texte (icon + padding)

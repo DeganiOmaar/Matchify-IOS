@@ -31,9 +31,7 @@ final class LoginViewModel: ObservableObject {
                     email: email,
                     password: password
                 )
-
-                // 🔥 Save session with or without persistence (must be on main thread)
-                await AuthManager.shared.saveLoginSession(
+                AuthManager.shared.saveLoginSession(
                     from: response,
                     rememberMe: rememberMe
                 )

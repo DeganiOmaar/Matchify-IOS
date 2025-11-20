@@ -44,7 +44,7 @@ struct MissionEditView: View {
             }
             
             // MARK: - Skills
-            Section(header: Text("Skills (max 10)")) {
+            Section(header: Text("Skills")) {
                 HStack {
                     TextField("Add a skill", text: $vm.skillInput)
                         .onSubmit {
@@ -58,7 +58,7 @@ struct MissionEditView: View {
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.blue)
                     }
-                    .disabled(vm.skillInput.isEmpty || vm.skills.count >= 10)
+                    .disabled(vm.skillInput.isEmpty)
                 }
                 
                 if !vm.skills.isEmpty {
@@ -88,12 +88,6 @@ struct MissionEditView: View {
                         }
                         .padding(.vertical, 4)
                     }
-                }
-                
-                if vm.skills.count >= 10 {
-                    Text("Maximum 10 skills reached")
-                        .font(.system(size: 12))
-                        .foregroundColor(.orange)
                 }
             }
             

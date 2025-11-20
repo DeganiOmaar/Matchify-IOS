@@ -1,14 +1,18 @@
 import Foundation
 
-struct MissionModel: Codable, Identifiable {
+struct MissionModel: Codable, Identifiable, Hashable {
     let id: String?            // Sometimes backend uses "id"
     let _id: String?           // MongoDB uses "_id"
     let title: String
     let description: String
     let duration: String
     let budget: Int
+    let price: Int?
     let skills: [String]
     let recruiterId: String
+    let ownerId: String?
+    let proposalsCount: Int?
+    let interviewingCount: Int?
     let createdAt: String?
     let updatedAt: String?
     
@@ -19,8 +23,12 @@ struct MissionModel: Codable, Identifiable {
         case description
         case duration
         case budget
+        case price
         case skills
         case recruiterId
+        case ownerId
+        case proposalsCount
+        case interviewingCount
         case createdAt
         case updatedAt
     }
@@ -50,12 +58,32 @@ struct MissionModel: Codable, Identifiable {
         return "-"
     }
     
+    private var resolvedBudget: Int {
+        if let price {
+            return price
+        }
+        return budget
+    }
+    
     /// Formatted budget string
     var formattedBudget: String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = " "
-        return "\(formatter.string(from: NSNumber(value: budget)) ?? "\(budget)") €"
+        let value = resolvedBudget
+        return "\(formatter.string(from: NSNumber(value: value)) ?? "\(value)") €"
+    }
+    
+    var proposals: Int {
+        proposalsCount ?? 0
+    }
+    
+    var interviewing: Int {
+        interviewingCount ?? 0
+    }
+    
+    var ownerIdentifier: String {
+        ownerId ?? recruiterId
     }
 }
 

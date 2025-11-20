@@ -98,7 +98,6 @@ final class MissionRealtimeService: NSObject, URLSessionDataDelegate {
                 self?.handlePayload(payload)
             }
         } catch {
-            // Ignore malformed payloads
         }
     }
     

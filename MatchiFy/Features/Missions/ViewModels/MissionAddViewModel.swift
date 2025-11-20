@@ -22,7 +22,7 @@ final class MissionAddViewModel: ObservableObject {
     // MARK: - Add Skill
     func addSkill() {
         let trimmed = skillInput.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, skills.count < 10 else { return }
+        guard !trimmed.isEmpty else { return }
         
         if !skills.contains(trimmed) {
             skills.append(trimmed)
@@ -43,8 +43,7 @@ final class MissionAddViewModel: ObservableObject {
         !duration.isEmpty &&
         !filteredBudget.isEmpty &&
         !skills.isEmpty &&
-        Int(filteredBudget) != nil &&
-        skills.count <= 10
+        Int(filteredBudget) != nil
     }
     
     // MARK: - Create Mission

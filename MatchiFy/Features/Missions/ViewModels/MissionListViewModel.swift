@@ -81,7 +81,7 @@ final class MissionListViewModel: ObservableObject {
         guard let currentUserId = AuthManager.shared.user?.id ?? AuthManager.shared.user?._id else {
             return false
         }
-        return mission.recruiterId == currentUserId
+        return mission.ownerIdentifier == currentUserId
     }
     
     // MARK: - Filtered Missions

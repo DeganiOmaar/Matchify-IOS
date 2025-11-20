@@ -14,18 +14,24 @@ struct DrawerMenuItem: Identifiable {
         case chatBot
         case settings
         case theme
-        case logOut
     }
     
-    /// Liste de tous les items du menu dans l'ordre spécifié
-    static var allItems: [DrawerMenuItem] {
+    static var recruiterItems: [DrawerMenuItem] {
+        [
+            DrawerMenuItem(title: "Profile", iconName: "person.fill", type: .profile),
+            DrawerMenuItem(title: "Chat Bot", iconName: "message.fill", type: .chatBot),
+            DrawerMenuItem(title: "Settings", iconName: "gearshape.fill", type: .settings),
+            DrawerMenuItem(title: "Theme", iconName: "paintbrush.fill", type: .theme)
+        ]
+    }
+    
+    static var talentItems: [DrawerMenuItem] {
         [
             DrawerMenuItem(title: "Profile", iconName: "person.fill", type: .profile),
             DrawerMenuItem(title: "My stats", iconName: "chart.bar.fill", type: .myStats),
             DrawerMenuItem(title: "Chat Bot", iconName: "message.fill", type: .chatBot),
             DrawerMenuItem(title: "Settings", iconName: "gearshape.fill", type: .settings),
-            DrawerMenuItem(title: "Theme", iconName: "paintbrush.fill", type: .theme),
-            DrawerMenuItem(title: "Log Out", iconName: "rectangle.portrait.and.arrow.right", type: .logOut)
+            DrawerMenuItem(title: "Theme", iconName: "paintbrush.fill", type: .theme)
         ]
     }
 }

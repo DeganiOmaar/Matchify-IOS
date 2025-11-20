@@ -6,8 +6,6 @@ struct RecruiterProfileView: View {
     @State private var showMoreSheet = false
     @State private var showEditProfile = false
     @State private var showSettings = false
-    @State private var selectedProject: ProjectModel? = nil
-    @State private var showProjectDetails = false
     
     var body: some View {
         NavigationStack {
@@ -67,20 +65,10 @@ struct RecruiterProfileView: View {
                     .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
                     .padding(.horizontal, 20)
                     
-                    // MARK: - Portfolio Section
-                    PortfolioSectionView(
-                        projects: vm.projects,
-                        onProjectTap: { project in
-                            selectedProject = project
-                            showProjectDetails = true
-                        },
-                        onAddProject: {
-                            // Recruiters don't have portfolio, but we keep the UI consistent
-                            // This will show empty state
-                        }
-                    )
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20) // Extra padding for tab bar
+                    // MARK: - Information Section
+                    informationSection
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 20)
                 }
                 .padding(.top, 10)
             }
@@ -91,11 +79,6 @@ struct RecruiterProfileView: View {
             .sheet(isPresented: $showMoreSheet) { moreSheet }
             .navigationDestination(isPresented: $showEditProfile) {
                 EditRecruiterProfileView()
-            }
-            .navigationDestination(isPresented: $showProjectDetails) {
-                if let project = selectedProject {
-                    ProjectDetailsView(project: project)
-                }
             }
             .navigationDestination(isPresented: $showSettings) {
                 SettingsView()
@@ -192,5 +175,44 @@ func profileButton(icon: String, title: String) -> some View {
 struct RecruiterProfileView_Previews: PreviewProvider {
     static var previews: some View {
         RecruiterProfileView()
+    }
+}
+
+// MARK: - Information Section
+private extension RecruiterProfileView {
+    var informationSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Information")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.textPrimary)
+            
+            infoRow(title: "Email", value: vm.user?.email ?? "-")
+            
+            if let phone = vm.user?.phone, !phone.isEmpty {
+                infoRow(title: "Phone", value: phone)
+            }
+            
+            if let location = vm.user?.location, !location.isEmpty {
+                infoRow(title: "Location", value: location)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppTheme.Colors.cardBackground)
+        .cornerRadius(20)
+        .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
+    }
+    
+    func infoRow(title: String, value: String) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(AppTheme.Colors.textSecondary)
+            Spacer()
+            Text(value)
+                .font(.system(size: 16))
+                .foregroundColor(AppTheme.Colors.textPrimary)
+                .multilineTextAlignment(.trailing)
+        }
     }
 }

@@ -12,9 +12,14 @@ struct MissionListView: View {
     @State private var showProfile = false
     @State private var showSettings = false
     @State private var showTheme = false
+    @State private var missionDetailsSelection: MissionModel? = nil
     
     private var isRecruiter: Bool {
         auth.role == "recruiter"
+    }
+    
+    private var isTalent: Bool {
+        auth.role == "talent"
     }
     
     @ViewBuilder
@@ -43,10 +48,12 @@ struct MissionListView: View {
                         .padding(.horizontal, 20)
                         .padding(.top, 16)
                     
-                    // MARK: - Tabs
-                    tabsView
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
+                    // MARK: - Tabs (Talent only)
+                    if isTalent {
+                        tabsView
+                            .padding(.horizontal, 20)
+                            .padding(.top, 16)
+                    }
                     
                     // MARK: - Missions List
                     if vm.isLoading && vm.filteredMissions.isEmpty {
@@ -95,6 +102,14 @@ struct MissionListView: View {
             }
             .navigationDestination(isPresented: $showSettings) {
                 SettingsView()
+            }
+            .navigationDestination(item: $missionDetailsSelection) { mission in
+                MissionDetailsView(
+                    viewModel: MissionDetailsViewModel(
+                        missionId: mission.missionId,
+                        initialMission: mission
+                    )
+                )
             }
             .sheet(isPresented: $showTheme) {
                 ThemeView()
@@ -148,7 +163,7 @@ struct MissionListView: View {
                             showSettings = true
                         case .theme:
                             showTheme = true
-                        case .chatBot, .logOut:
+                        case .chatBot:
                             // TODO: Implémenter les autres actions plus tard
                             break
                         }
@@ -223,7 +238,7 @@ struct MissionListView: View {
                 .foregroundColor(AppTheme.Colors.textSecondary)
             
             TextField(text: $vm.searchText) {
-                Text("Search for jobs")
+                Text("Search")
                     .foregroundColor(AppTheme.Colors.textSecondary)
             }
                 .font(.system(size: 15))
@@ -286,9 +301,9 @@ struct MissionListView: View {
                 ForEach(vm.filteredMissions, id: \.missionId) { mission in
                     MissionCardViewNew(
                         mission: mission,
-                        isFavorite: vm.isFavorite(mission),
-                        onFavoriteToggle: {
-                            vm.toggleFavorite(mission)
+                        action: missionCardAction(for: mission),
+                        onTap: {
+                            missionDetailsSelection = mission
                         }
                     )
                     .padding(.horizontal, 20)
@@ -297,6 +312,33 @@ struct MissionListView: View {
             .padding(.vertical, 20)
             .padding(.bottom, 20) // Extra padding for tab bar
         }
+    }
+    
+    // MARK: - Mission Card Action
+    private func missionCardAction(for mission: MissionModel) -> MissionCardViewNew.Action? {
+        if isRecruiter {
+            guard vm.isMissionOwner(mission) else { return nil }
+            return .ownerMenu(
+                onEdit: { handleEdit(mission: mission) },
+                onDelete: { handleDelete(mission: mission) }
+            )
+        } else if isTalent {
+            return .favorite(
+                isFavorite: vm.isFavorite(mission),
+                toggle: { vm.toggleFavorite(mission) }
+            )
+        }
+        return nil
+    }
+    
+    private func handleEdit(mission: MissionModel) {
+        selectedMission = mission
+        showEditMission = true
+    }
+    
+    private func handleDelete(mission: MissionModel) {
+        missionToDelete = mission
+        showDeleteAlert = true
     }
     
     // MARK: - Empty State
