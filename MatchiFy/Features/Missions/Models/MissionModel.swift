@@ -14,6 +14,7 @@ struct MissionModel: Codable, Identifiable, Hashable {
     let proposalsCount: Int?
     let interviewingCount: Int?
     let hasApplied: Bool?
+    let isFavorite: Bool?
     let createdAt: String?
     let updatedAt: String?
     
@@ -31,6 +32,7 @@ struct MissionModel: Codable, Identifiable, Hashable {
         case proposalsCount
         case interviewingCount
         case hasApplied
+        case isFavorite
         case createdAt
         case updatedAt
     }
@@ -90,6 +92,10 @@ struct MissionModel: Codable, Identifiable, Hashable {
     
     var hasAppliedToMission: Bool {
         hasApplied ?? false
+    }
+    
+    var isFavorited: Bool {
+        isFavorite ?? false
     }
 }
 

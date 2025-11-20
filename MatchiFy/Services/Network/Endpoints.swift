@@ -63,4 +63,10 @@ struct Endpoints {
     static func conversationMessages(id: String) -> String {
         return apiBase + "/conversations/\(id)/messages"
     }
+    
+    // Favorites endpoints
+    static let favorites = apiBase + "/favorites"
+    static func favorite(missionId: String) -> String {
+        return apiBase + "/favorites/\(missionId)"
+    }
 }

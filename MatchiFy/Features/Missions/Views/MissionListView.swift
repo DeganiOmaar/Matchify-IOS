@@ -22,6 +22,13 @@ struct MissionListView: View {
         auth.role == "talent"
     }
     
+    private var visibleTabs: [MissionListViewModel.MissionTab] {
+        if isTalent {
+            return MissionListViewModel.MissionTab.allCases
+        }
+        return []
+    }
+    
     @ViewBuilder
     private var profileView: some View {
         if isRecruiter {
@@ -56,7 +63,7 @@ struct MissionListView: View {
                     }
                     
                     // MARK: - Missions List
-                    if vm.isLoading && vm.filteredMissions.isEmpty {
+                    if (vm.isLoading || (vm.selectedTab == .favorites && vm.isLoadingFavorites)) && vm.filteredMissions.isEmpty {
                         Spacer()
                         ProgressView()
                             .scaleEffect(1.5)
@@ -81,6 +88,13 @@ struct MissionListView: View {
             }
             .onAppear {
                 vm.loadMissions()
+            }
+            .onChange(of: vm.selectedTab) { _, newTab in
+                if newTab == .favorites && isTalent {
+                    Task {
+                        await vm.loadFavorites()
+                    }
+                }
             }
             .sheet(isPresented: $showAddMission) {
                 MissionAddView(onMissionCreated: {
@@ -269,7 +283,7 @@ struct MissionListView: View {
     // MARK: - Tabs View
     private var tabsView: some View {
         HStack(spacing: 0) {
-            ForEach(MissionListViewModel.MissionTab.allCases, id: \.self) { tab in
+            ForEach(visibleTabs, id: \.self) { tab in
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         vm.selectedTab = tab
