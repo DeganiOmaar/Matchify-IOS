@@ -81,6 +81,12 @@ final class EditTalentProfileViewModel: ObservableObject {
     var skillNames: [String] {
         selectedSkills.map { $0.name }
     }
+    
+    var skillIds: [String] {
+        selectedSkills.compactMap { skill in
+            skill._id ?? skill.id ?? nil
+        }
+    }
 
     // MARK: - Update profile
     func updateProfile() {
@@ -103,6 +109,7 @@ final class EditTalentProfileViewModel: ObservableObject {
 
         Task { @MainActor in
             do {
+                // Send skill names (backend will find or create them and convert to IDs)
                 let response = try await service.updateTalentProfile(
                     fullName: name,
                     email: email,
@@ -123,6 +130,15 @@ final class EditTalentProfileViewModel: ObservableObject {
 
             } catch {
                 isSaving = false
+                // Log l'erreur détaillée pour le débogage
+                print("❌ Erreur lors de la mise à jour du profil: \(error.localizedDescription)")
+                if let nsError = error as NSError? {
+                    print("   Code d'erreur: \(nsError.code)")
+                    print("   Domaine: \(nsError.domain)")
+                    if let userInfo = nsError.userInfo as? [String: Any] {
+                        print("   Détails: \(userInfo)")
+                    }
+                }
                 errorMessage = ErrorHandler.getErrorMessage(from: error, context: .profileUpdate)
             }
         }

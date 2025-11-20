@@ -85,8 +85,8 @@ struct TalentProfileView: View {
                     .padding(.horizontal, 20)
                     
                     // MARK: - Skills Card
-                    if let skills = vm.user?.skills, !skills.isEmpty {
-                        skillsCard(skills: skills)
+                    if !vm.skillNames.isEmpty {
+                        skillsCard(skills: vm.skillNames)
                             .padding(.horizontal, 20)
                     }
                     

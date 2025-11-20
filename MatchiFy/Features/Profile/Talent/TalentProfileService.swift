@@ -79,8 +79,27 @@ final class TalentProfileService {
 
         if let http = response as? HTTPURLResponse,
            !(200...299).contains(http.statusCode) {
-
-            let serverMessage = String(data: data, encoding: .utf8) ?? "Unknown server error"
+            
+            // Try to extract error message from server response
+            var serverMessage = "Unknown server error"
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("❌ Erreur serveur (code \(http.statusCode)): \(dataString)")
+                
+                // Try to parse as JSON to extract message
+                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let message = json["message"] as? String {
+                        serverMessage = message
+                    } else if let error = json["error"] as? String {
+                        serverMessage = error
+                    } else if let msg = json["msg"] as? String {
+                        serverMessage = msg
+                    }
+                } else {
+                    // If not JSON, use the raw string (truncated if too long)
+                    serverMessage = dataString.count > 200 ? String(dataString.prefix(200)) : dataString
+                }
+            }
+            
             throw NSError(domain: "", code: http.statusCode,
                           userInfo: [NSLocalizedDescriptionKey: serverMessage])
         }
@@ -129,9 +148,20 @@ final class TalentProfileService {
         
         // Add skills as JSON array string
         if let skills = skills, !skills.isEmpty {
-            if let skillsJSON = try? JSONEncoder().encode(skills),
-               let skillsString = String(data: skillsJSON, encoding: .utf8) {
-                addField("skills", skillsString)
+            // Ensure all skill names are valid strings
+            let validSkills = skills.compactMap { skill in
+                let trimmed = skill.trimmingCharacters(in: .whitespacesAndNewlines)
+                return trimmed.isEmpty ? nil : trimmed
+            }
+            
+            if !validSkills.isEmpty {
+                if let skillsJSON = try? JSONEncoder().encode(validSkills),
+                   let skillsString = String(data: skillsJSON, encoding: .utf8) {
+                    addField("skills", skillsString)
+                    print("📤 Envoi des skills: \(validSkills)")
+                } else {
+                    print("❌ Erreur lors de l'encodage JSON des skills")
+                }
             }
         }
 
