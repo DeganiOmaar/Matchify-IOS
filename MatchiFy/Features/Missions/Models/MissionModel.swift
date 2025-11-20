@@ -13,6 +13,7 @@ struct MissionModel: Codable, Identifiable, Hashable {
     let ownerId: String?
     let proposalsCount: Int?
     let interviewingCount: Int?
+    let hasApplied: Bool?
     let createdAt: String?
     let updatedAt: String?
     
@@ -29,6 +30,7 @@ struct MissionModel: Codable, Identifiable, Hashable {
         case ownerId
         case proposalsCount
         case interviewingCount
+        case hasApplied
         case createdAt
         case updatedAt
     }
@@ -84,6 +86,10 @@ struct MissionModel: Codable, Identifiable, Hashable {
     
     var ownerIdentifier: String {
         ownerId ?? recruiterId
+    }
+    
+    var hasAppliedToMission: Bool {
+        hasApplied ?? false
     }
 }
 

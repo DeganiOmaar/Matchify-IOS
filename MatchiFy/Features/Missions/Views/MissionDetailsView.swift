@@ -4,6 +4,7 @@ struct MissionDetailsView: View {
     @StateObject private var viewModel: MissionDetailsViewModel
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var auth = AuthManager.shared
+    @State private var showCreateProposal = false
     
     init(viewModel: MissionDetailsViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -37,13 +38,34 @@ struct MissionDetailsView: View {
         .overlay(loadingOverlay)
         .overlay(errorOverlay)
         .navigationBarHidden(true)
+        .sheet(isPresented: $showCreateProposal) {
+            if let mission = viewModel.mission {
+                CreateProposalView(
+                    viewModel: CreateProposalViewModel(
+                        missionId: mission.missionId,
+                        missionTitle: mission.title
+                    ),
+                    onSuccess: {
+                        viewModel.loadMission()
+                    }
+                )
+            }
+        }
         .onAppear {
+            viewModel.loadMission()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ProposalDidUpdate"))) { _ in
             viewModel.loadMission()
         }
     }
     
     private var shouldShowApplyButton: Bool {
         auth.role?.lowercased() == "talent"
+    }
+    
+    private var canApply: Bool {
+        guard let mission = viewModel.mission else { return false }
+        return !mission.hasAppliedToMission
     }
     
     private var topSection: some View {
@@ -165,16 +187,19 @@ struct MissionDetailsView: View {
     private var applyButton: some View {
         VStack(spacing: 12) {
             Button {
-                // UI only for now
+                if canApply {
+                    showCreateProposal = true
+                }
             } label: {
-                Text("Apply to this mission")
+                Text(canApply ? "Apply to this mission" : "Already applied")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(AppTheme.Colors.buttonText)
+                    .foregroundColor(canApply ? AppTheme.Colors.buttonText : AppTheme.Colors.textSecondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(AppTheme.Colors.primary)
+                    .background(canApply ? AppTheme.Colors.primary : AppTheme.Colors.primary.opacity(0.4))
                     .cornerRadius(16)
             }
+            .disabled(!canApply)
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)
@@ -252,6 +277,7 @@ private struct FlexibleSkillsView: View {
                 ownerId: "123",
                 proposalsCount: 18,
                 interviewingCount: 4,
+                hasApplied: false,
                 createdAt: ISO8601DateFormatter().string(from: Date().addingTimeInterval(-1800)),
                 updatedAt: ISO8601DateFormatter().string(from: Date())
             )

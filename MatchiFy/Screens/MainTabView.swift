@@ -14,12 +14,19 @@ struct MainTabView: View {
                 }
                 .tag(0)
             
+            // MARK: - Proposals Tab
+            ProposalsView()
+                .tabItem {
+                    Label("Proposals", systemImage: "doc.text.fill")
+                }
+                .tag(1)
+            
             // MARK: - Messages Tab
             MessagesView()
                 .tabItem {
                     Label("Messages", systemImage: "message.fill")
                 }
-                .tag(1)
+                .tag(2)
         }
         .accentColor(AppTheme.Colors.primary)
     }
