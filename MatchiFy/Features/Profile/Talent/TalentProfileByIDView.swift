@@ -85,6 +85,12 @@ struct TalentProfileByIDView: View {
                                 .padding(.horizontal, 20)
                         }
                         
+                        // MARK: - Portfolio Section (Read-only for recruiters)
+                        if !viewModel.portfolio.isEmpty {
+                            portfolioSectionView
+                                .padding(.horizontal, 20)
+                        }
+                        
                         Spacer()
                             .frame(height: 20)
                     }
@@ -160,6 +166,31 @@ struct TalentProfileByIDView: View {
                         .padding(.vertical, 6)
                         .background(AppTheme.Colors.primary.opacity(0.1))
                         .cornerRadius(16)
+                }
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppTheme.Colors.cardBackground)
+        .cornerRadius(20)
+        .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
+    }
+    
+    // MARK: - Portfolio Section (Read-only)
+    private var portfolioSectionView: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            // MARK: - Header
+            Text("Portfolio")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.textPrimary)
+            
+            // MARK: - Projects List
+            VStack(spacing: 16) {
+                ForEach(viewModel.portfolio, id: \.projectId) { project in
+                    CompactProjectCardView(project: project) {
+                        // Read-only: no action on tap for recruiters
+                        // Could navigate to project detail view if needed
+                    }
                 }
             }
         }
