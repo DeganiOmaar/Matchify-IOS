@@ -25,6 +25,12 @@ struct Endpoints {
     static let proposals = apiBase + "/proposals"
     static let proposalsTalent = apiBase + "/proposals/talent"
     static let proposalsRecruiter = apiBase + "/proposals/recruiter"
+    static func proposal(id: String) -> String {
+        return apiBase + "/proposals/\(id)"
+    }
+    static func proposalStatus(id: String) -> String {
+        return apiBase + "/proposals/\(id)/status"
+    }
     static func proposalsMissionCount(_ missionId: String) -> String {
         return apiBase + "/proposals/mission/\(missionId)/count"
     }
@@ -32,6 +38,9 @@ struct Endpoints {
     // Profile endpoints
     static let recruiterProfile = apiBase + "/recruiter/profile"
     static let talentProfile = apiBase + "/talent/profile"
+    static func userById(_ id: String) -> String {
+        return apiBase + "/user/\(id)"
+    }
     
     // Portfolio endpoints
     static let portfolio = apiBase + "/talent/portfolio"
@@ -44,5 +53,14 @@ struct Endpoints {
     static func skillsByIds(ids: [String]) -> String {
         let idsString = ids.joined(separator: ",")
         return apiBase + "/skills/by-ids?ids=\(idsString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+    }
+    
+    // Conversations endpoints
+    static let conversations = apiBase + "/conversations"
+    static func conversation(id: String) -> String {
+        return apiBase + "/conversations/\(id)"
+    }
+    static func conversationMessages(id: String) -> String {
+        return apiBase + "/conversations/\(id)/messages"
     }
 }

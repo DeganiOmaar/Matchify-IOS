@@ -16,7 +16,7 @@ enum ProposalStatus: String, Codable {
     }
 }
 
-struct ProposalModel: Codable, Identifiable {
+struct ProposalModel: Codable, Identifiable, Hashable {
     let id: String?
     let _id: String?
     let missionId: String
@@ -24,6 +24,7 @@ struct ProposalModel: Codable, Identifiable {
     let talentId: String
     let talentName: String?
     let recruiterId: String
+    let recruiterName: String?
     let status: ProposalStatus
     let message: String
     let proposedBudget: Int?

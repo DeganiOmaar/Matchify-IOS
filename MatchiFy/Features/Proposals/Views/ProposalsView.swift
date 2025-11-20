@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProposalsView: View {
     @StateObject private var viewModel = ProposalsViewModel()
+    @State private var selectedProposal: ProposalModel? = nil
     
     var body: some View {
         NavigationStack {
@@ -26,6 +27,9 @@ struct ProposalsView: View {
                                     isRecruiter: viewModel.isRecruiter
                                 )
                                 .padding(.horizontal, 20)
+                                .onTapGesture {
+                                    selectedProposal = proposal
+                                }
                             }
                         }
                         .padding(.vertical, 20)
@@ -34,6 +38,14 @@ struct ProposalsView: View {
             }
             .background(AppTheme.Colors.groupedBackground.ignoresSafeArea())
             .navigationTitle("Proposals")
+            .navigationDestination(item: $selectedProposal) { proposal in
+                ProposalDetailsView(
+                    viewModel: ProposalDetailsViewModel(
+                        proposalId: proposal.proposalId,
+                        initialProposal: proposal
+                    )
+                )
+            }
             .onAppear {
                 viewModel.loadProposals()
             }
@@ -75,16 +87,28 @@ private struct ProposalCardView: View {
                 statusBadge
             }
             
+            // Show other user's name (talent name for recruiter, recruiter name for talent)
             if isRecruiter, let talentName = proposal.talentName {
                 HStack(spacing: 4) {
                     Image(systemName: "person.fill")
                         .foregroundColor(AppTheme.Colors.textSecondary)
+                        .font(.system(size: 12))
                     Text(talentName)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AppTheme.Colors.textSecondary)
+                }
+            } else if !isRecruiter, let recruiterName = proposal.recruiterName {
+                HStack(spacing: 4) {
+                    Image(systemName: "person.fill")
+                        .foregroundColor(AppTheme.Colors.textSecondary)
+                        .font(.system(size: 12))
+                    Text(recruiterName)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(AppTheme.Colors.textSecondary)
                 }
             }
             
+            // Short message preview
             Text(proposal.message)
                 .font(.system(size: 14))
                 .foregroundColor(AppTheme.Colors.textSecondary)

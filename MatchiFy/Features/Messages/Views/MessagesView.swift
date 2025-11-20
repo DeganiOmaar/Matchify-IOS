@@ -1,8 +1,12 @@
 import SwiftUI
 
 struct MessagesView: View {
-    @StateObject private var viewModel = MessagesViewModel()
+    @StateObject private var viewModel = ConversationsViewModel()
     @StateObject private var auth = AuthManager.shared
+    @State private var selectedConversation: ConversationModel? = nil
+    @State private var showConversation: Bool = false
+    @State private var searchText: String = ""
+    @State private var showFilterMenu: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -22,27 +26,46 @@ struct MessagesView: View {
                         .padding(.top, 12)
                     
                     // MARK: - Content
-                    if viewModel.hasMessages {
-                        // TODO: Messages list will be implemented later
-                        messagesList
-                    } else {
+                    if viewModel.conversations.isEmpty && !viewModel.isLoading {
                         emptyStateView
+                    } else {
+                        conversationsList
                     }
                 }
                 
                 // MARK: - Overlay to close filter menu when tapping outside
-                if viewModel.showFilterMenu {
+                if showFilterMenu {
                     Color.clear
                         .contentShape(Rectangle())
                         .onTapGesture {
                             withAnimation(.easeIn(duration: 0.15)) {
-                                viewModel.showFilterMenu = false
+                                showFilterMenu = false
                             }
                         }
                         .zIndex(999)
                 }
             }
             .navigationBarHidden(true)
+            .navigationDestination(isPresented: $showConversation) {
+                if let conversation = selectedConversation {
+                    ConversationView(
+                        viewModel: ConversationViewModel(
+                            conversationId: conversation.conversationId,
+                            initialConversation: conversation
+                        )
+                    )
+                }
+            }
+            .onAppear {
+                viewModel.loadConversations()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ConversationDidUpdate"))) { _ in
+                viewModel.loadConversations()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ProposalDidUpdate"))) { _ in
+                // Reload conversations when a proposal is accepted
+                viewModel.loadConversations()
+            }
         }
     }
     
@@ -60,18 +83,6 @@ struct MessagesView: View {
                 .foregroundColor(AppTheme.Colors.textPrimary)
             
             Spacer()
-            
-            // Add Message Button
-            Button {
-                // TODO: Action later
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 40, height: 40)
-                    .background(AppTheme.Colors.primary)
-                    .clipShape(Circle())
-            }
         }
     }
     
@@ -107,7 +118,7 @@ struct MessagesView: View {
     
     // MARK: - Search Bar Section
     private var searchBarSection: some View {
-        ZStack(alignment: .topTrailing) {
+        ZStack(alignment: .bottomTrailing) {
             HStack(spacing: 12) {
                 // Search Bar
                 HStack(spacing: 12) {
@@ -115,7 +126,7 @@ struct MessagesView: View {
                         .font(.system(size: 16))
                         .foregroundColor(AppTheme.Colors.textSecondary)
                     
-                    TextField(text: $viewModel.searchText) {
+                    TextField(text: $searchText) {
                         Text("Search")
                             .foregroundColor(AppTheme.Colors.textSecondary)
                     }
@@ -132,7 +143,7 @@ struct MessagesView: View {
                 // Filter Icon Button
                 Button {
                     withAnimation(.easeOut(duration: 0.2)) {
-                        viewModel.showFilterMenu.toggle()
+                        showFilterMenu.toggle()
                     }
                 } label: {
                     Image(systemName: "slider.horizontal.3")
@@ -144,10 +155,10 @@ struct MessagesView: View {
                 }
             }
             
-            // Pop-up positioned below the entire search bar section
-            if viewModel.showFilterMenu {
+            // Pop-up positioned above the search bar section
+            if showFilterMenu {
                 filterPopUpMenu
-                    .offset(x: 0, y: 56) // Positioned below both search bar and filter icon
+                    .offset(x: 0, y: -8) // Positioned above the filter icon
                     .transition(.asymmetric(
                         insertion: .scale(scale: 0.85).combined(with: .opacity).animation(.easeOut(duration: 0.2)),
                         removal: .opacity.animation(.easeIn(duration: 0.15))
@@ -165,7 +176,8 @@ struct MessagesView: View {
                 title: "Unread",
                 action: {
                     withAnimation(.easeIn(duration: 0.15)) {
-                        viewModel.filterUnread()
+                        showFilterMenu = false
+                        // TODO: Implement filter logic
                     }
                 }
             )
@@ -179,7 +191,8 @@ struct MessagesView: View {
                 title: "Favourite",
                 action: {
                     withAnimation(.easeIn(duration: 0.15)) {
-                        viewModel.filterFavourite()
+                        showFilterMenu = false
+                        // TODO: Implement filter logic
                     }
                 }
             )
@@ -193,7 +206,8 @@ struct MessagesView: View {
                 title: "Messages",
                 action: {
                     withAnimation(.easeIn(duration: 0.15)) {
-                        viewModel.filterMessages()
+                        showFilterMenu = false
+                        // TODO: Implement filter logic
                     }
                 }
             )
@@ -233,14 +247,24 @@ struct MessagesView: View {
         .buttonStyle(.plain)
     }
     
-    // MARK: - Messages List (placeholder)
-    private var messagesList: some View {
+    // MARK: - Conversations List
+    private var conversationsList: some View {
         ScrollView {
-            VStack(spacing: 0) {
-                // TODO: Implement messages list later
-                Text("Messages list will be implemented later")
-                    .foregroundColor(AppTheme.Colors.textSecondary)
-                    .padding()
+            LazyVStack(spacing: 0) {
+                if viewModel.isLoading {
+                    ProgressView()
+                        .padding()
+                } else {
+                    ForEach(viewModel.conversations, id: \.conversationId) { conversation in
+                        ConversationRowView(
+                            conversation: conversation,
+                            isRecruiter: viewModel.isRecruiter
+                        ) {
+                            selectedConversation = conversation
+                            showConversation = true
+                        }
+                    }
+                }
             }
         }
     }

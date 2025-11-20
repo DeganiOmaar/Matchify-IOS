@@ -25,5 +25,20 @@ final class ProposalService {
             requiresAuth: true
         )
     }
+    
+    func getProposal(id: String) async throws -> ProposalModel {
+        try await ApiClient.shared.get(
+            url: Endpoints.proposal(id: id),
+            requiresAuth: true
+        )
+    }
+    
+    func updateStatus(id: String, status: ProposalStatus) async throws -> ProposalModel {
+        try await ApiClient.shared.patch(
+            url: Endpoints.proposalStatus(id: id),
+            body: UpdateProposalStatusRequest(status: status),
+            requiresAuth: true
+        )
+    }
 }
 
