@@ -366,11 +366,20 @@ struct MissionListView: View {
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundColor(AppTheme.Colors.textSecondary)
             
-            Text("Create your first mission offer to get started")
-                .font(.system(size: 16))
-                .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+            // Role-based subtext
+            if isRecruiter {
+                Text("Create your first mission offer to get started")
+                    .font(.system(size: 16))
+                    .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            } else if isTalent {
+                Text("You can save your favourite or wait until there a new missions for best match and most recent missions")
+                    .font(.system(size: 16))
+                    .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
             
             // Only show button for Recruiters
             if isRecruiter {

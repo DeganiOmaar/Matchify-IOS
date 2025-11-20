@@ -178,27 +178,15 @@ struct TalentProfileByIDView: View {
     
     // MARK: - Portfolio Section (Read-only)
     private var portfolioSectionView: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // MARK: - Header
-            Text("Portfolio")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(AppTheme.Colors.textPrimary)
-            
-            // MARK: - Projects List
-            VStack(spacing: 16) {
-                ForEach(viewModel.portfolio, id: \.projectId) { project in
-                    CompactProjectCardView(project: project) {
-                        // Read-only: no action on tap for recruiters
-                        // Could navigate to project detail view if needed
-                    }
-                }
-            }
-        }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(AppTheme.Colors.cardBackground)
-        .cornerRadius(20)
-        .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
+        PortfolioGridView(
+            projects: viewModel.portfolio,
+            onProjectTap: { _ in
+                // Read-only: no action on tap for recruiters
+                // Could navigate to project detail view if needed
+            },
+            showAddButton: false,
+            onAddProject: nil
+        )
     }
 }
 
