@@ -47,6 +47,8 @@ final class ProposalDetailsViewModel: ObservableObject {
                 await MainActor.run {
                     self.proposal = loaded
                     self.isLoading = false
+                    // Notify that proposal was viewed (for badge update)
+                    NotificationCenter.default.post(name: NSNotification.Name("ProposalsDidUpdate"), object: nil)
                 }
             } catch {
                 await MainActor.run {
@@ -77,6 +79,7 @@ final class ProposalDetailsViewModel: ObservableObject {
                 await MainActor.run {
                     self.proposal = updated
                     self.isUpdatingStatus = false
+                    NotificationCenter.default.post(name: NSNotification.Name("ProposalsDidUpdate"), object: nil)
                     NotificationCenter.default.post(
                         name: NSNotification.Name("ProposalDidUpdate"),
                         object: nil

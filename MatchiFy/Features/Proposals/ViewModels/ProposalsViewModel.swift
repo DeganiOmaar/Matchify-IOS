@@ -48,6 +48,8 @@ final class ProposalsViewModel: ObservableObject {
                 }
                 self.proposals = fetched
                 self.isLoading = false
+                // Notify badge view model
+                NotificationCenter.default.post(name: NSNotification.Name("ProposalsDidUpdate"), object: nil)
             } catch {
                 self.isLoading = false
                 self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)

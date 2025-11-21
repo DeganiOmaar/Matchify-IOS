@@ -40,5 +40,16 @@ final class ProposalService {
             requiresAuth: true
         )
     }
+    
+    func getUnreadCount() async throws -> Int {
+        let response: UnreadProposalsCountResponse = try await ApiClient.shared.get(
+            url: Endpoints.proposalsUnreadCount,
+            requiresAuth: true
+        )
+        return response.count
+    }
 }
 
+struct UnreadProposalsCountResponse: Codable {
+    let count: Int
+}

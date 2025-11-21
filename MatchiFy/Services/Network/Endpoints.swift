@@ -69,4 +69,18 @@ struct Endpoints {
     static func favorite(missionId: String) -> String {
         return apiBase + "/favorites/\(missionId)"
     }
+    
+    // Alerts endpoints
+    static let alerts = apiBase + "/alerts"
+    static let alertsUnreadCount = apiBase + "/alerts/unread-count"
+    static func alert(id: String) -> String {
+        return apiBase + "/alerts/\(id)"
+    }
+    static func alertMarkRead(id: String) -> String {
+        return apiBase + "/alerts/\(id)/read"
+    }
+    static let alertsMarkAllRead = apiBase + "/alerts/read-all"
+    
+    // Proposals unread count (for recruiter)
+    static let proposalsUnreadCount = apiBase + "/proposals/recruiter/unread-count"
 }
