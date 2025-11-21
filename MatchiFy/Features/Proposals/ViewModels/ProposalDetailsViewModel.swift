@@ -98,7 +98,7 @@ final class ProposalDetailsViewModel: ObservableObject {
     
     var otherUserName: String {
         if isRecruiter {
-            return proposal?.talentName ?? "Talent"
+            return proposal?.talentFullName ?? "Talent"
         } else {
             return proposal?.recruiterName ?? "Recruiter"
         }

@@ -88,12 +88,12 @@ private struct ProposalCardView: View {
             }
             
             // Show other user's name (talent name for recruiter, recruiter name for talent)
-            if isRecruiter, let talentName = proposal.talentName {
+            if isRecruiter {
                 HStack(spacing: 4) {
                     Image(systemName: "person.fill")
                         .foregroundColor(AppTheme.Colors.textSecondary)
                         .font(.system(size: 12))
-                    Text(talentName)
+                    Text(proposal.talentFullName ?? "Talent")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(AppTheme.Colors.textSecondary)
                 }
