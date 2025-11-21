@@ -68,6 +68,8 @@ struct ConversationView: View {
         .onAppear {
             viewModel.loadConversation()
             viewModel.loadMessages()
+            // Mark conversation as read when opened
+            viewModel.markAsRead()
         }
     }
     

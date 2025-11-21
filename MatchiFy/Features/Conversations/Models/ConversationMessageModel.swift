@@ -5,7 +5,9 @@ struct ConversationMessageModel: Codable, Identifiable, Hashable {
     let _id: String?
     let conversationId: String
     let senderId: String
+    let receiverId: String?
     let text: String
+    let isRead: Bool?
     let seenAt: String?
     let createdAt: String?
     let updatedAt: String?

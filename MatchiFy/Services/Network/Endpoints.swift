@@ -57,11 +57,19 @@ struct Endpoints {
     
     // Conversations endpoints
     static let conversations = apiBase + "/conversations"
+    static let conversationsUnreadCount = apiBase + "/conversations/unread-count"
+    static let conversationsWithUnread = apiBase + "/conversations/conversations-with-unread"
     static func conversation(id: String) -> String {
         return apiBase + "/conversations/\(id)"
     }
     static func conversationMessages(id: String) -> String {
         return apiBase + "/conversations/\(id)/messages"
+    }
+    static func conversationUnreadCount(id: String) -> String {
+        return apiBase + "/conversations/\(id)/unread-count"
+    }
+    static func conversationMarkRead(id: String) -> String {
+        return apiBase + "/conversations/\(id)/mark-read"
     }
     
     // Favorites endpoints

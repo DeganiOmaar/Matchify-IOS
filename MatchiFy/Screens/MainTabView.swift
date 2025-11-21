@@ -36,6 +36,7 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Messages", systemImage: "message.fill")
                 }
+                .badge(badgeViewModel.conversationsWithUnreadCount > 0 ? badgeViewModel.conversationsWithUnreadCount : 0)
                 .tag(3)
         }
         .accentColor(AppTheme.Colors.primary)

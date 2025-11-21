@@ -69,11 +69,27 @@ struct ConversationRowView: View {
                 
                 Spacer()
                 
-                // Time
-                if !conversation.formattedLastMessageTime.isEmpty {
-                    Text(conversation.formattedLastMessageTime)
-                        .font(.system(size: 12))
-                        .foregroundColor(AppTheme.Colors.textSecondary)
+                // Time and Unread Badge
+                VStack(alignment: .trailing, spacing: 4) {
+                    if !conversation.formattedLastMessageTime.isEmpty {
+                        Text(conversation.formattedLastMessageTime)
+                            .font(.system(size: 12))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
+                    }
+                    
+                    // Unread badge
+                    if conversation.unreadCount > 0 {
+                        Text("\(conversation.unreadCount)")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                Capsule()
+                                    .fill(AppTheme.Colors.primary)
+                            )
+                            .frame(minWidth: 18, minHeight: 18)
+                    }
                 }
             }
             .padding(.horizontal, 20)

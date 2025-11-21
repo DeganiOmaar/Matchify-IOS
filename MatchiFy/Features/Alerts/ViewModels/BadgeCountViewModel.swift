@@ -5,9 +5,11 @@ import Combine
 final class BadgeCountViewModel: ObservableObject {
     @Published var alertsUnreadCount: Int = 0
     @Published var proposalsUnreadCount: Int = 0
+    @Published var conversationsWithUnreadCount: Int = 0
     
     private let alertService = AlertService.shared
     private let proposalService = ProposalService.shared
+    private let conversationService = ConversationService.shared
     private var cancellables = Set<AnyCancellable>()
     private var timer: Timer?
     
@@ -18,6 +20,7 @@ final class BadgeCountViewModel: ObservableObject {
     init() {
         loadCounts()
         startPeriodicRefresh()
+        observeNotifications()
     }
     
     deinit {
@@ -43,6 +46,14 @@ final class BadgeCountViewModel: ObservableObject {
                     print("Failed to load proposals count: \(error.localizedDescription)")
                 }
             }
+            
+            // Load conversations with unread count
+            do {
+                let count = try await conversationService.getConversationsWithUnreadCount()
+                self.conversationsWithUnreadCount = count
+            } catch {
+                print("Failed to load conversations with unread count: \(error.localizedDescription)")
+            }
         }
     }
     
@@ -53,6 +64,16 @@ final class BadgeCountViewModel: ObservableObject {
                 self?.loadCounts()
             }
         }
+    }
+    
+    private func observeNotifications() {
+        NotificationCenter.default.publisher(for: NSNotification.Name("MessagesDidUpdate"))
+            .sink { [weak self] _ in
+                Task { @MainActor in
+                    self?.loadCounts()
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 

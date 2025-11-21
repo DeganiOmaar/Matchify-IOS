@@ -59,6 +59,17 @@ struct MessagesView: View {
             .onAppear {
                 viewModel.loadConversations()
             }
+            .refreshable {
+                viewModel.loadConversations()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ConversationMarkedAsRead"))) { notification in
+                if let conversationId = notification.object as? String {
+                    viewModel.updateConversationUnreadCount(conversationId: conversationId, count: 0)
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MessagesDidUpdate"))) { _ in
+                viewModel.refreshUnreadCounts()
+            }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ConversationDidUpdate"))) { _ in
                 viewModel.loadConversations()
             }

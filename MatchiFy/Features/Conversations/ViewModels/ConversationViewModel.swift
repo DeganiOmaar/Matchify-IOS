@@ -97,6 +97,10 @@ final class ConversationViewModel: ObservableObject {
                         name: NSNotification.Name("ConversationDidUpdate"),
                         object: nil
                     )
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("MessagesDidUpdate"),
+                        object: nil
+                    )
                 }
             } catch {
                 await MainActor.run {
@@ -111,6 +115,29 @@ final class ConversationViewModel: ObservableObject {
     
     func isMessageFromCurrentUser(_ message: ConversationMessageModel) -> Bool {
         message.senderId == currentUserId
+    }
+    
+    func markAsRead() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                _ = try await service.markConversationAsRead(conversationId: conversationId)
+                // Notify that messages were updated
+                await MainActor.run {
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("MessagesDidUpdate"),
+                        object: nil
+                    )
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("ConversationMarkedAsRead"),
+                        object: conversationId
+                    )
+                }
+            } catch {
+                // Silently fail - marking as read is not critical
+                print("Failed to mark conversation as read: \(error.localizedDescription)")
+            }
+        }
     }
 }
 

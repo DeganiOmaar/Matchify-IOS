@@ -19,6 +19,17 @@ struct ConversationModel: Codable, Identifiable, Hashable {
     let recruiterName: String?
     let recruiterProfileImage: String?
     
+    // Unread count (not from backend, computed locally)
+    // This is excluded from Codable and Hashable
+    var unreadCount: Int = 0
+    
+    enum CodingKeys: String, CodingKey {
+        case id, _id, missionId, recruiterId, talentId
+        case lastMessageText, lastMessageAt, createdAt, updatedAt
+        case talentName, talentProfileImage
+        case recruiterName, recruiterProfileImage
+    }
+    
     var conversationId: String {
         if let id, !id.isEmpty { return id }
         if let mongo = _id, !mongo.isEmpty { return mongo }
@@ -80,6 +91,40 @@ struct ConversationModel: Codable, Identifiable, Hashable {
         
         let fullPath = path.hasPrefix("/") ? path : "/\(path)"
         return URL(string: Endpoints.baseURL + fullPath)
+    }
+    
+    // Hashable implementation (exclude unreadCount)
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(_id)
+        hasher.combine(missionId)
+        hasher.combine(recruiterId)
+        hasher.combine(talentId)
+        hasher.combine(lastMessageText)
+        hasher.combine(lastMessageAt)
+        hasher.combine(createdAt)
+        hasher.combine(updatedAt)
+        hasher.combine(talentName)
+        hasher.combine(talentProfileImage)
+        hasher.combine(recruiterName)
+        hasher.combine(recruiterProfileImage)
+    }
+    
+    // Equatable implementation (exclude unreadCount)
+    static func == (lhs: ConversationModel, rhs: ConversationModel) -> Bool {
+        return lhs.id == rhs.id &&
+               lhs._id == rhs._id &&
+               lhs.missionId == rhs.missionId &&
+               lhs.recruiterId == rhs.recruiterId &&
+               lhs.talentId == rhs.talentId &&
+               lhs.lastMessageText == rhs.lastMessageText &&
+               lhs.lastMessageAt == rhs.lastMessageAt &&
+               lhs.createdAt == rhs.createdAt &&
+               lhs.updatedAt == rhs.updatedAt &&
+               lhs.talentName == rhs.talentName &&
+               lhs.talentProfileImage == rhs.talentProfileImage &&
+               lhs.recruiterName == rhs.recruiterName &&
+               lhs.recruiterProfileImage == rhs.recruiterProfileImage
     }
 }
 

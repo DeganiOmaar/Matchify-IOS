@@ -48,5 +48,55 @@ final class ConversationService {
             requiresAuth: true
         )
     }
+    
+    func getUnreadCount() async throws -> Int {
+        let response: UnreadMessagesCountResponse = try await ApiClient.shared.get(
+            url: Endpoints.conversationsUnreadCount,
+            requiresAuth: true
+        )
+        return response.count
+    }
+    
+    func getConversationsWithUnreadCount() async throws -> Int {
+        let response: ConversationsWithUnreadCountResponse = try await ApiClient.shared.get(
+            url: Endpoints.conversationsWithUnread,
+            requiresAuth: true
+        )
+        return response.count
+    }
+    
+    func getConversationUnreadCount(conversationId: String) async throws -> Int {
+        let response: ConversationUnreadCountResponse = try await ApiClient.shared.get(
+            url: Endpoints.conversationUnreadCount(id: conversationId),
+            requiresAuth: true
+        )
+        return response.count
+    }
+    
+    func markConversationAsRead(conversationId: String) async throws -> MarkConversationReadResponse {
+        return try await ApiClient.shared.post(
+            url: Endpoints.conversationMarkRead(id: conversationId),
+            body: EmptyBody(),
+            requiresAuth: true
+        )
+    }
 }
+
+struct UnreadMessagesCountResponse: Codable {
+    let count: Int
+}
+
+struct ConversationsWithUnreadCountResponse: Codable {
+    let count: Int
+}
+
+struct ConversationUnreadCountResponse: Codable {
+    let count: Int
+}
+
+struct MarkConversationReadResponse: Codable {
+    let count: Int
+}
+
+private struct EmptyBody: Codable {}
 
