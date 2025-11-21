@@ -127,7 +127,7 @@ struct MissionListView: View {
             }
             .sheet(isPresented: $showTheme) {
                 ThemeView()
-                    .presentationDetents([.medium])
+                    .environmentObject(ThemeManager.shared)
             }
             .alert("Delete Mission", isPresented: $showDeleteAlert) {
                 Button("Cancel", role: .cancel) {
