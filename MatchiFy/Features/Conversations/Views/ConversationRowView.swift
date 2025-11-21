@@ -95,6 +95,14 @@ struct ConversationRowView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
             .background(AppTheme.Colors.groupedBackground)
+            .overlay(
+                // Bottom separator
+                Rectangle()
+                    .fill(AppTheme.Colors.separator)
+                    .frame(height: 0.5)
+                    .offset(y: 12),
+                alignment: .bottom
+            )
         }
         .buttonStyle(.plain)
     }

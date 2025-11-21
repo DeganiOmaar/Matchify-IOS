@@ -150,6 +150,10 @@ struct MessagesView: View {
                 .padding(.vertical, 12)
                 .background(AppTheme.Colors.inputBackground.opacity(0.8))
                 .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(AppTheme.Colors.inputBorder, lineWidth: 1)
+                )
                 
                 // Filter Icon Button
                 Button {

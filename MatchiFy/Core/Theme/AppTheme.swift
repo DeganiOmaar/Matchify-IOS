@@ -41,10 +41,6 @@ struct AppTheme {
             Color(.secondarySystemBackground)
         }
         
-        static var inputBorder: Color {
-            Color.gray.opacity(0.2)
-        }
-        
         // Button colors
         static var buttonBackground: Color {
             Color.blue
@@ -54,9 +50,28 @@ struct AppTheme {
             Color.white
         }
         
-        // Border colors
+        // Border colors - adaptive for light/dark mode
         static var border: Color {
-            Color.gray.opacity(0.2)
+            Color(.separator)
+        }
+        
+        static var separator: Color {
+            Color(.separator)
+        }
+        
+        // Card border - more visible in light mode
+        static var cardBorder: Color {
+            Color(.separator).opacity(0.5)
+        }
+        
+        // Message bubble border - visible in light mode
+        static var messageBubbleBorder: Color {
+            Color(.separator).opacity(0.3)
+        }
+        
+        // Input border - more visible in light mode
+        static var inputBorder: Color {
+            Color(.separator).opacity(0.5)
         }
         
         // Icon colors
