@@ -51,20 +51,8 @@ struct TalentProfileView: View {
                             }
                         }
                         .padding(.horizontal, 20)
+                        .padding(.top, 10)
                     }
-                    
-                    // MARK: - Buttons
-                    HStack(spacing: 10) {
-                        profileButton(icon: "person", title: "Follow")
-                        profileButton(icon: "bubble.left", title: "Message")
-                        
-                        Button {
-                            showMoreSheet = true
-                        } label: {
-                            profileButton(icon: "ellipsis", title: "More")
-                        }
-                    }
-                    .padding(.top, 10)
                     
                     // MARK: - Description (Dynamic)
                     VStack {
@@ -114,10 +102,11 @@ struct TalentProfileView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        showEditProfile = true
+                        showMoreSheet = true
                     } label: {
-                        Image(systemName: "pencil")
+                        Image(systemName: "ellipsis")
                             .foregroundColor(AppTheme.Colors.primary)
+                            .font(.system(size: 18, weight: .medium))
                     }
                 }
             }

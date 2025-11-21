@@ -33,19 +33,7 @@ struct RecruiterProfileView: View {
                     Text(vm.user?.email ?? "-")
                         .foregroundColor(AppTheme.Colors.textSecondary)
                         .font(.system(size: 16))
-                    
-                    // MARK: - Buttons
-                    HStack(spacing: 10) {
-                        profileButton(icon: "person", title: "Follow")
-                        profileButton(icon: "bubble.left", title: "Message")
-                        
-                        Button {
-                            showMoreSheet = true
-                        } label: {
-                            profileButton(icon: "ellipsis", title: "More")
-                        }
-                    }
-                    .padding(.top, 10)
+                        .padding(.top, 10)
                     
                     // MARK: - Description (Dynamic)
                     VStack {
@@ -77,6 +65,17 @@ struct RecruiterProfileView: View {
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .tabBar)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showMoreSheet = true
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .foregroundColor(AppTheme.Colors.primary)
+                            .font(.system(size: 18, weight: .medium))
+                    }
+                }
+            }
             .sheet(isPresented: $showMoreSheet) { moreSheet }
             .navigationDestination(isPresented: $showEditProfile) {
                 EditRecruiterProfileView()
@@ -149,28 +148,6 @@ struct RecruiterProfileView: View {
         }
         .presentationDetents([.height(180), .medium])
     }
-}
-
-
-// MARK: - Components
-
-@ViewBuilder
-func profileButton(icon: String, title: String) -> some View {
-    HStack(spacing: 6) {
-        Image(systemName: icon)
-            .font(.system(size: 18))
-            .foregroundColor(AppTheme.Colors.iconPrimary)
-        
-        Text(title)
-            .font(.system(size: 16))
-            .foregroundColor(AppTheme.Colors.textPrimary)
-    }
-    .padding(.horizontal, 18)
-    .padding(.vertical, 10)
-    .background(
-        RoundedRectangle(cornerRadius: 14)
-            .stroke(AppTheme.Colors.border, lineWidth: 1)
-    )
 }
 
 struct RecruiterProfileView_Previews: PreviewProvider {
