@@ -33,27 +33,67 @@ final class AddEditProjectViewModel: ObservableObject {
             // Convert existing media items to AttachedMediaItem
             self.attachedMedia = project.media.map { .existing($0) }
             
-            // Load skills by IDs
+            // Load skills - project.skills contains names (backend populates them in findAllByTalent)
             if !project.skills.isEmpty {
-                loadSkillsByIds(project.skills)
+                print("📋 [AddEditProjectViewModel] Skills du projet reçues: \(project.skills)")
+                
+                // Le backend retourne déjà les noms des skills dans findAllByTalent
+                // Créons des SkillModel à partir de ces noms
+                Task { @MainActor in
+                    selectedSkills = project.skills.map { name in
+                        // Give each skill a unique UUID to ensure proper identification
+                        // This prevents issues when removing skills (each has a unique ID)
+                        SkillModel(
+                            id: UUID().uuidString,
+                            _id: nil,
+                            name: name,
+                            source: "USER", // Assume user-created for now
+                            createdBy: nil,
+                            createdAt: nil,
+                            updatedAt: nil
+                        )
+                    }
+                    isLoadingSkills = false
+                    print("✅ [AddEditProjectViewModel] Skills créées depuis les noms: \(selectedSkills.count) skills")
+                    print("   Noms: \(selectedSkills.map { $0.name })")
+                }
+            } else {
+                print("⚠️ [AddEditProjectViewModel] Aucune skill trouvée pour ce projet")
+                isLoadingSkills = false
             }
         }
     }
     
     private func loadSkillsByIds(_ ids: [String]) {
         isLoadingSkills = true
-        Task {
+        print("🔄 [AddEditProjectViewModel] Début du chargement des skills avec \(ids.count) IDs")
+        print("   IDs: \(ids)")
+        
+        Task { @MainActor in
             do {
+                print("🔄 [AddEditProjectViewModel] Appel de skillService.getSkillsByIds...")
                 let skills = try await skillService.getSkillsByIds(ids)
-                await MainActor.run {
-                    selectedSkills = skills
-                    isLoadingSkills = false
-                }
+                print("✅ [AddEditProjectViewModel] Skills reçues du service: \(skills.count) skills")
+                
+                selectedSkills = skills
+                isLoadingSkills = false
+                
+                print("✅ [AddEditProjectViewModel] Skills assignées à selectedSkills: \(selectedSkills.count) skills")
+                print("   Noms: \(selectedSkills.map { $0.name })")
+                print("   selectedSkills.isEmpty: \(selectedSkills.isEmpty)")
+                
+                // Force une mise à jour de la vue
+                objectWillChange.send()
             } catch {
-                await MainActor.run {
-                    isLoadingSkills = false
-                    print("❌ Error loading skills: \(error.localizedDescription)")
+                isLoadingSkills = false
+                print("❌ [AddEditProjectViewModel] Erreur lors du chargement des skills: \(error.localizedDescription)")
+                print("   Type d'erreur: \(type(of: error))")
+                if let nsError = error as NSError? {
+                    print("   Code: \(nsError.code), Domaine: \(nsError.domain)")
+                    print("   UserInfo: \(nsError.userInfo)")
                 }
+                // Ne pas bloquer l'édition si les skills ne peuvent pas être chargées
+                // L'utilisateur pourra toujours les modifier
             }
         }
     }

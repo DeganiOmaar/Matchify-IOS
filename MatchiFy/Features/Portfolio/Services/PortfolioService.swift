@@ -267,6 +267,7 @@ final class PortfolioService {
         }
         
         // Add existing media items (for external links or to preserve existing media)
+        // Backend expects "media" not "mediaItems"
         if !existingMediaItems.isEmpty {
             let mediaItemsArray = existingMediaItems.map { item in
                 [
@@ -279,7 +280,7 @@ final class PortfolioService {
             
             if let mediaItemsJSON = try? JSONSerialization.data(withJSONObject: mediaItemsArray),
                let mediaItemsString = String(data: mediaItemsJSON, encoding: .utf8) {
-                addField("mediaItems", mediaItemsString)
+                addField("media", mediaItemsString)
             }
         }
         

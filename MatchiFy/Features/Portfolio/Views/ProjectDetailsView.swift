@@ -50,15 +50,17 @@ struct ProjectDetailsView: View {
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(AppTheme.Colors.textSecondary)
                             
-                            FlowLayout(spacing: 8) {
-                                ForEach(project.skills, id: \.self) { skill in
-                                    Text(skill)
-                                        .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(AppTheme.Colors.primary)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(AppTheme.Colors.primary.opacity(0.1))
-                                        .cornerRadius(12)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(project.skills, id: \.self) { skill in
+                                        Text(skill)
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(AppTheme.Colors.primary)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(AppTheme.Colors.primary.opacity(0.1))
+                                            .cornerRadius(12)
+                                    }
                                 }
                             }
                         }

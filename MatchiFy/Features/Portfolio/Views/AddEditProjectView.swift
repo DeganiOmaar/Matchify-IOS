@@ -60,6 +60,9 @@ struct AddEditProjectView: View {
                     HStack {
                         Spacer()
                         ProgressView()
+                        Text("Chargement des skills...")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
                         Spacer()
                     }
                 } else {

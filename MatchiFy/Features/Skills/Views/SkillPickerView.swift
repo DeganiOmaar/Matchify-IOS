@@ -98,14 +98,14 @@ struct SkillPickerView: View {
             // Selected skills chips
             if !selectedSkills.isEmpty {
                 FlowLayout(spacing: 8) {
-                    ForEach(selectedSkills, id: \.uniqueId) { skill in
+                    ForEach(Array(selectedSkills.enumerated()), id: \.element.uniqueId) { index, skill in
                         HStack(spacing: 6) {
                             Text(skill.name)
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(AppTheme.Colors.primary)
                             
                             Button {
-                                removeSkill(skill)
+                                removeSkill(at: index)
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.system(size: 14))
@@ -168,8 +168,10 @@ struct SkillPickerView: View {
         showSuggestions = false
     }
     
-    private func removeSkill(_ skill: SkillModel) {
-        selectedSkills.removeAll { $0.name.lowercased() == skill.name.lowercased() }
+    private func removeSkill(at index: Int) {
+        // Remove only the skill at the specific index
+        guard index >= 0 && index < selectedSkills.count else { return }
+        selectedSkills.remove(at: index)
     }
     
     private func addCustomSkill(_ skillName: String) {
