@@ -23,13 +23,13 @@ final class MissionListViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     init(
-        service: MissionService = .shared,
-        favoriteService: FavoriteService = .shared,
-        realtimeService: MissionRealtimeService = .shared
+        service: MissionService? = nil,
+        favoriteService: FavoriteService? = nil,
+        realtimeService: MissionRealtimeService? = nil
     ) {
-        self.service = service
-        self.favoriteService = favoriteService
-        self.realtimeService = realtimeService
+        self.service = service ?? MissionService.shared
+        self.favoriteService = favoriteService ?? FavoriteService.shared
+        self.realtimeService = realtimeService ?? MissionRealtimeService.shared
         observeRealtime()
     }
     
@@ -176,12 +176,10 @@ final class MissionListViewModel: ObservableObject {
                 }
                 
                 // Reload to get updated status from backend
-                await MainActor.run {
-                    Task {
-                        await self.refreshMissions()
-                        if self.selectedTab == .favorites {
-                            await self.loadFavorites()
-                        }
+                Task { @MainActor in
+                    await self.refreshMissions()
+                    if self.selectedTab == .favorites {
+                        await self.loadFavorites()
                     }
                 }
             } catch {

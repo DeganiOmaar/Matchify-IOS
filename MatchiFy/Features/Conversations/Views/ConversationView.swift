@@ -173,7 +173,7 @@ struct ConversationView: View {
                     .foregroundColor(AppTheme.Colors.textSecondary)
                     .padding(.horizontal, 4)
             }
-            .frame(maxWidth: UIScreen.main.bounds.width * 0.75, alignment: viewModel.isMessageFromCurrentUser(message) ? .trailing : .leading)
+            .frame(maxWidth: 300, alignment: viewModel.isMessageFromCurrentUser(message) ? .trailing : .leading)
             
             if !viewModel.isMessageFromCurrentUser(message) {
                 Spacer()

@@ -25,10 +25,10 @@ final class ConversationViewModel: ObservableObject {
     init(
         conversationId: String,
         initialConversation: ConversationModel? = nil,
-        service: ConversationService = .shared
+        service: ConversationService? = nil
     ) {
         self.conversationId = conversationId
-        self.service = service
+        self.service = service ?? ConversationService.shared
         self.conversation = initialConversation
     }
     
@@ -130,7 +130,7 @@ final class ConversationViewModel: ObservableObject {
                     )
                     NotificationCenter.default.post(
                         name: NSNotification.Name("ConversationMarkedAsRead"),
-                        object: conversationId
+                        object: self.conversationId
                     )
                 }
             } catch {

@@ -15,8 +15,8 @@ final class MissionAddViewModel: ObservableObject {
     
     private let service: MissionService
     
-    init(service: MissionService = .shared) {
-        self.service = service
+    init(service: MissionService? = nil) {
+        self.service = service ?? MissionService.shared
     }
     
     // MARK: - Add Skill

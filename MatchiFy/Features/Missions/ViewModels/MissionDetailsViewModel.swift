@@ -13,10 +13,10 @@ final class MissionDetailsViewModel: ObservableObject {
     init(
         missionId: String,
         initialMission: MissionModel? = nil,
-        service: MissionService = .shared
+        service: MissionService? = nil
     ) {
         self.missionId = missionId
-        self.service = service
+        self.service = service ?? MissionService.shared
         self.mission = initialMission
     }
     

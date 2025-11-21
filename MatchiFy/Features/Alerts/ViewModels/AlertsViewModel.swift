@@ -12,8 +12,8 @@ final class AlertsViewModel: ObservableObject {
     private let service: AlertService
     private var cancellables = Set<AnyCancellable>()
     
-    init(service: AlertService = .shared) {
-        self.service = service
+    init(service: AlertService? = nil) {
+        self.service = service ?? AlertService.shared
     }
     
     func loadAlerts() async {
@@ -50,11 +50,8 @@ final class AlertsViewModel: ObservableObject {
             do {
                 _ = try await service.markAsRead(alertId: alertId)
                 // Update local state
-                if let index = alerts.firstIndex(where: { $0.alertId == alertId }) {
-                    var updatedAlert = alerts[index]
-                    // Create a new alert with isRead = true
-                    // Since AlertModel is a struct, we need to create a new one
-                    // For now, just reload the alerts
+                if alerts.firstIndex(where: { $0.alertId == alertId }) != nil {
+                    // Reload the alerts to get updated state
                     await loadAlerts()
                 }
                 // Refresh unread count

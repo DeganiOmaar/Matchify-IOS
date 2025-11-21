@@ -185,7 +185,7 @@ final class AddEditProjectViewModel: ObservableObject {
                     )
                 } else {
                     // Create new project
-                    let response = try await service.createProject(
+                    _ = try await service.createProject(
                         title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                         role: role.isEmpty ? nil : role.trimmingCharacters(in: .whitespacesAndNewlines),
                         skills: skillNames.isEmpty ? nil : skillNames,

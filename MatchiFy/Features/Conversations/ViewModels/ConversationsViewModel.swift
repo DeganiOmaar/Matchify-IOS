@@ -14,8 +14,8 @@ final class ConversationsViewModel: ObservableObject {
         auth.role?.lowercased() == "recruiter"
     }
     
-    init(service: ConversationService = .shared) {
-        self.service = service
+    init(service: ConversationService? = nil) {
+        self.service = service ?? ConversationService.shared
     }
     
     func loadConversations() {

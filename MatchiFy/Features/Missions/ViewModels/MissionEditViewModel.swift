@@ -16,8 +16,8 @@ final class MissionEditViewModel: ObservableObject {
     private let service: MissionService
     private let missionId: String
     
-    init(mission: MissionModel, service: MissionService = .shared) {
-        self.service = service
+    init(mission: MissionModel, service: MissionService? = nil) {
+        self.service = service ?? MissionService.shared
         self.missionId = mission.missionId
         
         // Pre-fill form with mission data

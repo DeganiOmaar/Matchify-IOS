@@ -7,7 +7,7 @@ enum MissionRealtimeEvent {
     case deleted(String)
 }
 
-struct MissionRealtimePayload: Codable {
+nonisolated(unsafe) struct MissionRealtimePayload: Codable {
     let type: String
     let mission: MissionModel?
     let missionId: String?
