@@ -76,6 +76,7 @@ struct RecruiterProfileView: View {
             .ignoresSafeArea(edges: .top)
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .tabBar)
             .sheet(isPresented: $showMoreSheet) { moreSheet }
             .navigationDestination(isPresented: $showEditProfile) {
                 EditRecruiterProfileView()

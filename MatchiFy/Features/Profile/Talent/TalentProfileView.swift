@@ -110,6 +110,7 @@ struct TalentProfileView: View {
             .ignoresSafeArea(edges: .top)
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .tabBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {

@@ -104,6 +104,10 @@ struct AddEditProjectView: View {
         .onChange(of: vm.saveSuccess) { oldValue, newValue in
             if newValue {
                 NotificationCenter.default.post(name: NSNotification.Name("PortfolioDidUpdate"), object: nil)
+                // Post additional notification to indicate project was added (not just updated)
+                if vm.projectId == nil {
+                    NotificationCenter.default.post(name: NSNotification.Name("ProjectAdded"), object: nil)
+                }
                 dismiss()
             }
         }

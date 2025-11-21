@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PortfolioListView: View {
     @StateObject private var vm = PortfolioListViewModel()
+    @Environment(\.dismiss) private var dismiss
     @State private var showAddProject = false
     @State private var selectedProject: ProjectModel? = nil
     @State private var showEditProject = false
@@ -64,6 +65,12 @@ struct PortfolioListView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("PortfolioDidUpdate"))) { _ in
                 vm.loadProjects()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ProjectAdded"))) { _ in
+                // When a new project is added, go back to Profile page
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    dismiss()
+                }
             }
             .navigationDestination(isPresented: $showAddProject) {
                 AddEditProjectView()
