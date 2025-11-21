@@ -49,6 +49,7 @@ struct ProposalDetailsView: View {
         }
         .background(AppTheme.Colors.groupedBackground.ignoresSafeArea())
         .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar) // Hide bottom tab bar
         .onAppear {
             viewModel.loadProposal()
             if viewModel.showMessageButton {
