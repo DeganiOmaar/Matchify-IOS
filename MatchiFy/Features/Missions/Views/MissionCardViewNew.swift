@@ -4,7 +4,7 @@ import SwiftUI
 struct MissionCardViewNew: View {
     enum Action {
         case favorite(isFavorite: Bool, toggle: () -> Void)
-        case ownerMenu(onEdit: () -> Void, onDelete: () -> Void)
+        case ownerMenu(onEdit: () -> Void, onDelete: () -> Void, onViewProposals: (() -> Void)? = nil)
     }
     
     let mission: MissionModel
@@ -102,8 +102,11 @@ struct MissionCardViewNew: View {
                 }
                 .buttonStyle(PlainButtonStyle())
                 
-            case .ownerMenu(let onEdit, let onDelete):
+            case .ownerMenu(let onEdit, let onDelete, let onViewProposals):
                 Menu {
+                    if let onViewProposals = onViewProposals {
+                        Button("Voir propositions", action: onViewProposals)
+                    }
                     Button("Edit", action: onEdit)
                     Button(role: .destructive) {
                         onDelete()

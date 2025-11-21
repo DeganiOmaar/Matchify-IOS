@@ -71,6 +71,9 @@ struct Endpoints {
     static func conversationMarkRead(id: String) -> String {
         return apiBase + "/conversations/\(id)/mark-read"
     }
+    static func conversationDelete(id: String) -> String {
+        return apiBase + "/conversations/\(id)"
+    }
     
     // Favorites endpoints
     static let favorites = apiBase + "/favorites"
@@ -91,4 +94,23 @@ struct Endpoints {
     
     // Proposals unread count (for recruiter)
     static let proposalsUnreadCount = apiBase + "/proposals/recruiter/unread-count"
+    static func proposalArchive(id: String) -> String {
+        return apiBase + "/proposals/\(id)/archive"
+    }
+    static let proposalsRecruiterGrouped = apiBase + "/proposals/recruiter/grouped"
+    
+    // Contract endpoints
+    static let contracts = apiBase + "/contracts"
+    static func contract(id: String) -> String {
+        return apiBase + "/contracts/\(id)"
+    }
+    static func contractSign(id: String) -> String {
+        return apiBase + "/contracts/\(id)/sign"
+    }
+    static func contractDecline(id: String) -> String {
+        return apiBase + "/contracts/\(id)/decline"
+    }
+    static func contractsByConversation(conversationId: String) -> String {
+        return apiBase + "/contracts/conversation/\(conversationId)"
+    }
 }

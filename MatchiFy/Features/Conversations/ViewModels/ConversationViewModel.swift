@@ -9,6 +9,7 @@ final class ConversationViewModel: ObservableObject {
     @Published private(set) var isSending: Bool = false
     @Published private(set) var errorMessage: String?
     @Published var messageText: String = ""
+    @Published var showContractSheet: Bool = false
     
     private let conversationId: String
     private let service: ConversationService
@@ -138,6 +139,10 @@ final class ConversationViewModel: ObservableObject {
                 print("Failed to mark conversation as read: \(error.localizedDescription)")
             }
         }
+    }
+    
+    func setErrorMessage(_ message: String?) {
+        errorMessage = message
     }
 }
 

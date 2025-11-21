@@ -217,6 +217,7 @@ final class MissionListViewModel: ObservableObject {
                     interviewingCount: updated.interviewingCount,
                     hasApplied: updated.hasApplied,
                     isFavorite: isFavorite,
+                    status: updated.status,
                     createdAt: updated.createdAt,
                     updatedAt: updated.updatedAt
                 )

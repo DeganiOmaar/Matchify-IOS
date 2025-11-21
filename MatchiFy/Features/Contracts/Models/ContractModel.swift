@@ -1,0 +1,91 @@
+import Foundation
+
+enum ContractStatus: String, Codable {
+    case sentToTalent = "sent_to_talent"
+    case declinedByTalent = "declined_by_talent"
+    case signedByBoth = "signed_by_both"
+    
+    var displayName: String {
+        switch self {
+        case .sentToTalent: return "Envoyé au talent"
+        case .declinedByTalent: return "Refusé"
+        case .signedByBoth: return "Signé par les deux parties"
+        }
+    }
+}
+
+struct ContractModel: Codable, Identifiable {
+    let id: String?
+    let _id: String?
+    let missionId: String
+    let recruiterId: String
+    let talentId: String
+    let title: String
+    let content: String
+    let paymentDetails: String?
+    let startDate: String?
+    let endDate: String?
+    let recruiterSignature: String
+    let talentSignature: String?
+    let status: ContractStatus
+    let pdfUrl: String?
+    let signedPdfUrl: String?
+    let createdAt: String?
+    let updatedAt: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case _id
+        case missionId
+        case recruiterId
+        case talentId
+        case title
+        case content
+        case paymentDetails
+        case startDate
+        case endDate
+        case recruiterSignature
+        case talentSignature
+        case status
+        case pdfUrl
+        case signedPdfUrl
+        case createdAt
+        case updatedAt
+    }
+    
+    var contractId: String {
+        if let id, !id.isEmpty { return id }
+        if let mongo = _id, !mongo.isEmpty { return mongo }
+        return UUID().uuidString
+    }
+    
+    var formattedDate: String {
+        guard let createdAt else { return "-" }
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = iso.date(from: createdAt) {
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "fr_FR")
+            formatter.dateStyle = .medium
+            formatter.timeStyle = .short
+            return formatter.string(from: date)
+        }
+        return "-"
+    }
+}
+
+struct CreateContractRequest: Codable {
+    let missionId: String
+    let talentId: String
+    let title: String
+    let content: String
+    let paymentDetails: String?
+    let startDate: String?
+    let endDate: String?
+    let recruiterSignature: String
+}
+
+struct SignContractRequest: Codable {
+    let talentSignature: String
+}
+

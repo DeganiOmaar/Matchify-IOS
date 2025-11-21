@@ -47,6 +47,3 @@ final class AlertService {
     }
 }
 
-// Helper for empty request body
-private struct EmptyBody: Codable {}
-

@@ -279,6 +279,7 @@ private struct FlexibleSkillsView: View {
                 interviewingCount: 4,
                 hasApplied: false,
                 isFavorite: false,
+                status: "in_progress",
                 createdAt: ISO8601DateFormatter().string(from: Date().addingTimeInterval(-1800)),
                 updatedAt: ISO8601DateFormatter().string(from: Date())
             )

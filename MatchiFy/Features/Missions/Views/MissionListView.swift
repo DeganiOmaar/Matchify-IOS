@@ -13,6 +13,8 @@ struct MissionListView: View {
     @State private var showSettings = false
     @State private var showTheme = false
     @State private var missionDetailsSelection: MissionModel? = nil
+    @State private var showMissionProposals: Bool = false
+    @State private var selectedMissionForProposals: MissionModel? = nil
     
     private var isRecruiter: Bool {
         auth.role == "recruiter"
@@ -128,6 +130,14 @@ struct MissionListView: View {
             .sheet(isPresented: $showTheme) {
                 ThemeView()
                     .environmentObject(ThemeManager.shared)
+            }
+            .navigationDestination(isPresented: $showMissionProposals) {
+                if let mission = selectedMissionForProposals {
+                    MissionProposalsView(
+                        missionId: mission.missionId,
+                        missionTitle: mission.title
+                    )
+                }
             }
             .alert("Delete Mission", isPresented: $showDeleteAlert) {
                 Button("Cancel", role: .cancel) {
@@ -334,7 +344,8 @@ struct MissionListView: View {
             guard vm.isMissionOwner(mission) else { return nil }
             return .ownerMenu(
                 onEdit: { handleEdit(mission: mission) },
-                onDelete: { handleDelete(mission: mission) }
+                onDelete: { handleDelete(mission: mission) },
+                onViewProposals: { handleViewProposals(mission: mission) }
             )
         } else if isTalent {
             return .favorite(
@@ -343,6 +354,11 @@ struct MissionListView: View {
             )
         }
         return nil
+    }
+    
+    private func handleViewProposals(mission: MissionModel) {
+        selectedMissionForProposals = mission
+        showMissionProposals = true
     }
     
     private func handleEdit(mission: MissionModel) {

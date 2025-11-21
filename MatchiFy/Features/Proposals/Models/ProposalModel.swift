@@ -30,6 +30,7 @@ struct ProposalModel: Codable, Identifiable, Hashable {
     let message: String
     let proposedBudget: Int?
     let estimatedDuration: String?
+    let archived: Bool?
     let createdAt: String?
     let updatedAt: String?
     
@@ -47,6 +48,7 @@ struct ProposalModel: Codable, Identifiable, Hashable {
         case message
         case proposedBudget
         case estimatedDuration
+        case archived
         case createdAt
         case updatedAt
     }
@@ -88,6 +90,10 @@ struct ProposalModel: Codable, Identifiable, Hashable {
             return formatter.string(from: date)
         }
         return "-"
+    }
+    
+    var isArchived: Bool {
+        archived ?? false
     }
 }
 

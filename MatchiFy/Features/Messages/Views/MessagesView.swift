@@ -278,6 +278,13 @@ struct MessagesView: View {
                             selectedConversation = conversation
                             showConversation = true
                         }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                viewModel.deleteConversation(conversation)
+                            } label: {
+                                Label("Supprimer", systemImage: "trash")
+                            }
+                        }
                     }
                 }
             }

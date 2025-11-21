@@ -9,6 +9,9 @@ struct ConversationMessageModel: Codable, Identifiable, Hashable {
     let text: String
     let isRead: Bool?
     let seenAt: String?
+    let contractId: String?
+    let pdfUrl: String?
+    let isContractMessage: Bool?
     let createdAt: String?
     let updatedAt: String?
     

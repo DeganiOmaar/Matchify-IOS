@@ -35,12 +35,12 @@ enum ErrorHandler {
         
         // Handle decoding errors
         if case ApiError.decoding = error {
-            return "Erreur lors du traitement des données. Veuillez réessayer."
+            return "Error processing data. Please try again."
         }
         
         // Handle unknown errors
         if case ApiError.unknown = error {
-            return "Une erreur s'est produite. Veuillez réessayer."
+            return "An error occurred. Please try again."
         }
         
         // Try to extract message from error
@@ -58,28 +58,52 @@ enum ErrorHandler {
         }
         
         if lowerMessage.contains("email") && lowerMessage.contains("password") {
-            return "Email ou mot de passe incorrect."
+            return "Incorrect email or password."
         }
         
         if lowerMessage.contains("password") && (lowerMessage.contains("incorrect") || lowerMessage.contains("wrong")) {
-            return "Mot de passe incorrect."
+            return "Incorrect password."
         }
         
         if lowerMessage.contains("email") && (lowerMessage.contains("not found") || lowerMessage.contains("doesn't exist")) {
-            return "Aucun compte trouvé avec cet email."
+            return "No account found with this email."
         }
         
-        // Validation errors
-        if lowerMessage.contains("required") || lowerMessage.contains("missing") {
+        // Validation errors - check for structured error messages first
+        // IMPORTANT: Only treat as validation error if it's explicitly an error response
+        // Don't interpret success messages or other content as validation errors
+        
+        if lowerMessage.contains("missing required fields:") {
+            // This is a structured error from ApiClient, return it as-is
+            return message
+        }
+        
+        // Only treat as validation error if it's clearly an error message
+        // Check for error indicators first
+        let isErrorContext = lowerMessage.contains("error") || 
+                            lowerMessage.contains("failed") || 
+                            lowerMessage.contains("invalid") ||
+                            lowerMessage.contains("exception") ||
+                            lowerMessage.contains("bad request") ||
+                            lowerMessage.contains("validation failed")
+        
+        if isErrorContext && (lowerMessage.contains("required") || lowerMessage.contains("missing")) {
+            // Check if it's a contract validation error
+            if lowerMessage.contains("contract validation failed") {
+                return "Le contrat est incomplet. Veuillez vérifier tous les champs requis."
+            }
             return "Veuillez remplir tous les champs requis."
         }
         
+        // Don't treat standalone "required" or "missing" as errors if not in error context
+        // This prevents false positives from success messages
+        
         if lowerMessage.contains("email") && lowerMessage.contains("invalid") {
-            return "Format d'email invalide."
+            return "Invalid email format."
         }
         
         if lowerMessage.contains("password") && lowerMessage.contains("weak") {
-            return "Le mot de passe est trop faible. Utilisez au moins 6 caractères."
+            return "Password is too weak. Use at least 6 characters."
         }
         
         if lowerMessage.contains("already exists") || lowerMessage.contains("already registered") {
@@ -88,11 +112,11 @@ enum ErrorHandler {
         
         // Network errors
         if lowerMessage.contains("network") || lowerMessage.contains("connection") {
-            return "Problème de connexion. Vérifiez votre connexion internet."
+            return "Connection problem. Check your internet connection."
         }
         
         if lowerMessage.contains("timeout") {
-            return "La connexion a expiré. Veuillez réessayer."
+            return "Connection timed out. Please try again."
         }
         
         // If message seems user-friendly already, return it
@@ -101,50 +125,50 @@ enum ErrorHandler {
         }
         
         // Default fallback
-        return "Une erreur s'est produite. Veuillez réessayer."
+        return "An error occurred. Please try again."
     }
     
     /// Handles URL errors (network issues)
     private static func handleURLError(_ error: URLError) -> String {
         switch error.code {
         case .notConnectedToInternet, .networkConnectionLost:
-            return "Problème de connexion. Vérifiez votre connexion internet."
+            return "Connection problem. Check your internet connection."
         case .timedOut:
-            return "La connexion a expiré. Veuillez réessayer."
+            return "Connection timed out. Please try again."
         case .cannotFindHost, .cannotConnectToHost:
-            return "Impossible de se connecter au serveur. Veuillez réessayer plus tard."
+            return "Unable to connect to server. Please try again later."
         default:
-            return "Problème de connexion. Veuillez réessayer."
+            return "Connection problem. Please try again."
         }
     }
     
     private static func getUnauthorizedMessage(context: ErrorContext) -> String {
         switch context {
         case .login:
-            return "Email ou mot de passe incorrect."
+            return "Incorrect email or password."
         case .signup:
-            return "Erreur d'authentification. Veuillez réessayer."
+            return "Authentication error. Please try again."
         case .profileUpdate:
-            return "Votre session a expiré. Veuillez vous reconnecter."
+            return "Your session has expired. Please log in again."
         case .missionCreate, .missionUpdate, .missionDelete:
-            return "Vous devez être connecté pour effectuer cette action."
+            return "You must be logged in to perform this action."
         case .portfolioCreate, .portfolioUpdate, .portfolioDelete:
-            return "Vous devez être connecté pour gérer votre portfolio."
+            return "You must be logged in to manage your portfolio."
         case .passwordReset:
-            return "Le code de vérification est incorrect ou a expiré."
+            return "Verification code is incorrect or has expired."
         default:
-            return "Vous n'êtes pas autorisé à effectuer cette action."
+            return "You are not authorized to perform this action."
         }
     }
     
     private static func getConflictMessage(context: ErrorContext) -> String {
         switch context {
         case .signup:
-            return "Un compte existe déjà avec cet email."
+            return "An account already exists with this email."
         case .profileUpdate:
-            return "Cet email est déjà utilisé par un autre compte."
+            return "This email is already used by another account."
         default:
-            return "Cette ressource existe déjà."
+            return "This resource already exists."
         }
     }
 }

@@ -90,5 +90,23 @@ final class ConversationsViewModel: ObservableObject {
             return conversation.recruiterId
         }
     }
+    
+    func deleteConversation(_ conversation: ConversationModel) {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                _ = try await service.deleteConversation(conversationId: conversation.conversationId)
+                await MainActor.run {
+                    // Remove from local list
+                    self.conversations.removeAll { $0.conversationId == conversation.conversationId }
+                    NotificationCenter.default.post(name: NSNotification.Name("MessagesDidUpdate"), object: nil)
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
+                }
+            }
+        }
+    }
 }
 

@@ -45,9 +45,27 @@ final class ApiClient {
             }
         }
         
-        // Decode success
+        // Decode success - only decode if we have data
+        guard !data.isEmpty else {
+            // Empty response is valid for some endpoints
+            // Try to decode anyway, but handle gracefully
+            do {
+                return try JSONDecoder().decode(R.self, from: data)
+            } catch {
+                // If decoding fails on empty data, it might be expected
+                throw ApiError.decoding
+            }
+        }
+        
         do {
             return try JSONDecoder().decode(R.self, from: data)
+        } catch let decodingError as DecodingError {
+            // Log decoding error for debugging
+            print("❌ Decoding error: \(decodingError)")
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("📄 Response data: \(dataString.prefix(500))")
+            }
+            throw ApiError.decoding
         } catch {
             throw ApiError.decoding
         }
@@ -84,9 +102,27 @@ final class ApiClient {
             }
         }
         
-        // Decode success
+        // Decode success - only decode if we have data
+        guard !data.isEmpty else {
+            // Empty response is valid for some endpoints
+            // Try to decode anyway, but handle gracefully
+            do {
+                return try JSONDecoder().decode(R.self, from: data)
+            } catch {
+                // If decoding fails on empty data, it might be expected
+                throw ApiError.decoding
+            }
+        }
+        
         do {
             return try JSONDecoder().decode(R.self, from: data)
+        } catch let decodingError as DecodingError {
+            // Log decoding error for debugging
+            print("❌ Decoding error: \(decodingError)")
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("📄 Response data: \(dataString.prefix(500))")
+            }
+            throw ApiError.decoding
         } catch {
             throw ApiError.decoding
         }
@@ -125,9 +161,27 @@ final class ApiClient {
             }
         }
         
-        // Decode success
+        // Decode success - only decode if we have data
+        guard !data.isEmpty else {
+            // Empty response is valid for some endpoints
+            // Try to decode anyway, but handle gracefully
+            do {
+                return try JSONDecoder().decode(R.self, from: data)
+            } catch {
+                // If decoding fails on empty data, it might be expected
+                throw ApiError.decoding
+            }
+        }
+        
         do {
             return try JSONDecoder().decode(R.self, from: data)
+        } catch let decodingError as DecodingError {
+            // Log decoding error for debugging
+            print("❌ Decoding error: \(decodingError)")
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("📄 Response data: \(dataString.prefix(500))")
+            }
+            throw ApiError.decoding
         } catch {
             throw ApiError.decoding
         }
@@ -166,9 +220,27 @@ final class ApiClient {
             }
         }
         
-        // Decode success
+        // Decode success - only decode if we have data
+        guard !data.isEmpty else {
+            // Empty response is valid for some endpoints
+            // Try to decode anyway, but handle gracefully
+            do {
+                return try JSONDecoder().decode(R.self, from: data)
+            } catch {
+                // If decoding fails on empty data, it might be expected
+                throw ApiError.decoding
+            }
+        }
+        
         do {
             return try JSONDecoder().decode(R.self, from: data)
+        } catch let decodingError as DecodingError {
+            // Log decoding error for debugging
+            print("❌ Decoding error: \(decodingError)")
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("📄 Response data: \(dataString.prefix(500))")
+            }
+            throw ApiError.decoding
         } catch {
             throw ApiError.decoding
         }
@@ -205,9 +277,27 @@ final class ApiClient {
             }
         }
         
-        // Decode success
+        // Decode success - only decode if we have data
+        guard !data.isEmpty else {
+            // Empty response is valid for some endpoints
+            // Try to decode anyway, but handle gracefully
+            do {
+                return try JSONDecoder().decode(R.self, from: data)
+            } catch {
+                // If decoding fails on empty data, it might be expected
+                throw ApiError.decoding
+            }
+        }
+        
         do {
             return try JSONDecoder().decode(R.self, from: data)
+        } catch let decodingError as DecodingError {
+            // Log decoding error for debugging
+            print("❌ Decoding error: \(decodingError)")
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("📄 Response data: \(dataString.prefix(500))")
+            }
+            throw ApiError.decoding
         } catch {
             throw ApiError.decoding
         }
@@ -217,6 +307,21 @@ final class ApiClient {
         // Try to parse JSON error response
         if let jsonData = data.data(using: .utf8),
            let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+            
+            // Check for structured validation errors with missingFields
+            if let missingFields = json["missingFields"] as? [String],
+               let fieldErrors = json["fieldErrors"] as? [String: String],
+               !missingFields.isEmpty {
+                // Build a detailed error message
+                let fieldNames = missingFields.map { field in
+                    // Capitalize first letter and add space before capital letters
+                    field.prefix(1).uppercased() + field.dropFirst()
+                        .replacingOccurrences(of: "([A-Z])", with: " $1", options: .regularExpression)
+                }
+                let errorMessage = "Missing required fields: \(fieldNames.joined(separator: ", "))"
+                throw ApiError.server(errorMessage)
+            }
+            
             // Try common error message fields
             if let message = json["message"] as? String {
                 throw ApiError.server(message)

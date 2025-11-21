@@ -80,6 +80,13 @@ final class ConversationService {
             requiresAuth: true
         )
     }
+    
+    func deleteConversation(conversationId: String) async throws -> ConversationModel {
+        return try await ApiClient.shared.delete(
+            url: Endpoints.conversationDelete(id: conversationId),
+            requiresAuth: true
+        )
+    }
 }
 
 struct UnreadMessagesCountResponse: Codable {
@@ -97,6 +104,4 @@ struct ConversationUnreadCountResponse: Codable {
 struct MarkConversationReadResponse: Codable {
     let count: Int
 }
-
-private struct EmptyBody: Codable {}
 

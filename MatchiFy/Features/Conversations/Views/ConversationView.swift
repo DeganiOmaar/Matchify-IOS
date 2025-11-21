@@ -144,29 +144,34 @@ struct ConversationView: View {
             }
             
             VStack(alignment: viewModel.isMessageFromCurrentUser(message) ? .trailing : .leading, spacing: 4) {
-                Text(message.text)
-                    .font(.system(size: 16))
-                    .foregroundColor(viewModel.isMessageFromCurrentUser(message) ? .white : AppTheme.Colors.textPrimary)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 18)
-                            .fill(viewModel.isMessageFromCurrentUser(message) ? AppTheme.Colors.primary : AppTheme.Colors.secondaryBackground)
-                    )
-                    .overlay(
-                        // Border for non-primary messages in light mode
-                        RoundedRectangle(cornerRadius: 18)
-                            .stroke(
-                                viewModel.isMessageFromCurrentUser(message) ? Color.clear : AppTheme.Colors.messageBubbleBorder,
-                                lineWidth: 0.5
-                            )
-                    )
-                    .shadow(
-                        color: viewModel.isMessageFromCurrentUser(message) ? Color.clear : AppTheme.Colors.cardShadow,
-                        radius: 2,
-                        x: 0,
-                        y: 1
-                    )
+                // Check if this is a contract message
+                if message.isContractMessage == true, let contractId = message.contractId {
+                    contractMessageView(contractId: contractId, pdfUrl: message.pdfUrl, message: message)
+                } else {
+                    Text(message.text)
+                        .font(.system(size: 16))
+                        .foregroundColor(viewModel.isMessageFromCurrentUser(message) ? .white : AppTheme.Colors.textPrimary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 18)
+                                .fill(viewModel.isMessageFromCurrentUser(message) ? AppTheme.Colors.primary : AppTheme.Colors.secondaryBackground)
+                        )
+                        .overlay(
+                            // Border for non-primary messages in light mode
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(
+                                    viewModel.isMessageFromCurrentUser(message) ? Color.clear : AppTheme.Colors.messageBubbleBorder,
+                                    lineWidth: 0.5
+                                )
+                        )
+                        .shadow(
+                            color: viewModel.isMessageFromCurrentUser(message) ? Color.clear : AppTheme.Colors.cardShadow,
+                            radius: 2,
+                            x: 0,
+                            y: 1
+                        )
+                }
                 
                 Text(message.formattedTime)
                     .font(.system(size: 11))
@@ -181,6 +186,95 @@ struct ConversationView: View {
         }
     }
     
+    // MARK: - Contract Message View
+    @State private var selectedContract: ContractModel? = nil
+    @State private var showContractDetail = false
+    
+    private func contractMessageView(contractId: String, pdfUrl: String?, message: ConversationMessageModel) -> some View {
+        Button {
+            Task {
+                do {
+                    // Always reload contract from backend to get latest data
+                    let contract = try await ContractService.shared.getContract(id: contractId)
+                    await MainActor.run {
+                        selectedContract = contract
+                        showContractDetail = true
+                    }
+                } catch {
+                    await MainActor.run {
+                        // Show error if contract cannot be loaded
+                        viewModel.setErrorMessage(ErrorHandler.getErrorMessage(from: error, context: .general))
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "doc.text.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(viewModel.isRecruiter ? AppTheme.Colors.primary : .white)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Contract")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(viewModel.isRecruiter ? AppTheme.Colors.textPrimary : .white)
+                        
+                        // Show signed indicator if contract is signed (check message text)
+                        let signedKeywords = ["signed", "signé", "both parties", "Talent signed"]
+                        if signedKeywords.contains(where: { message.text.contains($0) }) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(.green)
+                        }
+                    }
+                    
+                    Text(message.text)
+                        .font(.system(size: 12))
+                        .foregroundColor(viewModel.isRecruiter ? AppTheme.Colors.textSecondary : .white.opacity(0.8))
+                }
+                
+                Spacer()
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(viewModel.isRecruiter ? AppTheme.Colors.secondaryBackground : AppTheme.Colors.primary)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(
+                        viewModel.isRecruiter ? AppTheme.Colors.messageBubbleBorder : Color.clear,
+                        lineWidth: 0.5
+                    )
+            )
+        }
+        .sheet(isPresented: $showContractDetail) {
+            if let contract = selectedContract {
+                if viewModel.isRecruiter {
+                    // Recruiter sees contract details with both signatures
+                    ContractDetailView(contract: contract)
+                } else {
+                    // Talent can review and sign (only if not already signed)
+                    if contract.status == .signedByBoth {
+                        ContractDetailView(contract: contract)
+                    } else {
+                        ContractReviewView(
+                            contract: contract,
+                            onSigned: {
+                                showContractDetail = false
+                                viewModel.loadMessages()
+                            },
+                            onDeclined: {
+                                showContractDetail = false
+                                viewModel.loadMessages()
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+    
     // MARK: - Input Section
     private var inputSection: some View {
         VStack(spacing: 0) {
@@ -188,6 +282,30 @@ struct ConversationView: View {
             Rectangle()
                 .fill(AppTheme.Colors.separator)
                 .frame(height: 0.5)
+            
+            // Contract button (Recruiter only)
+            if viewModel.isRecruiter {
+                HStack {
+                    Button {
+                        viewModel.showContractSheet = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 20))
+                            Text("Envoyer un contrat")
+                                .font(.system(size: 14, weight: .medium))
+                        }
+                        .foregroundColor(AppTheme.Colors.primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(AppTheme.Colors.secondaryBackground)
+                        .cornerRadius(20)
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+            }
             
             HStack(spacing: 12) {
                 TextField("Type a message...", text: $viewModel.messageText, axis: .vertical)
@@ -217,6 +335,18 @@ struct ConversationView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(AppTheme.Colors.groupedBackground)
+        }
+        .sheet(isPresented: $viewModel.showContractSheet) {
+            if let conversation = viewModel.conversation {
+                CreateContractView(
+                    missionId: conversation.missionId ?? "",
+                    talentId: conversation.talentId,
+                    onContractCreated: {
+                        viewModel.showContractSheet = false
+                        viewModel.loadMessages()
+                    }
+                )
+            }
         }
     }
 }

@@ -5,8 +5,23 @@ struct MissionCardView: View {
     let isOwner: Bool
     let onEdit: () -> Void
     let onDelete: () -> Void
+    let onViewProposals: (() -> Void)?
     
     @State private var showMenu = false
+    
+    init(
+        mission: MissionModel,
+        isOwner: Bool,
+        onEdit: @escaping () -> Void,
+        onDelete: @escaping () -> Void,
+        onViewProposals: (() -> Void)? = nil
+    ) {
+        self.mission = mission
+        self.isOwner = isOwner
+        self.onEdit = onEdit
+        self.onDelete = onDelete
+        self.onViewProposals = onViewProposals
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -38,6 +53,11 @@ struct MissionCardView: View {
                                 )
                         }
                         .confirmationDialog("Actions", isPresented: $showMenu) {
+                            if let onViewProposals = onViewProposals {
+                                Button("Voir propositions") {
+                                    onViewProposals()
+                                }
+                            }
                             Button("Edit Mission", role: .none) {
                                 onEdit()
                             }

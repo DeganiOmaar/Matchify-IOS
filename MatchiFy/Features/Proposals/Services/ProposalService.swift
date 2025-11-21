@@ -12,9 +12,20 @@ final class ProposalService {
         )
     }
     
-    func getTalentProposals() async throws -> [ProposalModel] {
-        try await ApiClient.shared.get(
-            url: Endpoints.proposalsTalent,
+    func getTalentProposals(missionId: String? = nil, archived: Bool? = nil) async throws -> [ProposalModel] {
+        var url = Endpoints.proposalsTalent
+        var queryItems: [String] = []
+        if let missionId = missionId {
+            queryItems.append("missionId=\(missionId)")
+        }
+        if let archived = archived {
+            queryItems.append("archived=\(archived)")
+        }
+        if !queryItems.isEmpty {
+            url += "?" + queryItems.joined(separator: "&")
+        }
+        return try await ApiClient.shared.get(
+            url: url,
             requiresAuth: true
         )
     }
@@ -47,6 +58,21 @@ final class ProposalService {
             requiresAuth: true
         )
         return response.count
+    }
+    
+    func archiveProposal(id: String) async throws -> ProposalModel {
+        try await ApiClient.shared.patch(
+            url: Endpoints.proposalArchive(id: id),
+            body: EmptyBody(),
+            requiresAuth: true
+        )
+    }
+    
+    func getRecruiterProposalsGrouped() async throws -> [String: [ProposalModel]] {
+        try await ApiClient.shared.get(
+            url: Endpoints.proposalsRecruiterGrouped,
+            requiresAuth: true
+        )
     }
 }
 

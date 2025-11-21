@@ -15,6 +15,7 @@ struct MissionModel: Codable, Identifiable, Hashable {
     let interviewingCount: Int?
     let hasApplied: Bool?
     let isFavorite: Bool?
+    let status: String?
     let createdAt: String?
     let updatedAt: String?
     
@@ -33,6 +34,7 @@ struct MissionModel: Codable, Identifiable, Hashable {
         case interviewingCount
         case hasApplied
         case isFavorite
+        case status
         case createdAt
         case updatedAt
     }
@@ -96,6 +98,25 @@ struct MissionModel: Codable, Identifiable, Hashable {
     
     var isFavorited: Bool {
         isFavorite ?? false
+    }
+    
+    var missionStatus: MissionStatus {
+        guard let status = status else { return .inProgress }
+        return MissionStatus(rawValue: status) ?? .inProgress
+    }
+}
+
+enum MissionStatus: String, Codable {
+    case inProgress = "in_progress"
+    case started = "started"
+    case completed = "completed"
+    
+    var displayName: String {
+        switch self {
+        case .inProgress: return "En cours"
+        case .started: return "Démarrée"
+        case .completed: return "Terminée"
+        }
     }
 }
 

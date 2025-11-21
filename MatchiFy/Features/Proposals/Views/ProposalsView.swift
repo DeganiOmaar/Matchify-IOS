@@ -6,33 +6,91 @@ struct ProposalsView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if !viewModel.errorMessage.nilOrEmpty {
-                    Text(viewModel.errorMessage ?? "Something went wrong.")
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                        .padding()
-                } else if viewModel.proposals.isEmpty {
-                    emptyState
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(viewModel.proposals, id: \.proposalId) { proposal in
-                                ProposalCardView(
-                                    proposal: proposal,
-                                    isRecruiter: viewModel.isRecruiter
-                                )
-                                .padding(.horizontal, 20)
-                                .onTapGesture {
-                                    selectedProposal = proposal
+            VStack(spacing: 0) {
+                // Tabs (Talent only)
+                if !viewModel.isRecruiter {
+                    Picker("Tab", selection: $viewModel.selectedTab) {
+                        ForEach(ProposalsViewModel.ProposalTab.allCases, id: \.self) { tab in
+                            Text(tab.rawValue).tag(tab)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .onChange(of: viewModel.selectedTab) { _, _ in
+                        viewModel.loadProposals()
+                    }
+                    
+                    // Mission filter (Talent only)
+                    if !viewModel.allMissions.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                Button {
+                                    viewModel.selectedMissionId = nil
+                                    viewModel.loadProposals()
+                                } label: {
+                                    Text("Toutes")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(viewModel.selectedMissionId == nil ? .white : AppTheme.Colors.textPrimary)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .fill(viewModel.selectedMissionId == nil ? AppTheme.Colors.primary : AppTheme.Colors.secondaryBackground)
+                                        )
+                                }
+                                
+                                ForEach(viewModel.allMissions, id: \.self) { missionId in
+                                    Button {
+                                        viewModel.selectedMissionId = missionId
+                                        viewModel.loadProposals()
+                                    } label: {
+                                        Text(missionId.prefix(8))
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(viewModel.selectedMissionId == missionId ? .white : AppTheme.Colors.textPrimary)
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 8)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 20)
+                                                    .fill(viewModel.selectedMissionId == missionId ? AppTheme.Colors.primary : AppTheme.Colors.secondaryBackground)
+                                            )
+                                    }
                                 }
                             }
+                            .padding(.horizontal, 20)
                         }
-                        .padding(.vertical, 20)
+                        .padding(.bottom, 12)
+                    }
+                }
+                
+                Group {
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if !viewModel.errorMessage.nilOrEmpty {
+                        Text(viewModel.errorMessage ?? "Something went wrong.")
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                    } else if viewModel.filteredProposals.isEmpty {
+                        emptyState
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 16) {
+                                ForEach(viewModel.filteredProposals, id: \.proposalId) { proposal in
+                                    ProposalCardView(
+                                        proposal: proposal,
+                                        isRecruiter: viewModel.isRecruiter
+                                    )
+                                    .padding(.horizontal, 20)
+                                    .onTapGesture {
+                                        selectedProposal = proposal
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 20)
+                        }
                     }
                 }
             }
@@ -70,7 +128,7 @@ struct ProposalsView: View {
     }
 }
 
-private struct ProposalCardView: View {
+struct ProposalCardView: View {
     let proposal: ProposalModel
     let isRecruiter: Bool
     
@@ -147,7 +205,7 @@ private struct ProposalCardView: View {
     }
 }
 
-private extension Optional where Wrapped == String {
+extension Optional where Wrapped == String {
     var nilOrEmpty: Bool {
         guard let value = self else { return true }
         return value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
