@@ -21,38 +21,23 @@ struct ProposalsView: View {
                         viewModel.loadProposals()
                     }
                     
-                    // Mission filter (Talent only)
-                    if !viewModel.allMissions.isEmpty {
+                    // Status filter (Talent only, Active tab only)
+                    if !viewModel.isRecruiter && viewModel.selectedTab == .active {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
-                                Button {
-                                    viewModel.selectedMissionId = nil
-                                    viewModel.loadProposals()
-                                } label: {
-                                    Text("Toutes")
-                                        .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(viewModel.selectedMissionId == nil ? .white : AppTheme.Colors.textPrimary)
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 8)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 20)
-                                                .fill(viewModel.selectedMissionId == nil ? AppTheme.Colors.primary : AppTheme.Colors.secondaryBackground)
-                                        )
-                                }
-                                
-                                ForEach(viewModel.allMissions, id: \.self) { missionId in
+                                ForEach(ProposalsViewModel.ProposalStatusFilter.allCases, id: \.self) { statusFilter in
                                     Button {
-                                        viewModel.selectedMissionId = missionId
+                                        viewModel.selectedStatus = statusFilter
                                         viewModel.loadProposals()
                                     } label: {
-                                        Text(missionId.prefix(8))
+                                        Text(statusFilter.rawValue)
                                             .font(.system(size: 14, weight: .medium))
-                                            .foregroundColor(viewModel.selectedMissionId == missionId ? .white : AppTheme.Colors.textPrimary)
+                                            .foregroundColor(viewModel.selectedStatus == statusFilter ? .white : AppTheme.Colors.textPrimary)
                                             .padding(.horizontal, 16)
                                             .padding(.vertical, 8)
                                             .background(
                                                 RoundedRectangle(cornerRadius: 20)
-                                                    .fill(viewModel.selectedMissionId == missionId ? AppTheme.Colors.primary : AppTheme.Colors.secondaryBackground)
+                                                    .fill(viewModel.selectedStatus == statusFilter ? AppTheme.Colors.primary : AppTheme.Colors.secondaryBackground)
                                             )
                                     }
                                 }

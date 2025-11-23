@@ -7,8 +7,25 @@ final class ProposalsViewModel: ObservableObject {
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
     @Published var selectedTab: ProposalTab = .active
-    @Published var selectedMissionId: String? = nil
-    @Published var allMissions: [String] = [] // Mission IDs for filter
+    @Published var selectedStatus: ProposalStatusFilter = .all
+    
+    enum ProposalStatusFilter: String, CaseIterable {
+        case all = "All"
+        case accepted = "Accepted"
+        case refused = "Refused"
+        case viewed = "Viewed"
+        case notViewed = "Not Viewed"
+        
+        var apiValue: String? {
+            switch self {
+            case .all: return nil
+            case .accepted: return "ACCEPTED"
+            case .refused: return "REFUSED"
+            case .viewed: return "VIEWED"
+            case .notViewed: return "NOT_VIEWED"
+            }
+        }
+    }
     
     enum ProposalTab: String, CaseIterable {
         case active = "Active"
@@ -56,10 +73,8 @@ final class ProposalsViewModel: ObservableObject {
             }
         }
         
-        // Filter by mission
-        if let missionId = selectedMissionId {
-            filtered = filtered.filter { $0.missionId == missionId }
-        }
+        // Note: Status filtering is now done on the backend
+        // This filteredProposals is mainly for tab filtering
         
         return filtered
     }
@@ -75,17 +90,14 @@ final class ProposalsViewModel: ObservableObject {
                     fetched = try await service.getRecruiterProposals()
                 } else {
                     let archived = selectedTab == .archive
+                    // Only apply status filter for active tab
+                    let statusFilter = selectedTab == .active ? selectedStatus.apiValue : nil
                     fetched = try await service.getTalentProposals(
-                        missionId: selectedMissionId,
+                        status: statusFilter,
                         archived: selectedTab == .archive ? true : nil
                     )
                 }
                 self.proposals = fetched
-                
-                // Extract unique mission IDs for filter
-                if !isRecruiter {
-                    self.allMissions = Array(Set(fetched.map { $0.missionId }))
-                }
                 
                 self.isLoading = false
                 // Notify badge view model

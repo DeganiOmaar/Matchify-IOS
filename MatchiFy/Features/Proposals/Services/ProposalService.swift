@@ -12,11 +12,11 @@ final class ProposalService {
         )
     }
     
-    func getTalentProposals(missionId: String? = nil, archived: Bool? = nil) async throws -> [ProposalModel] {
+    func getTalentProposals(status: String? = nil, archived: Bool? = nil) async throws -> [ProposalModel] {
         var url = Endpoints.proposalsTalent
         var queryItems: [String] = []
-        if let missionId = missionId {
-            queryItems.append("missionId=\(missionId)")
+        if let status = status {
+            queryItems.append("status=\(status)")
         }
         if let archived = archived {
             queryItems.append("archived=\(archived)")
