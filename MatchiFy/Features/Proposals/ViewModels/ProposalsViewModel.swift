@@ -117,5 +117,14 @@ final class ProposalsViewModel: ObservableObject {
             self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
         }
     }
+    
+    func deleteProposal(id: String) async {
+        do {
+            _ = try await service.deleteProposal(id: id)
+            await loadProposals()
+        } catch {
+            self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
+        }
+    }
 }
 

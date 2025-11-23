@@ -68,6 +68,13 @@ final class ProposalService {
         )
     }
     
+    func deleteProposal(id: String) async throws -> ProposalModel {
+        try await ApiClient.shared.delete(
+            url: Endpoints.proposal(id: id),
+            requiresAuth: true
+        )
+    }
+    
     func getRecruiterProposalsGrouped() async throws -> [String: [ProposalModel]] {
         try await ApiClient.shared.get(
             url: Endpoints.proposalsRecruiterGrouped,

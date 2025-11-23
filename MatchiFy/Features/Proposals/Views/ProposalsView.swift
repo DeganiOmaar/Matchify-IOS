@@ -61,21 +61,47 @@ struct ProposalsView: View {
                     } else if viewModel.filteredProposals.isEmpty {
                         emptyState
                     } else {
-                        ScrollView {
-                            LazyVStack(spacing: 16) {
-                                ForEach(viewModel.filteredProposals, id: \.proposalId) { proposal in
-                                    ProposalCardView(
-                                        proposal: proposal,
-                                        isRecruiter: viewModel.isRecruiter
-                                    )
-                                    .padding(.horizontal, 20)
-                                    .onTapGesture {
-                                        selectedProposal = proposal
+                        List {
+                            ForEach(viewModel.filteredProposals, id: \.proposalId) { proposal in
+                                ProposalCardView(
+                                    proposal: proposal,
+                                    isRecruiter: viewModel.isRecruiter
+                                )
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
+                                .listRowBackground(Color.clear)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    selectedProposal = proposal
+                                }
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    // Swipe actions only for talent, not for recruiter
+                                    if !viewModel.isRecruiter {
+                                        // Archive action
+                                        Button(role: .none) {
+                                            Task {
+                                                await viewModel.archiveProposal(id: proposal.proposalId)
+                                            }
+                                        } label: {
+                                            Label("Archive", systemImage: "archivebox")
+                                        }
+                                        .tint(.blue)
+                                        
+                                        // Delete action
+                                        Button(role: .destructive) {
+                                            Task {
+                                                await viewModel.deleteProposal(id: proposal.proposalId)
+                                            }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                        .tint(.red)
                                     }
                                 }
                             }
-                            .padding(.vertical, 20)
                         }
+                        .listStyle(.plain)
+                        .scrollContentBackground(.hidden)
                     }
                 }
             }
