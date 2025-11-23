@@ -23,20 +23,20 @@ struct MainTabView: View {
                 .badge(badgeViewModel.isRecruiter && badgeViewModel.proposalsUnreadCount > 0 ? badgeViewModel.proposalsUnreadCount : 0)
                 .tag(1)
             
-            // MARK: - Alerts Tab
-            AlertsView()
-                .tabItem {
-                    Label("Alerts", systemImage: "bell.fill")
-                }
-                .badge(badgeViewModel.alertsUnreadCount > 0 ? badgeViewModel.alertsUnreadCount : 0)
-                .tag(2)
-            
             // MARK: - Messages Tab
             MessagesView()
                 .tabItem {
                     Label("Messages", systemImage: "message.fill")
                 }
                 .badge(badgeViewModel.conversationsWithUnreadCount > 0 ? badgeViewModel.conversationsWithUnreadCount : 0)
+                .tag(2)
+            
+            // MARK: - Alerts Tab
+            AlertsView()
+                .tabItem {
+                    Label("Alerts", systemImage: "bell.fill")
+                }
+                .badge(badgeViewModel.alertsUnreadCount > 0 ? badgeViewModel.alertsUnreadCount : 0)
                 .tag(3)
         }
         .accentColor(AppTheme.Colors.primary)
