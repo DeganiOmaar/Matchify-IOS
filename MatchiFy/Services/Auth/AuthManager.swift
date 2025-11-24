@@ -135,15 +135,28 @@ final class AuthManager: ObservableObject {
 
     // MARK: - Logout
     @MainActor
-    func logout() {
+    func logout() async {
+        // 1. Call backend logout endpoint
+        do {
+            _ = try await AuthService.shared.logout()
+        } catch {
+            // Log but don't fail logout if backend call fails
+            // The local cleanup is more important
+            print("⚠️ Backend logout failed: \(error.localizedDescription)")
+        }
+        
+        // 2. Clear in-memory state
         token = nil
         user = nil
         role = nil
         isLoggedIn = false
 
+        // 3. Clear persisted auth data
         keychainDeleteToken()
         UserDefaults.standard.removeObject(forKey: "current_user")
-        UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
+        
+        // IMPORTANT: Do NOT reset hasSeenOnboarding
+        // This ensures user goes to Login screen after logout, not onboarding
     }
 }
 

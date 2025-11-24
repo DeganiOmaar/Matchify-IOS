@@ -58,4 +58,15 @@ final class AuthService {
             body: body
         )
     }
+    
+    // MARK: - LOGOUT
+    func logout() async throws -> LogoutResponse {
+        // Use an empty body for logout
+        struct EmptyBody: Codable {}
+        return try await ApiClient.shared.post(
+            url: Endpoints.logout,
+            body: EmptyBody(),
+            requiresAuth: true
+        )
+    }
 }

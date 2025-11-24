@@ -12,11 +12,16 @@ final class SettingsViewModel: ObservableObject {
         isLoggingOut = true
         errorMessage = nil
         
-        AuthManager.shared.logout()
-        UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
-        
-        didLogout = true
-        isLoggingOut = false
+        Task { @MainActor in
+            // Call async logout which handles backend call and local cleanup
+            await AuthManager.shared.logout()
+            
+            // IMPORTANT: Do NOT reset hasSeenOnboarding
+            // This ensures user goes to Login screen after logout, not onboarding
+            
+            didLogout = true
+            isLoggingOut = false
+        }
     }
 }
 

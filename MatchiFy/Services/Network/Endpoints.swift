@@ -8,6 +8,7 @@ struct Endpoints {
     static let login = base + "/login"
     static let signupTalent = base + "/signup/talent"
     static let signupRecruiter = base + "/signup/recruiter"
+    static let logout = base + "/logout"
     // Password reset flow
     static let forgotPassword = base + "/password/forgot"
     static let verifyResetCode = base + "/password/verify"

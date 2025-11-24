@@ -4,20 +4,26 @@ struct AppEntryView: View {
     @StateObject private var auth = AuthManager.shared
     @EnvironmentObject private var themeManager: ThemeManager
     @State private var hasCompletedOnboarding = false
-    @State private var shouldShowLogin = false
+
+    private var hasSeenOnboarding: Bool {
+        UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+    }
 
     var body: some View {
         Group {
             if auth.isLoggedIn {
                 MainTabView()
-            } else if shouldShowLogin {
+            } else if hasSeenOnboarding {
+                // User has seen onboarding before (or logged out)
+                // Always show login screen, never onboarding
                 LoginView()
             } else {
+                // First time user - show onboarding
                 OnboardingView(
                     hasCompletedOnboarding: $hasCompletedOnboarding,
                     onStart: {
                         hasCompletedOnboarding = true
-                        shouldShowLogin = true
+                        UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                     }
                 )
             }
@@ -26,20 +32,7 @@ struct AppEntryView: View {
             // Load theme immediately at app launch
             _ = themeManager.currentTheme
             auth.restoreSession()
-            if !auth.isLoggedIn {
-                resetOnboardingFlow()
-            }
         }
-        .onChange(of: auth.isLoggedIn) { _, newValue in
-            if !newValue {
-                resetOnboardingFlow()
-            }
-        }
-    }
-
-    private func resetOnboardingFlow() {
-        hasCompletedOnboarding = false
-        shouldShowLogin = false
     }
 }
 
