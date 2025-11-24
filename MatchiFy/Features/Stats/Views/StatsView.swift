@@ -188,25 +188,15 @@ struct StatsView: View {
                 statsList
             }
             .padding(.top, 16)
-            
-            // "My proposals" Link
-            HStack {
-                Spacer()
-                
-                Text("My proposals")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color.green)
-                    .padding(.top, 8)
-            }
         }
     }
     
     // MARK: - Graph Placeholder
     private var graphPlaceholder: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Four vertical bars
+            // Three vertical bars for sent, accepted, refused
             HStack(alignment: .bottom, spacing: 12) {
-                // Bar 1 - Organic
+                // Bar 1 - Sent
                 VStack(spacing: 4) {
                     ZStack(alignment: .bottom) {
                         RoundedRectangle(cornerRadius: 4)
@@ -214,12 +204,12 @@ struct StatsView: View {
                             .frame(width: 20, height: 80)
                         
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(organicColor)
-                            .frame(width: 20, height: 40)
+                            .fill(sentColor)
+                            .frame(width: 20, height: calculateBarHeight(value: viewModel.stats.proposalsSent, maxValue: maxProposalValue))
                     }
                 }
                 
-                // Bar 2 - Organic
+                // Bar 2 - Accepted
                 VStack(spacing: 4) {
                     ZStack(alignment: .bottom) {
                         RoundedRectangle(cornerRadius: 4)
@@ -227,12 +217,12 @@ struct StatsView: View {
                             .frame(width: 20, height: 80)
                         
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(organicColor)
-                            .frame(width: 20, height: 50)
+                            .fill(acceptedColor)
+                            .frame(width: 20, height: calculateBarHeight(value: viewModel.stats.proposalsAccepted, maxValue: maxProposalValue))
                     }
                 }
                 
-                // Bar 3 - Boosted
+                // Bar 3 - Refused
                 VStack(spacing: 4) {
                     ZStack(alignment: .bottom) {
                         RoundedRectangle(cornerRadius: 4)
@@ -240,80 +230,73 @@ struct StatsView: View {
                             .frame(width: 20, height: 80)
                         
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(boostedColor)
-                            .frame(width: 20, height: 30)
-                    }
-                }
-                
-                // Bar 4 - Boosted
-                VStack(spacing: 4) {
-                    ZStack(alignment: .bottom) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(AppTheme.Colors.border.opacity(0.2))
-                            .frame(width: 20, height: 80)
-                        
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(boostedColor)
-                            .frame(width: 20, height: 25)
+                            .fill(refusedColor)
+                            .frame(width: 20, height: calculateBarHeight(value: viewModel.stats.proposalsRefused, maxValue: maxProposalValue))
                     }
                 }
             }
-            
-            // Labels
-            HStack(spacing: 20) {
-                HStack(spacing: 6) {
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(organicColor)
-                        .frame(width: 12, height: 12)
-                    
-                    Text("Organic")
-                        .font(.system(size: 12))
-                        .foregroundColor(AppTheme.Colors.textSecondary)
-                }
-                
-                HStack(spacing: 6) {
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(boostedColor)
-                        .frame(width: 12, height: 12)
-                    
-                    Text("Boosted")
-                        .font(.system(size: 12))
-                        .foregroundColor(AppTheme.Colors.textSecondary)
-                }
-            }
-            .padding(.top, 8)
         }
     }
     
     // MARK: - Color Helpers
-    private var organicColor: Color {
+    private var sentColor: Color {
         // Light turquoise - adapts to dark mode
         Color(red: 0.4, green: 0.8, blue: 0.8)
     }
     
-    private var boostedColor: Color {
-        // Deeper blue - adapts to dark mode
-        AppTheme.Colors.primary
+    private var acceptedColor: Color {
+        // Green for accepted
+        Color(red: 0.2, green: 0.7, blue: 0.3)
+    }
+    
+    private var refusedColor: Color {
+        // Red for refused
+        Color(red: 0.9, green: 0.3, blue: 0.3)
+    }
+    
+    // MARK: - Helper Methods
+    private var maxProposalValue: Int {
+        max(1, max(viewModel.stats.proposalsSent, max(viewModel.stats.proposalsAccepted, viewModel.stats.proposalsRefused)))
+    }
+    
+    private func calculateBarHeight(value: Int, maxValue: Int) -> CGFloat {
+        guard maxValue > 0 else { return 0 }
+        let ratio = CGFloat(value) / CGFloat(maxValue)
+        return max(4, ratio * 80) // Minimum 4 points height
     }
     
     // MARK: - Stats List
     private var statsList: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("\(viewModel.stats.proposalsSent) proposals sent")
-                .font(.system(size: 15))
-                .foregroundColor(AppTheme.Colors.textPrimary)
+            HStack(spacing: 8) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(sentColor)
+                    .frame(width: 12, height: 12)
+                
+                Text("\(viewModel.stats.proposalsSent) proposals sent")
+                    .font(.system(size: 15))
+                    .foregroundColor(AppTheme.Colors.textPrimary)
+            }
             
-            Text("\(viewModel.stats.proposalsViewed) were viewed")
-                .font(.system(size: 15))
-                .foregroundColor(AppTheme.Colors.textPrimary)
+            HStack(spacing: 8) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(acceptedColor)
+                    .frame(width: 12, height: 12)
+                
+                Text("\(viewModel.stats.proposalsAccepted) proposals accepted")
+                    .font(.system(size: 15))
+                    .foregroundColor(AppTheme.Colors.textPrimary)
+            }
             
-            Text("\(viewModel.stats.interviews) interviews")
-                .font(.system(size: 15))
-                .foregroundColor(AppTheme.Colors.textPrimary)
-            
-            Text("\(viewModel.stats.hires) hires")
-                .font(.system(size: 15))
-                .foregroundColor(AppTheme.Colors.textPrimary)
+            HStack(spacing: 8) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(refusedColor)
+                    .frame(width: 12, height: 12)
+                
+                Text("\(viewModel.stats.proposalsRefused) proposals refused")
+                    .font(.system(size: 15))
+                    .foregroundColor(AppTheme.Colors.textPrimary)
+            }
         }
     }
 }

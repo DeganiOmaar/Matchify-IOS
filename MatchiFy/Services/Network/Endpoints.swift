@@ -113,4 +113,9 @@ struct Endpoints {
     static func contractsByConversation(conversationId: String) -> String {
         return apiBase + "/contracts/conversation/\(conversationId)"
     }
+    
+    // Stats endpoints
+    static func talentStats(days: Int) -> String {
+        return apiBase + "/talent/stats?days=\(days)"
+    }
 }

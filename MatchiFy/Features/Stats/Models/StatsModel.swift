@@ -10,9 +10,8 @@ struct StatsModel {
     
     // MARK: - Proposals
     let proposalsSent: Int
-    let proposalsViewed: Int
-    let interviews: Int
-    let hires: Int
+    let proposalsAccepted: Int
+    let proposalsRefused: Int
     
     // MARK: - Timeframe
     enum Timeframe: String, CaseIterable {
@@ -27,16 +26,14 @@ struct StatsModel {
         twelveMonthEarnings: Double = 0.0,
         jobSuccessScore: Int? = nil,
         proposalsSent: Int = 0,
-        proposalsViewed: Int = 0,
-        interviews: Int = 0,
-        hires: Int = 0
+        proposalsAccepted: Int = 0,
+        proposalsRefused: Int = 0
     ) {
         self.twelveMonthEarnings = twelveMonthEarnings
         self.jobSuccessScore = jobSuccessScore
         self.proposalsSent = proposalsSent
-        self.proposalsViewed = proposalsViewed
-        self.interviews = interviews
-        self.hires = hires
+        self.proposalsAccepted = proposalsAccepted
+        self.proposalsRefused = proposalsRefused
     }
     
     // MARK: - Computed Properties
