@@ -14,7 +14,6 @@ struct UserModel: Codable {
     let updatedAt: String?
     let description: String?
     let skills: [String]?
-    let portfolioLink: String?
     let cvUrl: String?
     
     enum CodingKeys: String, CodingKey {
@@ -31,7 +30,6 @@ struct UserModel: Codable {
         case updatedAt
         case description
         case skills
-        case portfolioLink
         case cvUrl
     }
     

@@ -41,7 +41,6 @@ final class TalentProfileService {
         talent: [String]?,
         skills: [String]?,
         description: String?,
-        portfolioLink: String?,
         profileImage: UIImage?
     ) async throws -> UpdateTalentProfileResponse {
 
@@ -71,7 +70,6 @@ final class TalentProfileService {
             talent: talent,
             skills: skills,
             description: description,
-            portfolioLink: portfolioLink,
             profileImage: profileImage
         )
 
@@ -116,7 +114,6 @@ final class TalentProfileService {
         talent: [String]?,
         skills: [String]?,
         description: String?,
-        portfolioLink: String?,
         profileImage: UIImage?
     ) throws -> Data {
 
@@ -136,7 +133,6 @@ final class TalentProfileService {
         addField("phone", phone)
         addField("location", location)
         addField("description", description)
-        addField("portfolioLink", portfolioLink)
         
         // Add talent as JSON array string
         if let talent = talent, !talent.isEmpty {

@@ -145,17 +145,6 @@ struct EditTalentProfileView: View {
                     .lineLimit(3...6)
             }
             
-            // MARK: - Portfolio
-            Section(header: Text("Portfolio")) {
-                TextField("Portfolio Link", text: $vm.portfolioLink)
-                    .keyboardType(.URL)
-                    .textInputAutocapitalization(.never)
-                    .placeholder(when: vm.portfolioLink.isEmpty) {
-                        Text("https://your-portfolio.com")
-                            .foregroundColor(.gray.opacity(0.6))
-                    }
-            }
-            
             // MARK: - Error
             if let error = vm.errorMessage {
                 Section {

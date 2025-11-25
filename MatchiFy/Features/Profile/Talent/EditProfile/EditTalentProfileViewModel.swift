@@ -12,7 +12,6 @@ final class EditTalentProfileViewModel: ObservableObject {
     @Published var talentInput: String = ""
     @Published var talents: [String] = []
     @Published var description: String = ""
-    @Published var portfolioLink: String = ""
     @Published var selectedSkills: [SkillModel] = []
     @Published var selectedImage: UIImage? = nil
 
@@ -35,7 +34,6 @@ final class EditTalentProfileViewModel: ObservableObject {
             self.location = user.location ?? ""
             self.talents = user.talent ?? []
             self.description = user.description ?? ""
-            self.portfolioLink = user.portfolioLink ?? ""
             
             // Load skills by IDs - user.skills contains skill IDs
             if let skillIds = user.skills, !skillIds.isEmpty {
@@ -98,13 +96,6 @@ final class EditTalentProfileViewModel: ObservableObject {
             return
         }
         
-        if !portfolioLink.isEmpty {
-            guard URL(string: portfolioLink) != nil else {
-                errorMessage = "Veuillez fournir une URL de portfolio valide."
-                return
-            }
-        }
-        
         isSaving = true
 
         Task { @MainActor in
@@ -118,7 +109,6 @@ final class EditTalentProfileViewModel: ObservableObject {
                     talent: talents.isEmpty ? nil : talents,
                     skills: skillNames.isEmpty ? nil : skillNames,
                     description: description.isEmpty ? nil : description,
-                    portfolioLink: portfolioLink.isEmpty ? nil : portfolioLink,
                     profileImage: selectedImage
                 )
 
