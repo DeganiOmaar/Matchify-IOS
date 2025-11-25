@@ -15,6 +15,7 @@ struct UserModel: Codable {
     let description: String?
     let skills: [String]?
     let portfolioLink: String?
+    let cvUrl: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -31,6 +32,7 @@ struct UserModel: Codable {
         case description
         case skills
         case portfolioLink
+        case cvUrl
     }
     
     /// URL complète de la photo de profil (ton backend renvoie un chemin relatif type "uploads/profile/xxx.jpg")
@@ -54,6 +56,25 @@ struct UserModel: Codable {
         print("📸 Profile image URL: \(fullUrlString) (from path: \(profileImage ?? "nil"))")
 
         return URL(string: fullUrlString)
-    }   
+    }
+    
+    /// URL complète du CV (le backend renvoie un chemin relatif type "uploads/cv/xxx.pdf")
+    var cvUrlURL: URL? {
+        // Return nil if cvUrl is nil, empty, or blank
+        guard var path = cvUrl?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !path.isEmpty else {
+            return nil
+        }
+
+        // Si le backend ne renvoie PAS de slash, on l'ajoute
+        if !path.hasPrefix("/") {
+            path = "/" + path
+        }
+
+        // Use Endpoints.baseURL for dynamic base URL
+        let fullUrlString = Endpoints.baseURL + path
+        
+        return URL(string: fullUrlString)
+    }
 }
 

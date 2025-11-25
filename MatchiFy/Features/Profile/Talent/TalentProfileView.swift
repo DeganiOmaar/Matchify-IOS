@@ -9,6 +9,10 @@ struct TalentProfileView: View {
     @State private var showPortfolio = false
     @State private var selectedProject: ProjectModel? = nil
     @State private var showProjectDetails = false
+    @State private var showDocumentPicker = false
+    @State private var selectedDocumentURL: URL? = nil
+    @State private var isUploadingCV = false
+    @State private var uploadError: String? = nil
     
     var body: some View {
         NavigationStack {
@@ -90,9 +94,15 @@ struct TalentProfileView: View {
                         }
                     )
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 20) // Extra padding for tab bar
+                    
+                    // MARK: - CV Section
+                    if let cvUrl = vm.user?.cvUrl, !cvUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        cvSection(cvUrl: cvUrl)
+                            .padding(.horizontal, 20)
+                    }
                 }
                 .padding(.top, 10)
+                .padding(.bottom, 20) // Extra padding for tab bar
             }
             .background(AppTheme.Colors.groupedBackground)
             .ignoresSafeArea(edges: .top)
@@ -111,6 +121,9 @@ struct TalentProfileView: View {
                 }
             }
             .sheet(isPresented: $showMoreSheet) { moreSheet }
+            .sheet(isPresented: $showDocumentPicker) {
+                CvDocumentPicker(documentURL: $selectedDocumentURL)
+            }
             .navigationDestination(isPresented: $showEditProfile) {
                 EditTalentProfileView()
             }
@@ -127,6 +140,20 @@ struct TalentProfileView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("PortfolioDidUpdate"))) { _ in
                 vm.loadProjects()
+            }
+            .onChange(of: selectedDocumentURL) { newURL in
+                if let url = newURL {
+                    uploadCV(fileURL: url)
+                }
+            }
+        }
+        .alert("Erreur", isPresented: .constant(uploadError != nil)) {
+            Button("OK") {
+                uploadError = nil
+            }
+        } message: {
+            if let error = uploadError {
+                Text(error)
             }
         }
     }
@@ -215,6 +242,13 @@ struct TalentProfileView: View {
                 
                 Button {
                     showMoreSheet = false
+                    showDocumentPicker = true
+                } label: {
+                    Label("Attach your CV", systemImage: "doc.fill")
+                }
+                
+                Button {
+                    showMoreSheet = false
                     showSettings = true
                 } label: {
                     Label("Settings", systemImage: "gearshape")
@@ -223,7 +257,69 @@ struct TalentProfileView: View {
             .navigationTitle("More")
             .navigationBarTitleDisplayMode(.inline)
         }
-        .presentationDetents([.height(240), .medium])
+        .presentationDetents([.height(300), .medium])
+    }
+    
+    // MARK: - CV Section
+    private func cvSection(cvUrl: String) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("CV")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.textPrimary)
+            
+            HStack {
+                Image(systemName: "doc.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(AppTheme.Colors.primary)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Curriculum Vitae")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(AppTheme.Colors.textPrimary)
+                    
+                    Text("PDF / DOC / DOCX")
+                        .font(.system(size: 14))
+                        .foregroundColor(AppTheme.Colors.textSecondary)
+                }
+                
+                Spacer()
+                
+                if let url = vm.user?.cvUrlURL {
+                    Link(destination: url) {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(AppTheme.Colors.primary)
+                    }
+                }
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppTheme.Colors.cardBackground)
+        .cornerRadius(20)
+        .shadow(color: AppTheme.Colors.cardShadow, radius: 8, x: 0, y: 3)
+    }
+    
+    // MARK: - Upload CV
+    private func uploadCV(fileURL: URL) {
+        isUploadingCV = true
+        uploadError = nil
+        
+        Task { @MainActor in
+            do {
+                let response = try await TalentProfileService.shared.uploadCV(fileURL: fileURL)
+                // Update user in AuthManager
+                AuthManager.shared.persistUpdatedUser(response.user)
+                // Refresh profile
+                vm.loadProfile()
+                isUploadingCV = false
+                selectedDocumentURL = nil
+            } catch {
+                isUploadingCV = false
+                uploadError = error.localizedDescription
+                selectedDocumentURL = nil
+            }
+        }
     }
 }
 

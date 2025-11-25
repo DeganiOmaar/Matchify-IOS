@@ -39,6 +39,7 @@ struct Endpoints {
     // Profile endpoints
     static let recruiterProfile = apiBase + "/recruiter/profile"
     static let talentProfile = apiBase + "/talent/profile"
+    static let talentUploadCv = apiBase + "/talent/upload-cv"
     static func userById(_ id: String) -> String {
         return apiBase + "/user/\(id)"
     }

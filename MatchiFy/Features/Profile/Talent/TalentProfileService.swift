@@ -178,6 +178,95 @@ final class TalentProfileService {
         body.append("--\(boundary)--\(line)")
         return body
     }
+
+    func uploadCV(fileURL: URL) async throws -> UpdateTalentProfileResponse {
+        guard let token = AuthManager.shared.token else {
+            throw NSError(domain: "", code: 401,
+                          userInfo: [NSLocalizedDescriptionKey: "Missing token"])
+        }
+
+        guard let url = URL(string: Endpoints.talentUploadCv) else {
+            throw NSError(domain: "", code: 500,
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
+
+        // Read file data
+        let fileData: Data
+        do {
+            fileData = try Data(contentsOf: fileURL)
+        } catch {
+            throw NSError(domain: "", code: 500,
+                          userInfo: [NSLocalizedDescriptionKey: "Failed to read file: \(error.localizedDescription)"])
+        }
+
+        // Get file name and extension
+        let fileName = fileURL.lastPathComponent
+        let fileExtension = (fileName as NSString).pathExtension.lowercased()
+        
+        // Determine MIME type
+        let mimeType: String
+        switch fileExtension {
+        case "pdf":
+            mimeType = "application/pdf"
+        case "doc":
+            mimeType = "application/msword"
+        case "docx":
+            mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        default:
+            mimeType = "application/octet-stream"
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let boundary = "Boundary-\(UUID().uuidString)"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        // Build multipart body
+        var body = Data()
+        let line = "\r\n"
+        
+        body.append("--\(boundary)\(line)")
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\(line)")
+        body.append("Content-Type: \(mimeType)\(line)\(line)")
+        body.append(fileData)
+        body.append(line)
+        body.append("--\(boundary)--\(line)")
+
+        request.httpBody = body
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        if let http = response as? HTTPURLResponse,
+           !(200...299).contains(http.statusCode) {
+            
+            // Try to extract error message from server response
+            var serverMessage = "Unknown server error"
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("❌ Erreur serveur (code \(http.statusCode)): \(dataString)")
+                
+                // Try to parse as JSON to extract message
+                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let message = json["message"] as? String {
+                        serverMessage = message
+                    } else if let error = json["error"] as? String {
+                        serverMessage = error
+                    } else if let msg = json["msg"] as? String {
+                        serverMessage = msg
+                    }
+                } else {
+                    // If not JSON, use the raw string (truncated if too long)
+                    serverMessage = dataString.count > 200 ? String(dataString.prefix(200)) : dataString
+                }
+            }
+            
+            throw NSError(domain: "", code: http.statusCode,
+                          userInfo: [NSLocalizedDescriptionKey: serverMessage])
+        }
+
+        return try JSONDecoder().decode(UpdateTalentProfileResponse.self, from: data)
+    }
 }
 
 private extension Data {
