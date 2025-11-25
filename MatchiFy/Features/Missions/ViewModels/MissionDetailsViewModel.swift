@@ -9,14 +9,17 @@ final class MissionDetailsViewModel: ObservableObject {
     
     private let missionId: String
     private let service: MissionService
+    private let favoriteService: FavoriteService
     
     init(
         missionId: String,
         initialMission: MissionModel? = nil,
-        service: MissionService? = nil
+        service: MissionService? = nil,
+        favoriteService: FavoriteService? = nil
     ) {
         self.missionId = missionId
         self.service = service ?? MissionService.shared
+        self.favoriteService = favoriteService ?? FavoriteService.shared
         self.mission = initialMission
     }
     
@@ -72,6 +75,62 @@ final class MissionDetailsViewModel: ObservableObject {
     
     var interviewingCountText: String {
         "\(mission?.interviewing ?? 0)"
+    }
+    
+    var isFavorite: Bool {
+        mission?.isFavorited ?? false
+    }
+    
+    func toggleFavorite() {
+        guard let mission = mission else { return }
+        let wasFavorite = mission.isFavorited
+        let newFavoriteStatus = !wasFavorite
+        
+        // Optimistic update
+        updateMissionFavoriteStatus(isFavorite: newFavoriteStatus)
+        
+        Task {
+            do {
+                if wasFavorite {
+                    try await favoriteService.removeFavorite(missionId: mission.missionId)
+                } else {
+                    _ = try await favoriteService.addFavorite(missionId: mission.missionId)
+                }
+                
+                // Reload mission to get updated status from backend
+                loadMission()
+                
+                // Notify MissionListView to update if needed
+                NotificationCenter.default.post(name: NSNotification.Name("MissionFavoriteDidUpdate"), object: nil, userInfo: ["missionId": mission.missionId, "isFavorite": newFavoriteStatus])
+            } catch {
+                // Revert on error
+                updateMissionFavoriteStatus(isFavorite: wasFavorite)
+                errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
+            }
+        }
+    }
+    
+    func updateMissionFavoriteStatus(isFavorite: Bool) {
+        guard let currentMission = mission else { return }
+        mission = MissionModel(
+            id: currentMission.id,
+            _id: currentMission._id,
+            title: currentMission.title,
+            description: currentMission.description,
+            duration: currentMission.duration,
+            budget: currentMission.budget,
+            price: currentMission.price,
+            skills: currentMission.skills,
+            recruiterId: currentMission.recruiterId,
+            ownerId: currentMission.ownerId,
+            proposalsCount: currentMission.proposalsCount,
+            interviewingCount: currentMission.interviewingCount,
+            hasApplied: currentMission.hasApplied,
+            isFavorite: isFavorite,
+            status: currentMission.status,
+            createdAt: currentMission.createdAt,
+            updatedAt: currentMission.updatedAt
+        )
     }
 }
 

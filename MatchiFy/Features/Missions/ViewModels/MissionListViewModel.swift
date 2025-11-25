@@ -31,6 +31,7 @@ final class MissionListViewModel: ObservableObject {
         self.favoriteService = favoriteService ?? FavoriteService.shared
         self.realtimeService = realtimeService ?? MissionRealtimeService.shared
         observeRealtime()
+        observeFavoriteUpdates()
     }
     
     // MARK: - Load Missions
@@ -66,6 +67,36 @@ final class MissionListViewModel: ObservableObject {
             let favorites = try await favoriteService.getFavorites()
             self.favoriteMissions = favorites
             self.isLoadingFavorites = false
+            
+            // Also update the missions array to sync favorite status
+            // This ensures that missions in the main list reflect the correct favorite status
+            for favorite in favorites {
+                if let index = missions.firstIndex(where: { $0.missionId == favorite.missionId }) {
+                    // Update the mission in missions array to have isFavorite: true
+                    let existingMission = missions[index]
+                    if !existingMission.isFavorited {
+                        missions[index] = MissionModel(
+                            id: existingMission.id,
+                            _id: existingMission._id,
+                            title: existingMission.title,
+                            description: existingMission.description,
+                            duration: existingMission.duration,
+                            budget: existingMission.budget,
+                            price: existingMission.price,
+                            skills: existingMission.skills,
+                            recruiterId: existingMission.recruiterId,
+                            ownerId: existingMission.ownerId,
+                            proposalsCount: existingMission.proposalsCount,
+                            interviewingCount: existingMission.interviewingCount,
+                            hasApplied: existingMission.hasApplied,
+                            isFavorite: true,
+                            status: existingMission.status,
+                            createdAt: existingMission.createdAt,
+                            updatedAt: existingMission.updatedAt
+                        )
+                    }
+                }
+            }
         } catch {
             self.isLoadingFavorites = false
             // Silently fail - favorites will remain empty
@@ -163,9 +194,10 @@ final class MissionListViewModel: ObservableObject {
     @MainActor
     func toggleFavorite(_ mission: MissionModel) {
         let wasFavorite = mission.isFavorited
+        let newFavoriteStatus = !wasFavorite
         
-        // Optimistic update
-        updateMissionFavoriteStatus(missionId: mission.missionId, isFavorite: !wasFavorite)
+        // Optimistic update - this will trigger UI update immediately
+        updateMissionFavoriteStatus(missionId: mission.missionId, isFavorite: newFavoriteStatus)
         
         Task {
             do {
@@ -175,12 +207,17 @@ final class MissionListViewModel: ObservableObject {
                     _ = try await favoriteService.addFavorite(missionId: mission.missionId)
                 }
                 
-                // Reload to get updated status from backend
-                Task { @MainActor in
-                    await self.refreshMissions()
-                    if self.selectedTab == .favorites {
-                        await self.loadFavorites()
-                    }
+                // Notify other views (like MissionDetailsView) about the update
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("MissionFavoriteDidUpdate"),
+                    object: nil,
+                    userInfo: ["missionId": mission.missionId, "isFavorite": newFavoriteStatus]
+                )
+                
+                // Only reload favorites list if we're on the favorites tab
+                // The missions array is already updated optimistically
+                if self.selectedTab == .favorites {
+                    await self.loadFavorites()
                 }
             } catch {
                 // Revert on error
@@ -193,45 +230,93 @@ final class MissionListViewModel: ObservableObject {
     }
     
     func isFavorite(_ mission: MissionModel) -> Bool {
-        mission.isFavorited
+        let missionId = mission.missionId
+        
+        // Check in missions array first (most up-to-date)
+        if let updatedMission = missions.first(where: { $0.missionId == missionId }) {
+            return updatedMission.isFavorited
+        }
+        
+        // Check in favoriteMissions array - if it's there, it should be favorite
+        // But also check its isFavorite property to be sure
+        if let favoriteMission = favoriteMissions.first(where: { $0.missionId == missionId }) {
+            return favoriteMission.isFavorited
+        }
+        
+        // Last resort: use the mission's own property
+        return mission.isFavorited
     }
     
     private func updateMissionFavoriteStatus(missionId: String, isFavorite: Bool) {
+        // First, get the updated mission from missions array (or create it if not found)
+        var updatedMission: MissionModel?
+        
         // Update in missions array
         missions = missions.map { mission in
             if mission.missionId == missionId {
-                var updated = mission
                 // Create a new MissionModel with updated isFavorite
-                return MissionModel(
-                    id: updated.id,
-                    _id: updated._id,
-                    title: updated.title,
-                    description: updated.description,
-                    duration: updated.duration,
-                    budget: updated.budget,
-                    price: updated.price,
-                    skills: updated.skills,
-                    recruiterId: updated.recruiterId,
-                    ownerId: updated.ownerId,
-                    proposalsCount: updated.proposalsCount,
-                    interviewingCount: updated.interviewingCount,
-                    hasApplied: updated.hasApplied,
+                let updated = MissionModel(
+                    id: mission.id,
+                    _id: mission._id,
+                    title: mission.title,
+                    description: mission.description,
+                    duration: mission.duration,
+                    budget: mission.budget,
+                    price: mission.price,
+                    skills: mission.skills,
+                    recruiterId: mission.recruiterId,
+                    ownerId: mission.ownerId,
+                    proposalsCount: mission.proposalsCount,
+                    interviewingCount: mission.interviewingCount,
+                    hasApplied: mission.hasApplied,
                     isFavorite: isFavorite,
-                    status: updated.status,
-                    createdAt: updated.createdAt,
-                    updatedAt: updated.updatedAt
+                    status: mission.status,
+                    createdAt: mission.createdAt,
+                    updatedAt: mission.updatedAt
                 )
+                updatedMission = updated
+                return updated
             }
             return mission
         }
         
+        // If mission wasn't in missions array, we need to find it elsewhere or create it
+        if updatedMission == nil {
+            // Try to find it in favoriteMissions
+            if let existingFavorite = favoriteMissions.first(where: { $0.missionId == missionId }) {
+                updatedMission = MissionModel(
+                    id: existingFavorite.id,
+                    _id: existingFavorite._id,
+                    title: existingFavorite.title,
+                    description: existingFavorite.description,
+                    duration: existingFavorite.duration,
+                    budget: existingFavorite.budget,
+                    price: existingFavorite.price,
+                    skills: existingFavorite.skills,
+                    recruiterId: existingFavorite.recruiterId,
+                    ownerId: existingFavorite.ownerId,
+                    proposalsCount: existingFavorite.proposalsCount,
+                    interviewingCount: existingFavorite.interviewingCount,
+                    hasApplied: existingFavorite.hasApplied,
+                    isFavorite: isFavorite,
+                    status: existingFavorite.status,
+                    createdAt: existingFavorite.createdAt,
+                    updatedAt: existingFavorite.updatedAt
+                )
+            }
+        }
+        
         // Update in favoriteMissions array
         if isFavorite {
-            // Add to favorites if not already there
-            if let mission = missions.first(where: { $0.missionId == missionId }),
-               !favoriteMissions.contains(where: { $0.missionId == missionId }) {
-                favoriteMissions.append(mission)
+            guard let missionToAdd = updatedMission ?? missions.first(where: { $0.missionId == missionId }) else {
+                return
             }
+            
+            // Remove any existing entry first to avoid duplicates
+            favoriteMissions.removeAll { $0.missionId == missionId }
+            
+            // Add the updated mission with isFavorite: true
+            favoriteMissions.append(missionToAdd)
         } else {
             // Remove from favorites
             favoriteMissions.removeAll { $0.missionId == missionId }
@@ -269,6 +354,22 @@ final class MissionListViewModel: ObservableObject {
             .store(in: &cancellables)
         
         realtimeService.connect()
+    }
+    
+    private func observeFavoriteUpdates() {
+        NotificationCenter.default.publisher(for: NSNotification.Name("MissionFavoriteDidUpdate"))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                guard let self = self,
+                      let userInfo = notification.userInfo,
+                      let missionId = userInfo["missionId"] as? String,
+                      let isFavorite = userInfo["isFavorite"] as? Bool else {
+                    return
+                }
+                // Update the mission's favorite status in our arrays
+                self.updateMissionFavoriteStatus(missionId: missionId, isFavorite: isFavorite)
+            }
+            .store(in: &cancellables)
     }
 }
 

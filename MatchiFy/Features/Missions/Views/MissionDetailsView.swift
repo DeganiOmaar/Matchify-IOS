@@ -57,6 +57,15 @@ struct MissionDetailsView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ProposalDidUpdate"))) { _ in
             viewModel.loadMission()
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("MissionFavoriteDidUpdate"))) { notification in
+            if let userInfo = notification.userInfo,
+               let missionId = userInfo["missionId"] as? String,
+               let isFavorite = userInfo["isFavorite"] as? Bool,
+               viewModel.mission?.missionId == missionId {
+                // Update the mission's favorite status locally using the ViewModel method
+                viewModel.updateMissionFavoriteStatus(isFavorite: isFavorite)
+            }
+        }
     }
     
     private var shouldShowApplyButton: Bool {
@@ -84,6 +93,22 @@ struct MissionDetailsView: View {
                         )
                 }
                 Spacer()
+                
+                // Favorite button for talents
+                if shouldShowApplyButton {
+                    Button {
+                        viewModel.toggleFavorite()
+                    } label: {
+                        Image(systemName: viewModel.isFavorite ? "heart.fill" : "heart")
+                            .font(.system(size: 18))
+                            .foregroundColor(viewModel.isFavorite ? .red : AppTheme.Colors.textSecondary)
+                            .frame(width: 36, height: 36)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(AppTheme.Colors.secondaryBackground)
+                            )
+                    }
+                }
             }
             
             VStack(alignment: .leading, spacing: 6) {

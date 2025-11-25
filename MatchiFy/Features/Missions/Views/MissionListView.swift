@@ -349,7 +349,7 @@ struct MissionListView: View {
             )
         } else if isTalent {
             return .favorite(
-                isFavorite: vm.isFavorite(mission),
+                isFavorite: { vm.isFavorite(mission) },
                 toggle: { vm.toggleFavorite(mission) }
             )
         }

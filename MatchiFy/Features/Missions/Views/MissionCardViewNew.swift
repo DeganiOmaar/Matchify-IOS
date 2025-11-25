@@ -3,7 +3,7 @@ import SwiftUI
 /// New Mission Card View matching the exact design from screenshots
 struct MissionCardViewNew: View {
     enum Action {
-        case favorite(isFavorite: Bool, toggle: () -> Void)
+        case favorite(isFavorite: () -> Bool, toggle: () -> Void)
         case ownerMenu(onEdit: () -> Void, onDelete: () -> Void, onViewProposals: (() -> Void)? = nil)
     }
     
@@ -96,9 +96,9 @@ struct MissionCardViewNew: View {
             switch action {
             case .favorite(let isFavorite, let toggle):
                 Button(action: toggle) {
-                    Image(systemName: isFavorite ? "heart.fill" : "heart")
+                    Image(systemName: isFavorite() ? "heart.fill" : "heart")
                         .font(.system(size: 18))
-                        .foregroundColor(isFavorite ? .red : AppTheme.Colors.textSecondary)
+                        .foregroundColor(isFavorite() ? .red : AppTheme.Colors.textSecondary)
                 }
                 .buttonStyle(PlainButtonStyle())
                 
