@@ -53,5 +53,13 @@ final class MissionService {
             requiresAuth: true
         )
     }
+    
+    // MARK: - Get Best Match Missions
+    func getBestMatchMissions() async throws -> BestMatchMissionsResponse {
+        return try await ApiClient.shared.get(
+            url: Endpoints.bestMatchMissions,
+            requiresAuth: true
+        )
+    }
 }
 

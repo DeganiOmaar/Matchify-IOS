@@ -65,7 +65,7 @@ struct MissionListView: View {
                     }
                     
                     // MARK: - Missions List
-                    if (vm.isLoading || (vm.selectedTab == .favorites && vm.isLoadingFavorites)) && vm.filteredMissions.isEmpty {
+                    if (vm.isLoading || (vm.selectedTab == .favorites && vm.isLoadingFavorites) || (vm.selectedTab == .bestMatches && vm.isLoadingBestMatches)) && vm.filteredMissions.isEmpty {
                         Spacer()
                         ProgressView()
                             .scaleEffect(1.5)
@@ -92,9 +92,13 @@ struct MissionListView: View {
                 vm.loadMissions()
             }
             .onChange(of: vm.selectedTab) { _, newTab in
-                if newTab == .favorites && isTalent {
+                if isTalent {
                     Task {
-                        await vm.loadFavorites()
+                        if newTab == .favorites {
+                            await vm.loadFavorites()
+                        } else if newTab == .bestMatches {
+                            await vm.loadBestMatches()
+                        }
                     }
                 }
             }
@@ -323,12 +327,16 @@ struct MissionListView: View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 ForEach(vm.filteredMissions, id: \.missionId) { mission in
+                    let bestMatchInfo = vm.getBestMatchInfo(for: mission.missionId)
                     MissionCardViewNew(
                         mission: mission,
                         action: missionCardAction(for: mission),
                         onTap: {
                             missionDetailsSelection = mission
-                        }
+                        },
+                        matchScore: bestMatchInfo?.matchScore,
+                        reasoning: bestMatchInfo?.reasoning,
+                        showAIMatchBadge: vm.selectedTab == .bestMatches && bestMatchInfo != nil
                     )
                     .padding(.horizontal, 20)
                 }
@@ -390,11 +398,19 @@ struct MissionListView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             } else if isTalent {
-                Text("You can save your favourite or wait until there a new missions for best match and most recent missions")
-                    .font(.system(size: 16))
-                    .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
+                if vm.selectedTab == .bestMatches {
+                    Text("No matching missions available yet. Try updating your profile or skills.")
+                        .font(.system(size: 16))
+                        .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                } else {
+                    Text("You can save your favourite or wait until there a new missions for best match and most recent missions")
+                        .font(.system(size: 16))
+                        .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                }
             }
             
             // Only show button for Recruiters

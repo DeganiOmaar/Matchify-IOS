@@ -3,8 +3,10 @@ import Combine
 
 final class MissionListViewModel: ObservableObject {
     @Published var missions: [MissionModel] = []
+    @Published var bestMatchMissions: [BestMatchMissionModel] = []
     @Published var favoriteMissions: [MissionModel] = []
     @Published var isLoading: Bool = false
+    @Published var isLoadingBestMatches: Bool = false
     @Published var isLoadingFavorites: Bool = false
     @Published var errorMessage: String? = nil
     @Published var searchText: String = ""
@@ -12,7 +14,7 @@ final class MissionListViewModel: ObservableObject {
     @Published var showProfileDrawer: Bool = false
     
     enum MissionTab: String, CaseIterable {
-        case bestMatches = "Best Matches"
+        case bestMatches = "Best Match"
         case mostRecent = "Most Recent"
         case favorites = "Favorites"
     }
@@ -46,14 +48,41 @@ final class MissionListViewModel: ObservableObject {
                 self.missions = fetchedMissions
                 self.isLoading = false
                 
-                // Load favorites if talent
+                // Load favorites and best matches if talent
                 if AuthManager.shared.role == "talent" {
                     await loadFavorites()
+                    await loadBestMatches()
                 }
             } catch {
                 self.isLoading = false
                 self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
             }
+        }
+    }
+    
+    // MARK: - Load Best Matches
+    @MainActor
+    func loadBestMatches() async {
+        guard AuthManager.shared.role == "talent" else { return }
+        isLoadingBestMatches = true
+        
+        do {
+            let response = try await service.getBestMatchMissions()
+            self.bestMatchMissions = response.missions
+            
+            // Enrich best matches with full mission data from missions array
+            for (index, bestMatch) in self.bestMatchMissions.enumerated() {
+                if let fullMission = missions.first(where: { $0.missionId == bestMatch.missionId }) {
+                    // Update the mission in missions array to include best match info
+                    // This ensures filteredMissions can access the full data
+                }
+            }
+            
+            self.isLoadingBestMatches = false
+        } catch {
+            self.isLoadingBestMatches = false
+            // Silently fail - best matches will remain empty
+            // This is expected if no profile analysis exists yet
         }
     }
     
@@ -128,9 +157,10 @@ final class MissionListViewModel: ObservableObject {
             self.missions = fetchedMissions
             self.isLoading = false
             
-            // Load favorites if talent
+            // Load favorites and best matches if talent
             if AuthManager.shared.role == "talent" {
                 await loadFavorites()
+                await loadBestMatches()
             }
         } catch {
             self.isLoading = false
@@ -154,7 +184,17 @@ final class MissionListViewModel: ObservableObject {
         switch selectedTab {
         case .favorites:
             filtered = favoriteMissions
-        case .bestMatches, .mostRecent:
+        case .bestMatches:
+            // Enrich best matches with full mission data
+            filtered = bestMatchMissions.compactMap { bestMatch in
+                // Try to find full mission data from missions array
+                if let fullMission = missions.first(where: { $0.missionId == bestMatch.missionId }) {
+                    return fullMission
+                }
+                // Fallback: create a minimal MissionModel from best match data
+                return bestMatch.toMissionModel()
+            }
+        case .mostRecent:
             filtered = missions
         }
         
@@ -169,8 +209,15 @@ final class MissionListViewModel: ObservableObject {
         
         // Sort based on tab
         switch selectedTab {
-        case .bestMatches, .favorites:
-            // For best matches and favorites, sort by most recent
+        case .bestMatches:
+            // Sort by matchScore descending
+            return filtered.sorted { mission1, mission2 in
+                let score1 = bestMatchMissions.first(where: { $0.missionId == mission1.missionId })?.matchScore ?? 0
+                let score2 = bestMatchMissions.first(where: { $0.missionId == mission2.missionId })?.matchScore ?? 0
+                return score1 > score2
+            }
+        case .favorites:
+            // For favorites, sort by most recent
             return filtered.sorted { mission1, mission2 in
                 guard let date1 = parseDate(mission1.createdAt),
                       let date2 = parseDate(mission2.createdAt) else {
@@ -188,6 +235,14 @@ final class MissionListViewModel: ObservableObject {
                 return date1 > date2 // Most recent first
             }
         }
+    }
+    
+    // MARK: - Get Best Match Info
+    func getBestMatchInfo(for missionId: String) -> (matchScore: Int, reasoning: String)? {
+        guard let bestMatch = bestMatchMissions.first(where: { $0.missionId == missionId }) else {
+            return nil
+        }
+        return (bestMatch.matchScore, bestMatch.reasoning)
     }
     
     // MARK: - Toggle Favorite

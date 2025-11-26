@@ -1,7 +1,7 @@
 import Foundation
 
 struct Endpoints {
-    static let baseURL = "http://192.168.1.102:3000"
+    static let baseURL = "http://10.86.128.201:3000"
     static let base = baseURL + "/auth"
     static let apiBase = baseURL
 
@@ -17,6 +17,7 @@ struct Endpoints {
     // Missions endpoints
     static let missions = apiBase + "/missions"
     static let allMissions = apiBase + "/missions/all"
+    static let bestMatchMissions = apiBase + "/missions/best-match"
     static let missionStream = apiBase + "/missions/stream"
     static func mission(id: String) -> String {
         return apiBase + "/missions/\(id)"

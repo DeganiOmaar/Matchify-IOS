@@ -10,26 +10,54 @@ struct MissionCardViewNew: View {
     let mission: MissionModel
     let action: Action?
     let onTap: (() -> Void)?
+    let matchScore: Int?
+    let reasoning: String?
+    let showAIMatchBadge: Bool
     
     init(
         mission: MissionModel,
         action: Action? = nil,
-        onTap: (() -> Void)? = nil
+        onTap: (() -> Void)? = nil,
+        matchScore: Int? = nil,
+        reasoning: String? = nil,
+        showAIMatchBadge: Bool = false
     ) {
         self.mission = mission
         self.action = action
         self.onTap = onTap
+        self.matchScore = matchScore
+        self.reasoning = reasoning
+        self.showAIMatchBadge = showAIMatchBadge
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // MARK: - Card Content
             VStack(alignment: .leading, spacing: 12) {
-                // 1. Posted time (small, light-gray font)
+                // 1. Posted time and AI Match badge (small, light-gray font)
                 HStack {
-                    Text(mission.timePostedText)
-                        .font(.system(size: 13))
-                        .foregroundColor(AppTheme.Colors.textSecondary)
+                    HStack(spacing: 8) {
+                        Text(mission.timePostedText)
+                            .font(.system(size: 13))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
+                        
+                        if showAIMatchBadge {
+                            HStack(spacing: 4) {
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(AppTheme.Colors.primary)
+                                Text("AI Match")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(AppTheme.Colors.primary)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(AppTheme.Colors.primary.opacity(0.1))
+                            )
+                        }
+                    }
                     
                     Spacer()
                     
@@ -43,10 +71,23 @@ struct MissionCardViewNew: View {
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 
-                // 3. Price (directly under title)
-                Text(mission.formattedBudget)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(AppTheme.Colors.textPrimary)
+                // 3. Price and Match Score (directly under title)
+                HStack(alignment: .center, spacing: 12) {
+                    Text(mission.formattedBudget)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(AppTheme.Colors.textPrimary)
+                    
+                    if let matchScore = matchScore {
+                        HStack(spacing: 4) {
+                            Text("\(matchScore)%")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(AppTheme.Colors.primary)
+                            Text("match")
+                                .font(.system(size: 13))
+                                .foregroundColor(AppTheme.Colors.textSecondary)
+                        }
+                    }
+                }
                 
                 // 4. Description (2 lines only, auto-truncate)
                 Text(mission.description)
@@ -54,6 +95,16 @@ struct MissionCardViewNew: View {
                     .foregroundColor(AppTheme.Colors.textSecondary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
+                
+                // 4.5. Reasoning (if available, 1-2 lines)
+                if let reasoning = reasoning, !reasoning.isEmpty {
+                    Text(reasoning)
+                        .font(.system(size: 13))
+                        .foregroundColor(AppTheme.Colors.primary.opacity(0.8))
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 4)
+                }
                 
                 // 5. Skills (rounded pill-shaped tags, neutral gray background)
                 if !mission.skills.isEmpty {
