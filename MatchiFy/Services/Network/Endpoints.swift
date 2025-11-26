@@ -125,4 +125,7 @@ struct Endpoints {
     // AI endpoints
     static let aiProfileAnalysis = apiBase + "/ai/profile-analysis"
     static let aiProfileAnalysisLatest = apiBase + "/ai/profile-analysis"
+    static func aiMissionFit(missionId: String) -> String {
+        return apiBase + "/ai/mission-fit/\(missionId)"
+    }
 }

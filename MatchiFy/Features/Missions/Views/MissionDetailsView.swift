@@ -5,6 +5,7 @@ struct MissionDetailsView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var auth = AuthManager.shared
     @State private var showCreateProposal = false
+    @State private var showMissionFitAnalysis = false
     
     init(viewModel: MissionDetailsViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -51,6 +52,11 @@ struct MissionDetailsView: View {
                 )
             }
         }
+        .sheet(isPresented: $showMissionFitAnalysis) {
+            if let missionId = viewModel.mission?.missionId {
+                MissionFitAnalysisView(missionId: missionId)
+            }
+        }
         .onAppear {
             viewModel.loadMission()
         }
@@ -94,14 +100,16 @@ struct MissionDetailsView: View {
                 }
                 Spacer()
                 
-                // Favorite button for talents
+                // AI Analyze button for talents
                 if shouldShowApplyButton {
                     Button {
-                        viewModel.toggleFavorite()
+                        if let missionId = viewModel.mission?.missionId {
+                            showMissionFitAnalysis = true
+                        }
                     } label: {
-                        Image(systemName: viewModel.isFavorite ? "heart.fill" : "heart")
-                            .font(.system(size: 18))
-                            .foregroundColor(viewModel.isFavorite ? .red : AppTheme.Colors.textSecondary)
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(AppTheme.Colors.primary)
                             .frame(width: 36, height: 36)
                             .background(
                                 RoundedRectangle(cornerRadius: 10)
