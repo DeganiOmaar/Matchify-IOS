@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum ProposalStatus: String, Codable {
     case notViewed = "NOT_VIEWED"
@@ -34,6 +35,7 @@ struct ProposalModel: Codable, Identifiable, Hashable {
     let archived: Bool?
     let createdAt: String?
     let updatedAt: String?
+    let aiScore: Int? // AI compatibility score (0-100)
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -53,6 +55,7 @@ struct ProposalModel: Codable, Identifiable, Hashable {
         case archived
         case createdAt
         case updatedAt
+        case aiScore
     }
     
     // Helper to get talent full name from either direct field or nested object
@@ -96,6 +99,27 @@ struct ProposalModel: Codable, Identifiable, Hashable {
     
     var isArchived: Bool {
         archived ?? false
+    }
+    
+    // AI Score display properties
+    var aiScoreColor: Color {
+        guard let score = aiScore else { return .gray }
+        if score >= 80 {
+            return .green
+        } else if score >= 50 {
+            return .orange
+        } else {
+            return .red
+        }
+    }
+    
+    var aiScoreText: String {
+        guard let score = aiScore else { return "N/A" }
+        return "\(score)/100"
+    }
+    
+    var hasAiScore: Bool {
+        aiScore != nil
     }
 }
 

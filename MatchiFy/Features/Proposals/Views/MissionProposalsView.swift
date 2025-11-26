@@ -5,38 +5,67 @@ struct MissionProposalsView: View {
     let missionId: String
     let missionTitle: String
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = MissionProposalsViewModel()
+    @StateObject private var viewModel: MissionProposalsViewModel
     @State private var selectedProposal: ProposalModel? = nil
+    @State private var sortMode: ProposalSortMode = .chronological
+    
+    init(missionId: String, missionTitle: String) {
+        self.missionId = missionId
+        self.missionTitle = missionTitle
+        _viewModel = StateObject(wrappedValue: MissionProposalsViewModel(missionId: missionId))
+    }
     
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if !viewModel.errorMessage.nilOrEmpty {
-                    Text(viewModel.errorMessage ?? "Something went wrong.")
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                        .padding()
-                } else if viewModel.proposals.isEmpty {
-                    emptyState
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(viewModel.proposals, id: \.proposalId) { proposal in
-                                ProposalCardView(
-                                    proposal: proposal,
-                                    isRecruiter: true
-                                )
-                                .padding(.horizontal, 20)
-                                .onTapGesture {
-                                    selectedProposal = proposal
-                                }
+            VStack(spacing: 0) {
+                // Sort mode picker
+                Picker("Sort Mode", selection: $sortMode) {
+                    Text("All").tag(ProposalSortMode.chronological)
+                    Text("AI Ranked").tag(ProposalSortMode.aiRanked)
+                }
+                .pickerStyle(.segmented)
+                .padding()
+                .onChange(of: sortMode) { _, newValue in
+                    viewModel.loadProposals(sortMode: newValue)
+                }
+                
+                // Content
+                Group {
+                    if viewModel.isLoading {
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                            if sortMode == .aiRanked {
+                                Text("AI is analyzing proposals...")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(AppTheme.Colors.textSecondary)
                             }
                         }
-                        .padding(.vertical, 20)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if !viewModel.errorMessage.nilOrEmpty {
+                        Text(viewModel.errorMessage ?? "Something went wrong.")
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                    } else if viewModel.proposals.isEmpty {
+                        emptyState
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 16) {
+                                ForEach(viewModel.proposals, id: \.proposalId) { proposal in
+                                    ProposalCardView(
+                                        proposal: proposal,
+                                        isRecruiter: true,
+                                        showAiScore: sortMode == .aiRanked
+                                    )
+                                    .padding(.horizontal, 20)
+                                    .onTapGesture {
+                                        selectedProposal = proposal
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 20)
+                        }
                     }
                 }
             }
@@ -52,7 +81,7 @@ struct MissionProposalsView: View {
                 )
             }
             .onAppear {
-                viewModel.loadProposals(missionId: missionId)
+                viewModel.loadProposals(sortMode: sortMode)
             }
         }
     }
@@ -75,6 +104,11 @@ struct MissionProposalsView: View {
     }
 }
 
+enum ProposalSortMode {
+    case chronological
+    case aiRanked
+}
+
 @MainActor
 final class MissionProposalsViewModel: ObservableObject {
     @Published private(set) var proposals: [ProposalModel] = []
@@ -82,16 +116,24 @@ final class MissionProposalsViewModel: ObservableObject {
     @Published private(set) var errorMessage: String?
     
     private let service = ProposalService.shared
+    private let missionId: String
     
-    func loadProposals(missionId: String) {
+    init(missionId: String) {
+        self.missionId = missionId
+    }
+    
+    func loadProposals(sortMode: ProposalSortMode) {
         isLoading = true
         errorMessage = nil
         
         Task {
             do {
-                let fetched = try await service.getRecruiterProposals()
-                // Filter by mission
-                self.proposals = fetched.filter { $0.missionId == missionId }
+                let useAiSort = sortMode == .aiRanked
+                let response = try await service.getProposalsForMission(
+                    missionId: missionId,
+                    aiSort: useAiSort
+                )
+                self.proposals = response.proposals
                 self.isLoading = false
             } catch {
                 self.isLoading = false
@@ -100,4 +142,3 @@ final class MissionProposalsViewModel: ObservableObject {
         }
     }
 }
-

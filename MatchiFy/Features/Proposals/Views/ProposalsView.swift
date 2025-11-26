@@ -7,6 +7,11 @@ struct ProposalsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // Mission Selector (Recruiter only)
+                if viewModel.isRecruiter {
+                    recruiterMissionSelector
+                }
+                
                 // Tabs (Talent only)
                 if !viewModel.isRecruiter {
                     Picker("Tab", selection: $viewModel.selectedTab) {
@@ -58,6 +63,22 @@ struct ProposalsView: View {
                             .foregroundColor(.red)
                             .multilineTextAlignment(.center)
                             .padding()
+                    } else if viewModel.isRecruiter && viewModel.selectedMission == nil {
+                        // Show placeholder when no mission selected
+                        VStack(spacing: 16) {
+                            Image(systemName: "list.bullet.rectangle")
+                                .font(.system(size: 48))
+                                .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.4))
+                            Text("Select a mission to view proposals")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(AppTheme.Colors.textPrimary)
+                            Text("Choose a mission from the dropdown above")
+                                .font(.system(size: 15))
+                                .foregroundColor(AppTheme.Colors.textSecondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else if viewModel.filteredProposals.isEmpty {
                         emptyState
                     } else {
@@ -65,7 +86,8 @@ struct ProposalsView: View {
                             ForEach(viewModel.filteredProposals, id: \.proposalId) { proposal in
                                 ProposalCardView(
                                     proposal: proposal,
-                                    isRecruiter: viewModel.isRecruiter
+                                    isRecruiter: viewModel.isRecruiter,
+                                    showAiScore: viewModel.aiSortEnabled
                                 )
                                 .listRowSeparator(.hidden)
                                 .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
@@ -116,9 +138,112 @@ struct ProposalsView: View {
                 )
             }
             .onAppear {
-                viewModel.loadProposals()
+                if viewModel.isRecruiter {
+                    viewModel.loadMissions()
+                } else {
+                    viewModel.loadProposals()
+                }
             }
         }
+    }
+    
+    // MARK: - Recruiter Mission Selector
+    
+    private var recruiterMissionSelector: some View {
+        VStack(spacing: 12) {
+            // Mission Dropdown
+            Menu {
+                ForEach(viewModel.missions) { mission in
+                    Button {
+                        viewModel.selectedMission = mission
+                        viewModel.loadProposals()
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(mission.title)
+                                    .foregroundColor(AppTheme.Colors.textPrimary)
+                                if !mission.formattedDate.isEmpty {
+                                    Text(mission.formattedDate)
+                                        .font(.caption)
+                                        .foregroundColor(AppTheme.Colors.textSecondary)
+                                }
+                            }
+                            Spacer()
+                            
+                            // Unviewed count badge
+                            if let count = mission.unviewedCount, count > 0 {
+                                Text("\(count)")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.red)
+                                    .clipShape(Capsule())
+                            }
+                            
+                            if viewModel.selectedMission?.missionId == mission.missionId {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(AppTheme.Colors.primary)
+                            }
+                        }
+                    }
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "briefcase.fill")
+                        .foregroundColor(AppTheme.Colors.primary)
+                        .font(.system(size: 16))
+                    
+                    Text(viewModel.selectedMission?.title ?? "Select a mission")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(viewModel.selectedMission != nil ? AppTheme.Colors.textPrimary : AppTheme.Colors.textSecondary)
+                    
+                    if let mission = viewModel.selectedMission, let count = mission.unviewedCount, count > 0 {
+                        Text("\(count)")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.red)
+                            .clipShape(Capsule())
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.down")
+                        .foregroundColor(AppTheme.Colors.textSecondary)
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(AppTheme.Colors.secondaryBackground)
+                .cornerRadius(12)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            
+            // AI Sort Toggle (only shown when mission is selected)
+            if viewModel.selectedMission != nil {
+                Button {
+                    viewModel.toggleAiSort()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: viewModel.aiSortEnabled ? "sparkles.square.filled.on.square" : "sparkles")
+                            .font(.system(size: 16, weight: .semibold))
+                        Text(viewModel.aiSortEnabled ? "AI Sorting Enabled" : "Enable AI Sorting")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .foregroundColor(viewModel.aiSortEnabled ? .white : AppTheme.Colors.primary)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .background(viewModel.aiSortEnabled ? AppTheme.Colors.primary : AppTheme.Colors.primary.opacity(0.1))
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal, 20)
+            }
+        }
+        .padding(.bottom, 12)
     }
     
     private var emptyState: some View {
@@ -129,7 +254,7 @@ struct ProposalsView: View {
             Text("No proposals yet")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(AppTheme.Colors.textPrimary)
-            Text(viewModel.isRecruiter ? "You have not received any proposals yet." : "You have not applied to any missions yet.")
+            Text(viewModel.isRecruiter ? "No proposals for this mission yet." : "You have not applied to any missions yet.")
                 .font(.system(size: 15))
                 .foregroundColor(AppTheme.Colors.textSecondary)
                 .multilineTextAlignment(.center)
@@ -142,6 +267,7 @@ struct ProposalsView: View {
 struct ProposalCardView: View {
     let proposal: ProposalModel
     let isRecruiter: Bool
+    var showAiScore: Bool = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -154,6 +280,22 @@ struct ProposalCardView: View {
                 Spacer()
                 
                 statusBadge
+            }
+            
+            // AI Score Badge (shown when AI sorting is enabled and score is available)
+            if showAiScore && proposal.hasAiScore {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(proposal.aiScoreColor)
+                    Text("AI Match: \(proposal.aiScoreText)")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(proposal.aiScoreColor)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(proposal.aiScoreColor.opacity(0.15))
+                .cornerRadius(12)
             }
             
             // Show other user's name (talent name for recruiter, recruiter name for talent)

@@ -4,6 +4,9 @@ import Combine
 @MainActor
 final class ProposalsViewModel: ObservableObject {
     @Published private(set) var proposals: [ProposalModel] = []
+    @Published private(set) var missions: [MissionSummaryModel] = []
+    @Published var selectedMission: MissionSummaryModel?
+    @Published var aiSortEnabled: Bool = false
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
     @Published var selectedTab: ProposalTab = .active
@@ -79,6 +82,25 @@ final class ProposalsViewModel: ObservableObject {
         return filtered
     }
     
+    /// Load missions for recruiter (mission selector)
+    func loadMissions() {
+        guard isRecruiter else { return }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                let fetched = try await service.getRecruiterMissions()
+                self.missions = fetched
+                self.isLoading = false
+            } catch {
+                self.isLoading = false
+                self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
+            }
+        }
+    }
+    
     func loadProposals() {
         isLoading = true
         errorMessage = nil
@@ -87,7 +109,19 @@ final class ProposalsViewModel: ObservableObject {
             do {
                 let fetched: [ProposalModel]
                 if isRecruiter {
-                    fetched = try await service.getRecruiterProposals()
+                    // Recruiter must select a mission first
+                    guard let mission = selectedMission else {
+                        self.proposals = []
+                        self.isLoading = false
+                        return
+                    }
+                    
+                    // Load proposals for selected mission with optional AI sorting
+                    let response = try await service.getProposalsForMission(
+                        missionId: mission.missionId,
+                        aiSort: aiSortEnabled
+                    )
+                    fetched = response.proposals
                 } else {
                     let archived = selectedTab == .archive
                     // Only apply status filter for active tab
@@ -107,6 +141,12 @@ final class ProposalsViewModel: ObservableObject {
                 self.errorMessage = ErrorHandler.getErrorMessage(from: error, context: .general)
             }
         }
+    }
+    
+    /// Toggle AI sorting and reload proposals
+    func toggleAiSort() {
+        aiSortEnabled.toggle()
+        loadProposals()
     }
     
     func archiveProposal(id: String) async {

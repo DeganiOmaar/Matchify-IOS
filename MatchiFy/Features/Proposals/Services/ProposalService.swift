@@ -37,6 +37,15 @@ final class ProposalService {
         )
     }
     
+    /// Get missions created by the authenticated recruiter
+    /// Used for the mission selector dropdown
+    func getRecruiterMissions() async throws -> [MissionSummaryModel] {
+        try await ApiClient.shared.get(
+            url: Endpoints.apiBase + "/recruiter/missions",
+            requiresAuth: true
+        )
+    }
+    
     func getProposal(id: String) async throws -> ProposalModel {
         try await ApiClient.shared.get(
             url: Endpoints.proposal(id: id),
@@ -91,6 +100,36 @@ final class ProposalService {
         )
         return response.proposalContent
     }
+    
+    // MARK: - AI-Powered Proposal Ranking
+    
+    /// Get proposals for a specific mission with optional AI sorting
+    /// - Parameters:
+    ///   - missionId: ID of the mission
+    ///   - aiSort: Whether to sort by AI compatibility score
+    /// - Returns: Mission with its proposals
+    func getProposalsForMission(missionId: String, aiSort: Bool = false) async throws -> MissionProposalsResponse {
+        var url = Endpoints.apiBase + "/recruiter/proposals/mission/\(missionId)"
+        if aiSort {
+            url += "?sort=ai"
+        }
+        return try await ApiClient.shared.get(
+            url: url,
+            requiresAuth: true
+        )
+    }
+    
+    /// Search proposals by mission title
+    /// - Parameter title: Search query for mission title
+    /// - Returns: Array of missions with their proposals
+    func searchProposalsByMissionTitle(_ title: String) async throws -> [MissionProposalsSearchResult] {
+        let encodedTitle = title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? title
+        let url = Endpoints.apiBase + "/recruiter/proposals?title=\(encodedTitle)"
+        return try await ApiClient.shared.get(
+            url: url,
+            requiresAuth: true
+        )
+    }
 }
 
 struct GenerateProposalRequest: Codable {
@@ -103,4 +142,17 @@ struct GenerateProposalResponse: Codable {
 
 struct UnreadProposalsCountResponse: Codable {
     let count: Int
+}
+
+// MARK: - AI Proposal Ranking Models
+
+struct MissionProposalsResponse: Codable {
+    let mission: MissionModel
+    let proposals: [ProposalModel]
+}
+
+struct MissionProposalsSearchResult: Codable {
+    let mission: MissionModel
+    let proposalCount: Int
+    let proposals: [ProposalModel]
 }
