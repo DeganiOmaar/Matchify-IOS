@@ -128,4 +128,5 @@ struct Endpoints {
     static func aiMissionFit(missionId: String) -> String {
         return apiBase + "/ai/mission-fit/\(missionId)"
     }
+    static let aiProposalGenerate = apiBase + "/ai/proposals/generate"
 }

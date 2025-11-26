@@ -19,6 +19,7 @@ struct CreateProposalView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     missionHeader
                     messageSection
+                    proposalSection
                     optionalSection
                     
                     if let error = viewModel.errorMessage {
@@ -76,7 +77,7 @@ struct CreateProposalView: View {
             
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $viewModel.message)
-                    .frame(minHeight: 160)
+                    .frame(minHeight: 120)
                     .padding(12)
                     .background(AppTheme.Colors.cardBackground)
                     .cornerRadius(16)
@@ -91,6 +92,76 @@ struct CreateProposalView: View {
                         .padding(20)
                         .allowsHitTesting(false)
                 }
+            }
+        }
+    }
+    
+    private var proposalSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Proposal")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(AppTheme.Colors.textPrimary)
+                
+                Spacer()
+                
+                Button {
+                    viewModel.generateWithAI()
+                } label: {
+                    HStack(spacing: 4) {
+                        if viewModel.isGeneratingAI {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 14))
+                        }
+                        Text(viewModel.isGeneratingAI ? "Génération..." : "Générer avec IA")
+                            .font(.system(size: 14, weight: .medium))
+                    }
+                    .foregroundColor(AppTheme.Colors.primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(AppTheme.Colors.primary.opacity(0.1))
+                    .cornerRadius(8)
+                }
+                .disabled(viewModel.isGeneratingAI)
+            }
+            
+            Text("Généré par IA ou écrit par vous. C'est ce que le recruteur recevra comme proposition détaillée.")
+                .font(.system(size: 13))
+                .foregroundColor(AppTheme.Colors.textSecondary)
+            
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $viewModel.proposalContent)
+                    .frame(minHeight: 200)
+                    .padding(12)
+                    .background(AppTheme.Colors.cardBackground)
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                viewModel.proposalContent.trimmingCharacters(in: .whitespacesAndNewlines).count < 200 && !viewModel.proposalContent.isEmpty
+                                ? Color.red.opacity(0.5)
+                                : AppTheme.Colors.border,
+                                lineWidth: 1
+                            )
+                    )
+                
+                if viewModel.proposalContent.isEmpty {
+                    Text("Votre proposition détaillée pour cette mission...")
+                        .foregroundColor(AppTheme.Colors.textSecondary)
+                        .padding(20)
+                        .allowsHitTesting(false)
+                }
+            }
+            
+            if !viewModel.proposalContent.isEmpty {
+                let charCount = viewModel.proposalContent.trimmingCharacters(in: .whitespacesAndNewlines).count
+                Text("\(charCount) / 200 caractères minimum")
+                    .font(.system(size: 12))
+                    .foregroundColor(charCount < 200 ? .red : AppTheme.Colors.textSecondary)
             }
         }
     }

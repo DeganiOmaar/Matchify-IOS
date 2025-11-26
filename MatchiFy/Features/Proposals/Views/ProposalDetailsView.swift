@@ -24,6 +24,7 @@ struct ProposalDetailsView: View {
                         missionTitleSection
                         otherUserSection
                         messageSection
+                        proposalContentSection
                         dateSection
                         statusSection
                             .padding(.bottom, 8)
@@ -152,7 +153,7 @@ struct ProposalDetailsView: View {
     // MARK: - Message Section
     private var messageSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Proposal Message")
+            Text("Cover Letter")
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(AppTheme.Colors.textSecondary)
             
@@ -160,6 +161,23 @@ struct ProposalDetailsView: View {
                 .font(.system(size: 16))
                 .foregroundColor(AppTheme.Colors.textPrimary)
                 .lineSpacing(4)
+        }
+    }
+    
+    // MARK: - Proposal Content Section
+    @ViewBuilder
+    private var proposalContentSection: some View {
+        if let proposal = viewModel.proposal, let proposalContent = proposal.proposalContent, !proposalContent.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Proposal")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(AppTheme.Colors.textSecondary)
+                
+                Text(proposalContent)
+                    .font(.system(size: 16))
+                    .foregroundColor(AppTheme.Colors.textPrimary)
+                    .lineSpacing(4)
+            }
         }
     }
     

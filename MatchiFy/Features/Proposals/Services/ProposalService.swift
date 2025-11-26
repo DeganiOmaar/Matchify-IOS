@@ -81,6 +81,24 @@ final class ProposalService {
             requiresAuth: true
         )
     }
+    
+    func generateProposalContent(missionId: String) async throws -> String {
+        let request = GenerateProposalRequest(missionId: missionId)
+        let response: GenerateProposalResponse = try await ApiClient.shared.post(
+            url: Endpoints.aiProposalGenerate,
+            body: request,
+            requiresAuth: true
+        )
+        return response.proposalContent
+    }
+}
+
+struct GenerateProposalRequest: Codable {
+    let missionId: String
+}
+
+struct GenerateProposalResponse: Codable {
+    let proposalContent: String
 }
 
 struct UnreadProposalsCountResponse: Codable {

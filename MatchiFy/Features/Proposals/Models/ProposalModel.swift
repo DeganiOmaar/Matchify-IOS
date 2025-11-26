@@ -28,6 +28,7 @@ struct ProposalModel: Codable, Identifiable, Hashable {
     let recruiterName: String?
     let status: ProposalStatus
     let message: String
+    let proposalContent: String?
     let proposedBudget: Int?
     let estimatedDuration: String?
     let archived: Bool?
@@ -46,6 +47,7 @@ struct ProposalModel: Codable, Identifiable, Hashable {
         case recruiterName
         case status
         case message
+        case proposalContent
         case proposedBudget
         case estimatedDuration
         case archived
