@@ -8,8 +8,8 @@ struct RadarChartView: View {
         ("Skills Match", "skillsMatch"),
         ("Experience Fit", "experienceFit"),
         ("Project Relevance", "projectRelevance"),
-        ("Strength Alignment", "talentStrengthAlignment"),
-        ("Overall Coherence", "overallCoherence")
+        ("Mission Requirements", "missionRequirementsFit"),
+        ("Soft Skills Fit", "softSkillsFit")
     ]
     
     private var maxValue: CGFloat {
@@ -101,12 +101,13 @@ struct RadarChartView: View {
     }
     
     private func getDataPoints(center: CGPoint, radius: CGFloat) -> [CGPoint] {
+        // Use new category names, fallback to legacy names for backward compatibility
         let values = [
             CGFloat(data.skillsMatch),
             CGFloat(data.experienceFit),
             CGFloat(data.projectRelevance),
-            CGFloat(data.talentStrengthAlignment),
-            CGFloat(data.overallCoherence)
+            CGFloat(data.missionRequirementsFit),
+            CGFloat(data.softSkillsFit)
         ]
         
         return (0..<5).map { index in
@@ -126,8 +127,8 @@ struct RadarChartView: View {
             skillsMatch: 85,
             experienceFit: 75,
             projectRelevance: 80,
-            talentStrengthAlignment: 90,
-            overallCoherence: 82
+            missionRequirementsFit: 82,
+            softSkillsFit: 78
         )
     )
     .frame(width: 300, height: 300)
