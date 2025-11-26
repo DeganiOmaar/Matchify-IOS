@@ -100,6 +100,10 @@ struct TalentProfileView: View {
                         cvSection(cvUrl: cvUrl)
                             .padding(.horizontal, 20)
                     }
+                    
+                    // MARK: - AI Profile Insights
+                    AIProfileInsightsView()
+                        .padding(.horizontal, 20)
                 }
                 .padding(.top, 10)
                 .padding(.bottom, 20) // Extra padding for tab bar

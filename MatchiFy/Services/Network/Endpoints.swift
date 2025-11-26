@@ -120,4 +120,8 @@ struct Endpoints {
     static func talentStats(days: Int) -> String {
         return apiBase + "/talent/stats?days=\(days)"
     }
+    
+    // AI endpoints
+    static let aiProfileAnalysis = apiBase + "/ai/profile-analysis"
+    static let aiProfileAnalysisLatest = apiBase + "/ai/profile-analysis"
 }
