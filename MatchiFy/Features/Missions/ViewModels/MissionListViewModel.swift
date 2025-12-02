@@ -34,6 +34,7 @@ final class MissionListViewModel: ObservableObject {
         self.realtimeService = realtimeService ?? MissionRealtimeService.shared
         observeRealtime()
         observeFavoriteUpdates()
+        observeProfileAnalysisRefresh()
     }
     
     // MARK: - Load Missions
@@ -65,6 +66,7 @@ final class MissionListViewModel: ObservableObject {
     func loadBestMatches() async {
         guard AuthManager.shared.role == "talent" else { return }
         isLoadingBestMatches = true
+        errorMessage = nil
         
         do {
             let response = try await service.getBestMatchMissions()
@@ -78,11 +80,33 @@ final class MissionListViewModel: ObservableObject {
                 }
             }
             
+            // If no best matches found, check if it's because profile analysis is missing
+            if self.bestMatchMissions.isEmpty {
+                // Check if we have missions available (if yes, it means profile analysis might be missing)
+                if !self.missions.isEmpty {
+                    print("⚠️ Best Match: No matches found but missions exist. Profile analysis may be needed.")
+                } else {
+                    print("⚠️ Best Match: No missions available in the system.")
+                }
+            }
+            
             self.isLoadingBestMatches = false
         } catch {
             self.isLoadingBestMatches = false
-            // Silently fail - best matches will remain empty
-            // This is expected if no profile analysis exists yet
+            // Log error but don't show it to user unless it's a critical error
+            print("⚠️ Failed to load best matches: \(error.localizedDescription)")
+            
+            // Only set error message if it's not a "no profile analysis" case
+            if let apiError = error as? ApiError {
+                switch apiError {
+                case .server(let message):
+                    if !message.contains("profile analysis") && !message.contains("No profile analysis") {
+                        self.errorMessage = "Unable to load best matches. Please try again later."
+                    }
+                default:
+                    break
+                }
+            }
         }
     }
     
@@ -423,6 +447,20 @@ final class MissionListViewModel: ObservableObject {
                 }
                 // Update the mission's favorite status in our arrays
                 self.updateMissionFavoriteStatus(missionId: missionId, isFavorite: isFavorite)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func observeProfileAnalysisRefresh() {
+        NotificationCenter.default.publisher(for: NSNotification.Name("AIProfileAnalysisDidRefresh"))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                // Refresh best matches when profile analysis is updated
+                print("🔄 MissionListViewModel: Profile analysis refreshed, reloading best matches...")
+                Task { @MainActor in
+                    await self.loadBestMatches()
+                }
             }
             .store(in: &cancellables)
     }

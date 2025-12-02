@@ -1,7 +1,7 @@
 import Foundation
 
 struct Endpoints {
-    static let baseURL = "http://192.168.1.102:3000"
+    static let baseURL = "http://192.168.1.126:3000"
     static let base = baseURL + "/auth"
     static let apiBase = baseURL
 
@@ -125,6 +125,7 @@ struct Endpoints {
     // AI endpoints
     static let aiProfileAnalysis = apiBase + "/ai/profile-analysis"
     static let aiProfileAnalysisLatest = apiBase + "/ai/profile-analysis"
+    static let aiProfileAnalysisRefresh = apiBase + "/ai/profile-analysis"
     static func aiMissionFit(missionId: String) -> String {
         return apiBase + "/ai/mission-fit/\(missionId)"
     }

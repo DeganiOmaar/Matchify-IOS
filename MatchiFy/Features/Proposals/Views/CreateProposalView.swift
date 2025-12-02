@@ -49,6 +49,10 @@ struct CreateProposalView: View {
                     dismiss()
                 }
             }
+            .onDisappear {
+                // Cancel any ongoing generation when view is dismissed
+                viewModel.cancelGeneration()
+            }
         }
     }
     
@@ -105,33 +109,59 @@ struct CreateProposalView: View {
                 
                 Spacer()
                 
-                Button {
-                    viewModel.generateWithAI()
-                } label: {
-                    HStack(spacing: 4) {
-                        if viewModel.isGeneratingAI {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                                .scaleEffect(0.8)
-                        } else {
+                if viewModel.isGeneratingAI {
+                    // Cancel button during generation
+                    Button {
+                        viewModel.cancelGeneration()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 14))
+                            Text("Annuler")
+                                .font(.system(size: 14, weight: .medium))
+                        }
+                        .foregroundColor(.red)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.red.opacity(0.1))
+                        .cornerRadius(8)
+                    }
+                } else {
+                    // Generate button when not generating
+                    Button {
+                        viewModel.generateWithAI()
+                    } label: {
+                        HStack(spacing: 4) {
                             Image(systemName: "sparkles")
                                 .font(.system(size: 14))
+                            Text("Générer avec IA")
+                                .font(.system(size: 14, weight: .medium))
                         }
-                        Text(viewModel.isGeneratingAI ? "Génération..." : "Générer avec IA")
-                            .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AppTheme.Colors.primary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(AppTheme.Colors.primary.opacity(0.1))
+                        .cornerRadius(8)
                     }
-                    .foregroundColor(AppTheme.Colors.primary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(AppTheme.Colors.primary.opacity(0.1))
-                    .cornerRadius(8)
                 }
-                .disabled(viewModel.isGeneratingAI)
             }
             
-            Text("Généré par IA ou écrit par vous. C'est ce que le recruteur recevra comme proposition détaillée.")
-                .font(.system(size: 13))
-                .foregroundColor(AppTheme.Colors.textSecondary)
+            if viewModel.isGeneratingAI {
+                // Streaming indicator
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .scaleEffect(0.8)
+                    Text("L'IA génère votre proposition en temps réel...")
+                        .font(.system(size: 13))
+                        .foregroundColor(AppTheme.Colors.primary)
+                }
+                .padding(.vertical, 4)
+            } else {
+                Text("Généré par IA ou écrit par vous. C'est ce que le recruteur recevra comme proposition détaillée.")
+                    .font(.system(size: 13))
+                    .foregroundColor(AppTheme.Colors.textSecondary)
+            }
             
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $viewModel.proposalContent)
@@ -148,8 +178,9 @@ struct CreateProposalView: View {
                                 lineWidth: 1
                             )
                     )
+                    .disabled(viewModel.isGeneratingAI) // Disable editing during generation
                 
-                if viewModel.proposalContent.isEmpty {
+                if viewModel.proposalContent.isEmpty && !viewModel.isGeneratingAI {
                     Text("Votre proposition détaillée pour cette mission...")
                         .foregroundColor(AppTheme.Colors.textSecondary)
                         .padding(20)

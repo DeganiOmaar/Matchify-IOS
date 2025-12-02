@@ -399,11 +399,19 @@ struct MissionListView: View {
                     .padding(.horizontal, 40)
             } else if isTalent {
                 if vm.selectedTab == .bestMatches {
-                    Text("No matching missions available yet. Try updating your profile or skills.")
-                        .font(.system(size: 16))
-                        .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
+                    VStack(spacing: 12) {
+                        Text("No matching missions available yet.")
+                            .font(.system(size: 16))
+                            .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                        
+                        Text("To get personalized matches:\n1. Complete your profile\n2. Add your skills\n3. Run AI profile analysis")
+                            .font(.system(size: 14))
+                            .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.6))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+                    }
+                    .padding(.horizontal, 40)
                 } else {
                     Text("You can save your favourite or wait until there a new missions for best match and most recent missions")
                         .font(.system(size: 16))

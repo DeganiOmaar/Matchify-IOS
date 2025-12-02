@@ -65,25 +65,56 @@ final class CreateProposalViewModel: ObservableObject {
         }
     }
     
+    private var generationTask: Task<Void, Never>?
+    
     func generateWithAI() {
-        guard !isGeneratingAI else { return }
+        print("🚀 [VM] generateWithAI called")
+        
+        guard !isGeneratingAI else {
+            print("⚠️ [VM] Already generating, ignoring")
+            return
+        }
+        
+        print("🔵 [VM] Starting generation, missionId: \(missionId)")
         isGeneratingAI = true
         errorMessage = nil
+        proposalContent = "" // Clear existing content
         
-        Task {
-            do {
-                let content = try await service.generateProposalContent(missionId: missionId)
-                await MainActor.run {
-                    self.proposalContent = content
-                    self.isGeneratingAI = false
+        generationTask = Task {
+            print("🔵 [VM] Task started, creating stream...")
+            var chunkCount = 0
+            
+            for await chunk in service.generateProposalContentStream(missionId: missionId) {
+                chunkCount += 1
+                print("📝 [VM] Chunk #\(chunkCount) received: \(chunk.prefix(50))...")
+                
+                // Check if task was cancelled
+                if Task.isCancelled {
+                    print("⚠️ [VM] Task cancelled")
+                    break
                 }
-            } catch {
+                
                 await MainActor.run {
-                    self.isGeneratingAI = false
-                    self.errorMessage = "La génération IA n'est pas disponible. Veuillez écrire votre proposition manuellement."
+                    self.proposalContent += chunk
+                }
+            }
+            
+            print("✅ [VM] Stream ended, total chunks: \(chunkCount)")
+            
+            await MainActor.run {
+                self.isGeneratingAI = false
+                if chunkCount == 0 {
+                    self.errorMessage = "Aucun contenu généré. Veuillez réessayer."
                 }
             }
         }
+    }
+    
+    func cancelGeneration() {
+        print("🛑 [VM] Cancelling generation")
+        generationTask?.cancel()
+        generationTask = nil
+        isGeneratingAI = false
     }
 }
 
