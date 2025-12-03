@@ -80,11 +80,17 @@ struct TalentProfileByIDView: View {
                         }
                         
                         // MARK: - Skills Card
-                        if let skills = user.skills, !skills.isEmpty {
-                            skillsCard(skills: skills)
+                        if !viewModel.skillNames.isEmpty {
+                            skillsCard(skills: viewModel.skillNames)
                                 .padding(.horizontal, 20)
                         }
                         
+                        // MARK: - CV File Section
+                        if let cvUrl = user.cvUrl, !cvUrl.isEmpty {
+                            cvFileSection(cvUrl: cvUrl)
+                                .padding(.horizontal, 20)
+                        }
+
                         // MARK: - Portfolio Section (Read-only for recruiters)
                         if !viewModel.portfolio.isEmpty {
                             portfolioSectionView
@@ -187,6 +193,46 @@ struct TalentProfileByIDView: View {
             showAddButton: false,
             onAddProject: nil
         )
+    }
+    
+    // MARK: - CV File Section
+    private func cvFileSection(cvUrl: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("CV File")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(AppTheme.Colors.textPrimary)
+            
+            HStack {
+                HStack(spacing: 12) {
+                    Image(systemName: "doc.text.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(AppTheme.Colors.textPrimary)
+                    
+                    Text(extractFileName(from: cvUrl))
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AppTheme.Colors.textSecondary)
+                        .lineLimit(1)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "eye.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(AppTheme.Colors.textSecondary)
+            }
+            .padding()
+            .background(AppTheme.Colors.cardBackground)
+            .cornerRadius(12)
+            .onTapGesture {
+                if let url = URL(string: cvUrl.starts(with: "http") ? cvUrl : Endpoints.baseURL + cvUrl) {
+                    UIApplication.shared.open(url)
+                }
+            }
+        }
+    }
+    
+    private func extractFileName(from url: String) -> String {
+        return URL(string: url)?.lastPathComponent ?? "CV.pdf"
     }
 }
 

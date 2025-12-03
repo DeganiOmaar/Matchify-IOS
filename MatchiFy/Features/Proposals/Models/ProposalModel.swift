@@ -36,6 +36,7 @@ struct ProposalModel: Codable, Identifiable, Hashable {
     let createdAt: String?
     let updatedAt: String?
     let aiScore: Int? // AI compatibility score (0-100)
+    let rejectionReason: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -56,6 +57,7 @@ struct ProposalModel: Codable, Identifiable, Hashable {
         case createdAt
         case updatedAt
         case aiScore
+        case rejectionReason
     }
     
     // Helper to get talent full name from either direct field or nested object

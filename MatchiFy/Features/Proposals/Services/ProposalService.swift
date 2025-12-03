@@ -53,10 +53,10 @@ final class ProposalService {
         )
     }
     
-    func updateStatus(id: String, status: ProposalStatus) async throws -> ProposalModel {
+    func updateStatus(id: String, status: ProposalStatus, rejectionReason: String? = nil) async throws -> ProposalModel {
         try await ApiClient.shared.patch(
             url: Endpoints.proposalStatus(id: id),
-            body: UpdateProposalStatusRequest(status: status),
+            body: UpdateProposalStatusRequest(status: status, rejectionReason: rejectionReason),
             requiresAuth: true
         )
     }

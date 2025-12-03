@@ -63,11 +63,11 @@ final class ProposalDetailsViewModel: ObservableObject {
         updateStatus(.accepted)
     }
     
-    func refuseProposal() {
-        updateStatus(.refused)
+    func refuseProposal(reason: String) {
+        updateStatus(.refused, rejectionReason: reason)
     }
     
-    private func updateStatus(_ status: ProposalStatus) {
+    private func updateStatus(_ status: ProposalStatus, rejectionReason: String? = nil) {
         guard !isUpdatingStatus, let proposal = proposal else { return }
         isUpdatingStatus = true
         errorMessage = nil
@@ -75,7 +75,7 @@ final class ProposalDetailsViewModel: ObservableObject {
         Task { [weak self] in
             guard let self else { return }
             do {
-                let updated = try await service.updateStatus(id: proposal.proposalId, status: status)
+                let updated = try await service.updateStatus(id: proposal.proposalId, status: status, rejectionReason: rejectionReason)
                 await MainActor.run {
                     self.proposal = updated
                     self.isUpdatingStatus = false

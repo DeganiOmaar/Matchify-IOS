@@ -5,6 +5,8 @@ struct ProposalDetailsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showTalentProfile = false
     @State private var showConversation = false
+    @State private var showRejectAlert = false
+    @State private var rejectionReason = ""
     
     init(viewModel: ProposalDetailsViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -28,6 +30,10 @@ struct ProposalDetailsView: View {
                         dateSection
                         statusSection
                             .padding(.bottom, 8)
+                        
+                        if let reason = viewModel.proposal?.rejectionReason, !reason.isEmpty, viewModel.proposal?.status == .refused {
+                            rejectionReasonSection(reason: reason)
+                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
@@ -76,6 +82,20 @@ struct ProposalDetailsView: View {
                     )
                 )
             }
+        }
+        .alert("Reject Proposal", isPresented: $showRejectAlert) {
+            TextField("Rejection Reason", text: $rejectionReason)
+            Button("Cancel", role: .cancel) {
+                rejectionReason = ""
+            }
+            Button("Reject", role: .destructive) {
+                if !rejectionReason.isEmpty {
+                    viewModel.refuseProposal(reason: rejectionReason)
+                    rejectionReason = ""
+                }
+            }
+        } message: {
+            Text("Please provide a reason for rejecting this proposal.")
         }
     }
     
@@ -194,6 +214,20 @@ struct ProposalDetailsView: View {
         }
     }
     
+    // MARK: - Rejection Reason Section
+    private func rejectionReasonSection(reason: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Rejection Reason")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(AppTheme.Colors.textSecondary)
+            
+            Text(reason)
+                .font(.system(size: 16))
+                .foregroundColor(.red)
+                .lineSpacing(4)
+        }
+    }
+    
     // MARK: - Status Section
     private var statusSection: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -241,7 +275,7 @@ struct ProposalDetailsView: View {
     private var acceptRefuseButtons: some View {
         HStack(spacing: 12) {
             Button {
-                viewModel.refuseProposal()
+                showRejectAlert = true
             } label: {
                 Text("Refuse")
                     .font(.system(size: 17, weight: .semibold))
@@ -325,4 +359,3 @@ struct ProposalDetailsView: View {
             )
     }
 }
-
