@@ -4,17 +4,7 @@
 
 MatchiFy is a professional talent-recruitment platform that connects talented individuals with recruiters through intelligent matching and streamlined contract management. The iOS application is built using SwiftUI and follows the MVVM architecture pattern, providing a modern, responsive user experience for both talent seekers and recruiters.
 
-## Table of Contents
 
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Application Flow](#application-flow)
-- [Core Features](#core-features)
-- [Technical Stack](#technical-stack)
-- [Setup and Installation](#setup-and-installation)
-- [Configuration](#configuration)
-- [User Roles](#user-roles)
-- [API Integration](#api-integration)
 
 ## Architecture
 
@@ -26,42 +16,7 @@ The application follows the MVVM (Model-View-ViewModel) architectural pattern wi
 - **Services**: Network communication and data persistence
 - **Core**: Shared utilities, extensions, and theme management
 
-## Project Structure
 
-```
-MatchiFy/
-├── Assets.xcassets/          # Images, colors, and asset catalogs
-├── Core/                     # Shared components and utilities
-│   ├── Components/           # Reusable UI components
-│   ├── Extensions/           # Swift extensions
-│   ├── Theme/                # Theme management and styling
-│   └── FlowLayout.swift      # Custom layout implementations
-├── Features/                 # Feature modules
-│   ├── Alerts/               # Notification alerts system
-│   ├── Auth/                 # Authentication flows
-│   ├── Contracts/            # Contract management
-│   ├── Conversations/        # Messaging system
-│   ├── Favorites/            # Favorite missions
-│   ├── Missions/             # Mission browsing and management
-│   ├── Onboarding/           # First-time user experience
-│   ├── Portfolio/            # Talent portfolio showcase
-│   ├── Profile/              # User profile management
-│   ├── Proposals/            # Proposal submission and review
-│   ├── Settings/             # Application settings
-│   ├── Skills/               # Skills management
-│   ├── Stats/                # Analytics and statistics
-│   └── Theme/                # Theme customization
-├── Screens/                  # Main screen containers
-│   ├── App/                  # App entry point
-│   ├── Home/                 # Home screen
-│   └── MainTabView.swift     # Tab bar navigation
-└── Services/                 # Backend integration
-    ├── Auth/                 # Authentication services
-    ├── Network/              # API client and networking
-    └── Profile/              # Profile data services
-```
-
-## Application Flow
 
 ### 1. Onboarding Flow
 
@@ -548,7 +503,6 @@ The main interface uses a bottom tab bar with four primary sections:
    - Profile
    - Settings
    - Theme
-   - Chat Bot (future feature)
 
 3. **Navigation**:
    - Swipe from left edge to open
@@ -688,18 +642,7 @@ This project uses native iOS frameworks and does not require external package ma
 
 ## Configuration
 
-### API Endpoints
 
-The application connects to a backend API. Configure the base URL in:
-
-**File**: `Services/Network/Endpoints.swift`
-
-```swift
-struct Endpoints {
-    static let baseURL = "YOUR_API_BASE_URL"
-    // Additional endpoint configurations
-}
-```
 
 ### Environment Setup
 
@@ -749,89 +692,6 @@ struct Endpoints {
 - Cannot create portfolio
 - Cannot access talent-specific features
 
-## API Integration
-
-### Authentication Endpoints
-
-- `POST /auth/signup/talent`: Talent registration
-- `POST /auth/signup/recruiter`: Recruiter registration
-- `POST /auth/login`: User login
-- `POST /auth/verify`: Email verification
-- `POST /auth/forgot-password`: Password recovery
-- `POST /auth/reset-password`: Password reset
-- `GET /auth/me`: Get current user
-
-### Mission Endpoints
-
-- `GET /missions`: List all missions
-- `GET /missions/:id`: Get mission details
-- `POST /missions`: Create mission (Recruiter)
-- `PUT /missions/:id`: Update mission (Recruiter)
-- `DELETE /missions/:id`: Delete mission (Recruiter)
-- `GET /missions/best-matches`: AI-recommended missions (Talent)
-- `POST /missions/:id/favorite`: Toggle favorite
-
-### Proposal Endpoints
-
-- `GET /proposals`: List proposals
-- `GET /proposals/:id`: Get proposal details
-- `POST /proposals`: Create proposal (Talent)
-- `PUT /proposals/:id/status`: Update proposal status (Recruiter)
-- `DELETE /proposals/:id`: Delete proposal
-- `POST /proposals/:id/archive`: Archive proposal
-- `GET /proposals/ai-rank`: AI-ranked proposals (Recruiter)
-
-### Contract Endpoints
-
-- `GET /contracts`: List contracts
-- `GET /contracts/:id`: Get contract details
-- `POST /contracts`: Create contract (Recruiter)
-- `PUT /contracts/:id/sign`: Sign contract (Talent)
-- `PUT /contracts/:id/decline`: Decline contract (Talent)
-
-### Conversation Endpoints
-
-- `GET /conversations`: List conversations
-- `GET /conversations/:id`: Get conversation details
-- `GET /conversations/:id/messages`: Get messages
-- `POST /conversations/:id/messages`: Send message
-- `PUT /conversations/:id/read`: Mark as read
-
-### Profile Endpoints
-
-- `GET /profile`: Get user profile
-- `PUT /profile`: Update profile
-- `POST /profile/upload-image`: Upload profile picture
-- `POST /profile/upload-cv`: Upload CV (Talent)
-- `GET /profile/ai-insights`: Get AI profile insights (Talent)
-
-### Portfolio Endpoints
-
-- `GET /portfolio`: List projects
-- `GET /portfolio/:id`: Get project details
-- `POST /portfolio`: Create project
-- `PUT /portfolio/:id`: Update project
-- `DELETE /portfolio/:id`: Delete project
-- `POST /portfolio/:id/media`: Upload project media
-
-### Alert Endpoints
-
-- `GET /alerts`: List alerts
-- `PUT /alerts/:id/read`: Mark alert as read
-
-### Stats Endpoints
-
-- `GET /stats`: Get user statistics
-
-## Error Handling
-
-The application implements comprehensive error handling:
-
-- **Network Errors**: Connection failures, timeouts
-- **API Errors**: 4xx and 5xx status codes
-- **Validation Errors**: Form validation and data integrity
-- **Authentication Errors**: Token expiration, invalid credentials
-- **User-Friendly Messages**: Localized error descriptions
 
 ## Security
 
@@ -849,41 +709,8 @@ The application implements comprehensive error handling:
 - **Background Tasks**: Async operations for smooth UI
 - **Memory Management**: Proper resource cleanup
 
-## Testing
-
-The project includes:
-
-- **Unit Tests**: MatchiFyTests target
-- **UI Tests**: MatchiFyUITests target
-
-Run tests using:
-- Cmd+U in Xcode
-- Product > Test menu
-
-## Future Enhancements
-
-- Push notifications
-- Chat bot integration
-- Advanced analytics
-- Video calls
-- Payment integration
-- Multi-language support
-- Accessibility improvements
 
 ## Support
 
 For issues, questions, or contributions, please contact the development team or create an issue in the project repository.
 
-## License
-
-[Specify your license here]
-
-## Version History
-
-- **1.0.0**: Initial release with core features
-  - Authentication and authorization
-  - Mission and proposal management
-  - Contract creation and signing
-  - Messaging system
-  - Portfolio showcase
-  - AI-powered matching
