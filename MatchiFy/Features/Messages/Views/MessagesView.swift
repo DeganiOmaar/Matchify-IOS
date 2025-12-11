@@ -7,6 +7,11 @@ struct MessagesView: View {
     @State private var showConversation: Bool = false
     @State private var searchText: String = ""
     @State private var showFilterMenu: Bool = false
+    @State private var showProfileDrawer = false
+    @State private var showStats = false
+    @State private var showProfile = false
+    @State private var showSettings = false
+    @State private var showTheme = false
     
     var body: some View {
         NavigationStack {
@@ -15,10 +20,15 @@ struct MessagesView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // MARK: - Top Section
-                    topSection
-                        .padding(.horizontal, 20)
-                        .padding(.top, 8)
+                    // MARK: - AppBar
+                    CustomAppBar(
+                        title: "Messages",
+                        profileImageURL: auth.user?.profileImageURL,
+                        onProfileTap: {
+                            showProfileDrawer = true
+                        }
+                    )
+                        .padding(.bottom, 4)
                     
                     // MARK: - Search Bar with Filter
                     searchBarSection
@@ -31,6 +41,13 @@ struct MessagesView: View {
                     } else {
                         conversationsList
                     }
+                }
+                
+                // MARK: - Left Side Drawer
+                if showProfileDrawer {
+                    leftDrawer
+                        .transition(.move(edge: .leading))
+                        .zIndex(1000)
                 }
                 
                 // MARK: - Overlay to close filter menu when tapping outside
@@ -77,52 +94,71 @@ struct MessagesView: View {
                 // Reload conversations when a proposal is accepted
                 viewModel.loadConversations()
             }
-        }
-    }
-    
-    // MARK: - Top Section
-    private var topSection: some View {
-        HStack(alignment: .center, spacing: 10) {
-            // Profile Image
-            profileImageView
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
-            
-            // Title
-            Text("Messages")
-                .font(.system(size: 34, weight: .bold))
-                .foregroundColor(AppTheme.Colors.textPrimary)
-            
-            Spacer()
-        }
-    }
-    
-    // MARK: - Profile Image View
-    private var profileImageView: some View {
-        Group {
-            if let profileImage = auth.user?.profileImage,
-               !profileImage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-               let url = auth.user?.profileImageURL {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let img):
-                        img
-                            .resizable()
-                            .scaledToFill()
-                    case .failure, .empty:
-                        Image("avatar")
-                            .resizable()
-                            .scaledToFill()
-                    @unknown default:
-                        Image("avatar")
-                            .resizable()
-                            .scaledToFill()
-                    }
+            .navigationDestination(isPresented: $showStats) {
+                StatsView()
+            }
+            .navigationDestination(isPresented: $showProfile) {
+                if AuthManager.shared.role == "recruiter" {
+                    RecruiterProfileView()
+                } else {
+                    TalentProfileView()
                 }
-            } else {
-                Image("avatar")
-                    .resizable()
-                    .scaledToFill()
+            }
+            .navigationDestination(isPresented: $showSettings) {
+                SettingsView()
+            }
+            .sheet(isPresented: $showTheme) {
+                ThemeView()
+                    .environmentObject(ThemeManager.shared)
+            }
+            .animation(.easeInOut(duration: 0.3), value: showProfileDrawer)
+        }
+    }
+    
+    // MARK: - Left Side Drawer
+    private var leftDrawer: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Background overlay
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showProfileDrawer = false
+                        }
+                    }
+                
+                // Drawer content sliding from left
+                ProfileDrawerView(
+                    onItemSelected: { itemType in
+                        // Close drawer first
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showProfileDrawer = false
+                        }
+                        
+                        // Navigate after a short delay for better UX
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            switch itemType {
+                            case .myStats:
+                                showStats = true
+                            case .profile:
+                                showProfile = true
+                            case .settings:
+                                showSettings = true
+                            case .theme:
+                                showTheme = true
+                            case .chatBot:
+                                // TODO: Implement chatbot later
+                                break
+                            }
+                        }
+                    }
+                )
+                .frame(width: geometry.size.width * 0.75)
+                .frame(maxHeight: .infinity, alignment: .leading)
+                .background(AppTheme.Colors.groupedBackground)
+                .cornerRadius(20, corners: [.topRight, .bottomRight])
+                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 5, y: 0)
             }
         }
     }

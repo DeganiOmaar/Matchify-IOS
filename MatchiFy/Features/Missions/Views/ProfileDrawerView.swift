@@ -2,15 +2,10 @@ import SwiftUI
 
 /// Left-side drawer view avec section utilisateur et menu items
 struct ProfileDrawerView: View {
-    @ObservedObject var viewModel: MissionListViewModel
     @StateObject private var drawerViewModel = DrawerViewModel()
     let onItemSelected: (DrawerMenuItem.MenuItemType) -> Void
     
-    init(
-        viewModel: MissionListViewModel,
-        onItemSelected: @escaping (DrawerMenuItem.MenuItemType) -> Void
-    ) {
-        self.viewModel = viewModel
+    init(onItemSelected: @escaping (DrawerMenuItem.MenuItemType) -> Void) {
         self.onItemSelected = onItemSelected
     }
     

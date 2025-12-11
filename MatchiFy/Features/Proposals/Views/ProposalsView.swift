@@ -3,10 +3,28 @@ import SwiftUI
 struct ProposalsView: View {
     @StateObject private var viewModel = ProposalsViewModel()
     @State private var selectedProposal: ProposalModel? = nil
+    @State private var showProfileDrawer = false
+    @State private var showStats = false
+    @State private var showProfile = false
+    @State private var showSettings = false
+    @State private var showTheme = false
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            ZStack {
+                AppTheme.Colors.groupedBackground
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // MARK: - AppBar
+                    CustomAppBar(
+                        title: "Proposals",
+                        profileImageURL: AuthManager.shared.user?.profileImageURL,
+                        onProfileTap: {
+                            showProfileDrawer = true
+                        }
+                    )
+                
                 // Mission Selector (Recruiter only)
                 if viewModel.isRecruiter {
                     recruiterMissionSelector
@@ -125,10 +143,17 @@ struct ProposalsView: View {
                         .listStyle(.plain)
                         .scrollContentBackground(.hidden)
                     }
+                    }
+                }
+                
+                // MARK: - Left Side Drawer
+                if showProfileDrawer {
+                    leftDrawer
+                        .transition(.move(edge: .leading))
+                        .zIndex(1000)
                 }
             }
-            .background(AppTheme.Colors.groupedBackground.ignoresSafeArea())
-            .navigationTitle("Proposals")
+            .navigationBarHidden(true)
             .navigationDestination(item: $selectedProposal) { proposal in
                 ProposalDetailsView(
                     viewModel: ProposalDetailsViewModel(
@@ -137,12 +162,78 @@ struct ProposalsView: View {
                     )
                 )
             }
+            .navigationDestination(isPresented: $showStats) {
+                StatsView()
+            }
+            .navigationDestination(isPresented: $showProfile) {
+                if viewModel.isRecruiter {
+                    RecruiterProfileView()
+                } else {
+                    TalentProfileView()
+                }
+            }
+            .navigationDestination(isPresented: $showSettings) {
+                SettingsView()
+            }
+            .sheet(isPresented: $showTheme) {
+                ThemeView()
+                    .environmentObject(ThemeManager.shared)
+            }
             .onAppear {
                 if viewModel.isRecruiter {
                     viewModel.loadMissions()
                 } else {
                     viewModel.loadProposals()
                 }
+            }
+            .animation(.easeInOut(duration: 0.3), value: showProfileDrawer)
+        }
+    }
+    
+    // MARK: - Left Side Drawer
+    private var leftDrawer: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Background overlay
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showProfileDrawer = false
+                        }
+                    }
+                
+                // Drawer content sliding from left
+                ProfileDrawerView(
+                    onItemSelected: { itemType in
+                        // Close drawer first
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showProfileDrawer = false
+                        }
+                        
+                        // Navigate after a short delay for better UX
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            switch itemType {
+                            case .myStats:
+                                showStats = true
+                            case .profile:
+                                showProfile = true
+                            case .settings:
+                                showSettings = true
+                            case .theme:
+                                showTheme = true
+                            case .chatBot:
+                                // TODO: Implement chatbot later
+                                break
+                            }
+                        }
+                    }
+                )
+                .frame(width: geometry.size.width * 0.75)
+                .frame(maxHeight: .infinity, alignment: .leading)
+                .background(AppTheme.Colors.groupedBackground)
+                .cornerRadius(20, corners: [.topRight, .bottomRight])
+                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 5, y: 0)
             }
         }
     }

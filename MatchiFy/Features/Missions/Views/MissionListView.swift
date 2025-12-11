@@ -47,10 +47,25 @@ struct MissionListView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // MARK: - Profile Image Header (Left Aligned)
-                    profileImageHeader
-                        .padding(.top, 8)
-                        .padding(.horizontal, 20)
+                    // MARK: - AppBar
+                    CustomAppBar(
+                        title: "Missions",
+                        profileImageURL: auth.user?.profileImageURL,
+                        onProfileTap: {
+                            vm.showProfileDrawer = true
+                        },
+                        rightButton: isRecruiter ? {
+                            AnyView(
+                                Button {
+                                    showAddMission = true
+                                } label: {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundColor(AppTheme.Colors.primary)
+                                }
+                            )
+                        } : nil
+                    )
                     
                     // MARK: - Search Bar
                     searchBar
@@ -161,99 +176,48 @@ struct MissionListView: View {
     
     // MARK: - Left Side Drawer
     private var leftDrawer: some View {
-        ZStack(alignment: .leading) {
-            // Background overlay
-            Color.black.opacity(0.3)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        vm.showProfileDrawer = false
-                    }
-                }
-            
-            // Drawer content sliding from left
-            ProfileDrawerView(
-                viewModel: vm,
-                onItemSelected: { itemType in
-                    // Fermer le drawer d'abord
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        vm.showProfileDrawer = false
-                    }
-                    
-                    // Naviguer après un court délai pour une meilleure UX
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        switch itemType {
-                        case .myStats:
-                            showStats = true
-                        case .profile:
-                            showProfile = true
-                        case .settings:
-                            showSettings = true
-                        case .theme:
-                            showTheme = true
-                        case .chatBot:
-                            // TODO: Implémenter les autres actions plus tard
-                            break
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Background overlay
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            vm.showProfileDrawer = false
                         }
                     }
-                }
-            )
-            .frame(width: UIScreen.main.bounds.width * 0.75)
-            .frame(maxHeight: .infinity, alignment: .leading)
-            .background(AppTheme.Colors.groupedBackground)
-            .cornerRadius(20, corners: [.topRight, .bottomRight])
-            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 5, y: 0)
-        }
-    }
-    
-    // MARK: - Profile Image Header (Left Aligned)
-    private var profileImageHeader: some View {
-        HStack {
-            Button {
-                vm.showProfileDrawer = true
-            } label: {
-                Group {
-                    if let profileImage = auth.user?.profileImage,
-                       !profileImage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-                       let url = auth.user?.profileImageURL {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .success(let img):
-                                img
-                                    .resizable()
-                                    .scaledToFill()
-                            case .failure, .empty:
-                                Image("avatar")
-                                    .resizable()
-                                    .scaledToFill()
-                            @unknown default:
-                                Image("avatar")
-                                    .resizable()
-                                    .scaledToFill()
+                
+                // Drawer content sliding from left
+                ProfileDrawerView(
+                    onItemSelected: { itemType in
+                        // Fermer le drawer d'abord
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            vm.showProfileDrawer = false
+                        }
+                        
+                        // Naviguer après un court délai pour une meilleure UX
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            switch itemType {
+                            case .myStats:
+                                showStats = true
+                            case .profile:
+                                showProfile = true
+                            case .settings:
+                                showSettings = true
+                            case .theme:
+                                showTheme = true
+                            case .chatBot:
+                                // TODO: Implémenter les autres actions plus tard
+                                break
                             }
                         }
-                    } else {
-                        Image("avatar")
-                            .resizable()
-                            .scaledToFill()
                     }
-                }
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            Spacer()
-            
-            // Add Mission button for Recruiters
-            if isRecruiter {
-                Button {
-                    showAddMission = true
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(AppTheme.Colors.primary)
-                }
+                )
+                .frame(width: geometry.size.width * 0.75)
+                .frame(maxHeight: .infinity, alignment: .leading)
+                .background(AppTheme.Colors.groupedBackground)
+                .cornerRadius(20, corners: [.topRight, .bottomRight])
+                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 5, y: 0)
             }
         }
     }

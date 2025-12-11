@@ -5,50 +5,74 @@ struct AlertsView: View {
     @State private var selectedAlert: AlertModel? = nil
     @State private var showProposalDetails = false
     @State private var proposalId: String? = nil
+    @State private var showProfileDrawer = false
+    @State private var showStats = false
+    @State private var showProfile = false
+    @State private var showSettings = false
+    @State private var showTheme = false
     
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading && viewModel.alerts.isEmpty {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if viewModel.alerts.isEmpty {
-                    emptyState
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(viewModel.alerts) { alert in
-                                AlertRowView(alert: alert)
-                                    .padding(.horizontal, 20)
-                                    .onTapGesture {
-                                        handleAlertTap(alert)
+            ZStack {
+                AppTheme.Colors.groupedBackground
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // MARK: - AppBar
+                    CustomAppBar(
+                        title: "Alerts",
+                        profileImageURL: AuthManager.shared.user?.profileImageURL,
+                        onProfileTap: {
+                            showProfileDrawer = true
+                        },
+                        rightButton: (!viewModel.alerts.isEmpty && viewModel.unreadCount > 0) ? {
+                            AnyView(
+                                Button {
+                                    viewModel.markAllAsRead()
+                                } label: {
+                                    Text("Mark All")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(AppTheme.Colors.primary)
+                                }
+                            )
+                        } : nil
+                    )
+                    
+                    Group {
+                        if viewModel.isLoading && viewModel.alerts.isEmpty {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        } else if viewModel.alerts.isEmpty {
+                            emptyState
+                        } else {
+                            ScrollView {
+                                LazyVStack(spacing: 12) {
+                                    ForEach(viewModel.alerts) { alert in
+                                        AlertRowView(alert: alert)
+                                            .padding(.horizontal, 20)
+                                            .onTapGesture {
+                                                handleAlertTap(alert)
+                                            }
                                     }
+                                }
+                                .padding(.vertical, 20)
+                            }
+                            .refreshable {
+                                await viewModel.loadAlerts()
                             }
                         }
-                        .padding(.vertical, 20)
-                    }
-                    .refreshable {
-                        await viewModel.loadAlerts()
                     }
                 }
-            }
-            .background(AppTheme.Colors.groupedBackground.ignoresSafeArea())
-            .navigationTitle("Alerts")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                if !viewModel.alerts.isEmpty && viewModel.unreadCount > 0 {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            viewModel.markAllAsRead()
-                        } label: {
-                            Text("Mark All Read")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(AppTheme.Colors.primary)
-                        }
-                    }
+                
+                // MARK: - Left Side Drawer
+                if showProfileDrawer {
+                    leftDrawer
+                        .transition(.move(edge: .leading))
+                        .zIndex(1000)
                 }
             }
+            .navigationBarHidden(true)
             .navigationDestination(isPresented: $showProposalDetails) {
                 if let proposalId = proposalId {
                     ProposalDetailsView(
@@ -56,8 +80,74 @@ struct AlertsView: View {
                     )
                 }
             }
+            .navigationDestination(isPresented: $showStats) {
+                StatsView()
+            }
+            .navigationDestination(isPresented: $showProfile) {
+                if AuthManager.shared.role == "recruiter" {
+                    RecruiterProfileView()
+                } else {
+                    TalentProfileView()
+                }
+            }
+            .navigationDestination(isPresented: $showSettings) {
+                SettingsView()
+            }
+            .sheet(isPresented: $showTheme) {
+                ThemeView()
+                    .environmentObject(ThemeManager.shared)
+            }
             .task {
                 await viewModel.loadAlerts()
+            }
+            .animation(.easeInOut(duration: 0.3), value: showProfileDrawer)
+        }
+    }
+    
+    // MARK: - Left Side Drawer
+    private var leftDrawer: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Background overlay
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showProfileDrawer = false
+                        }
+                    }
+                
+                // Drawer content sliding from left
+                ProfileDrawerView(
+                    onItemSelected: { itemType in
+                        // Close drawer first
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showProfileDrawer = false
+                        }
+                        
+                        // Navigate after a short delay for better UX
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            switch itemType {
+                            case .myStats:
+                                showStats = true
+                            case .profile:
+                                showProfile = true
+                            case .settings:
+                                showSettings = true
+                            case .theme:
+                                showTheme = true
+                            case .chatBot:
+                                // TODO: Implement chatbot later
+                                break
+                            }
+                        }
+                    }
+                )
+                .frame(width: geometry.size.width * 0.75)
+                .frame(maxHeight: .infinity, alignment: .leading)
+                .background(AppTheme.Colors.groupedBackground)
+                .cornerRadius(20, corners: [.topRight, .bottomRight])
+                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 5, y: 0)
             }
         }
     }
