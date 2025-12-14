@@ -147,4 +147,8 @@ struct Endpoints {
         }
         return url + params.joined(separator: "&")
     }
+    
+    static func offerReviews(id: String) -> String {
+        return apiBase + "/offers/\(id)/reviews"
+    }
 }

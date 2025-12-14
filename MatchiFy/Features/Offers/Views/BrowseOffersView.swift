@@ -26,7 +26,7 @@ struct BrowseOffersView: View {
                     offersGrid
                 }
             }
-            .background(AppTheme.Colors.background)
+            .background(Color.black)
             .navigationTitle("Browse Offers")
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
@@ -89,7 +89,7 @@ struct BrowseOffersView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(AppTheme.Colors.background)
+        .background(Color.black)
     }
     
     private var activeFiltersBar: some View {
@@ -120,7 +120,7 @@ struct BrowseOffersView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
         }
-        .background(AppTheme.Colors.groupedBackground)
+        .background(Color.black)
     }
     
     private var offersGrid: some View {

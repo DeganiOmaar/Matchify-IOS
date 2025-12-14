@@ -36,7 +36,7 @@ struct CreateOfferView: View {
                     LoadingOverlay()
                 }
             }
-            .background(AppTheme.Colors.background)
+            .background(Color.black)
             .navigationTitle("Create Offer")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

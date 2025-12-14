@@ -16,6 +16,7 @@ struct OfferModel: Codable, Identifiable, Hashable {
     let dateOfPosting: String?
     let createdAt: String?
     let updatedAt: String?
+    let reviews: [ReviewModel]?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -33,6 +34,7 @@ struct OfferModel: Codable, Identifiable, Hashable {
         case dateOfPosting
         case createdAt
         case updatedAt
+        case reviews
     }
     
     /// Get the offer ID (handles both id and _id)
@@ -78,10 +80,24 @@ struct OfferModel: Codable, Identifiable, Hashable {
         capabilities ?? []
     }
     
+    /// Reviews array (never nil)
+    var reviewsList: [ReviewModel] {
+        reviews ?? []
+    }
+    
     /// Has introduction video
     var hasVideo: Bool {
         introductionVideo != nil && !(introductionVideo?.isEmpty ?? true)
     }
+}
+
+struct ReviewModel: Codable, Hashable, Identifiable {
+    var id: String { recruiterId + (createdAt ?? "") }
+    let recruiterId: String
+    let recruiterName: String
+    let rating: Int
+    let message: String
+    let createdAt: String?
 }
 
 enum OfferCategory: String, CaseIterable, Codable {

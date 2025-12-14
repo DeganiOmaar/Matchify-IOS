@@ -77,7 +77,7 @@ struct EditOfferView: View {
                 }
                 .padding(20)
             }
-            .background(AppTheme.Colors.background)
+            .background(Color.black)
             .navigationTitle("Edit Offer")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

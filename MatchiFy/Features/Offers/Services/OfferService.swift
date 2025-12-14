@@ -176,4 +176,19 @@ final class OfferService {
             requiresAuth: true
         )
     }
+    // MARK: - Add Review
+    func addReview(offerId: String, rating: Int, message: String) async throws -> OfferModel {
+        struct AddReviewRequest: Codable {
+            let rating: Int
+            let message: String
+        }
+        
+        let body = AddReviewRequest(rating: rating, message: message)
+        
+        return try await ApiClient.shared.post(
+            url: Endpoints.offerReviews(id: offerId),
+            body: body,
+            requiresAuth: true
+        )
+    }
 }
