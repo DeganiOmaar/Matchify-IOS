@@ -15,6 +15,10 @@ struct MissionListView: View {
     @State private var missionDetailsSelection: MissionModel? = nil
     @State private var showMissionProposals: Bool = false
     @State private var selectedMissionForProposals: MissionModel? = nil
+    @State private var showCreateOffer = false
+    @State private var showBrowseOffers = false
+    @State private var showCreateMission = false
+    @State private var showMyOffers = false
     
     private var isRecruiter: Bool {
         auth.role == "recruiter"
@@ -158,6 +162,18 @@ struct MissionListView: View {
                     )
                 }
             }
+            .sheet(isPresented: $showCreateOffer) {
+                CategorySelectionView()
+            }
+            .sheet(isPresented: $showBrowseOffers) {
+                BrowseOffersView()
+            }
+            .sheet(isPresented: $showCreateMission) {
+                MissionAddView(onMissionCreated: {})
+            }
+            .sheet(isPresented: $showMyOffers) {
+                MyOffersView()
+            }
             .alert("Delete Mission", isPresented: $showDeleteAlert) {
                 Button("Cancel", role: .cancel) {
                     missionToDelete = nil
@@ -209,6 +225,14 @@ struct MissionListView: View {
                             case .chatBot:
                                 // TODO: Implémenter les autres actions plus tard
                                 break
+                            case .createOffer:
+                                showCreateOffer = true
+                            case .myOffers:
+                                showMyOffers = true
+                            case .browseOffers:
+                                showBrowseOffers = true
+                            case .createMission:
+                                showCreateMission = true
                             }
                         }
                     }

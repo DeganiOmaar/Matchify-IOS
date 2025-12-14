@@ -130,4 +130,21 @@ struct Endpoints {
         return apiBase + "/ai/mission-fit/\(missionId)"
     }
     static let aiProposalGenerate = apiBase + "/ai/proposals/generate"
+    
+    // Offers endpoints
+    static let offers = apiBase + "/offers"
+    static func offer(id: String) -> String {
+        return apiBase + "/offers/\(id)"
+    }
+    static func offersFiltered(category: String? = nil, search: String? = nil) -> String {
+        var url = apiBase + "/offers?"
+        var params: [String] = []
+        if let category = category {
+            params.append("category=\(category.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
+        }
+        if let search = search {
+            params.append("search=\(search.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")
+        }
+        return url + params.joined(separator: "&")
+    }
 }

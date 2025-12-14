@@ -12,6 +12,10 @@ struct MessagesView: View {
     @State private var showProfile = false
     @State private var showSettings = false
     @State private var showTheme = false
+    @State private var showCreateOffer = false
+    @State private var showBrowseOffers = false
+    @State private var showCreateMission = false
+    @State private var showMyOffers = false
     
     var body: some View {
         NavigationStack {
@@ -111,6 +115,18 @@ struct MessagesView: View {
                 ThemeView()
                     .environmentObject(ThemeManager.shared)
             }
+            .sheet(isPresented: $showCreateOffer) {
+                CategorySelectionView()
+            }
+            .sheet(isPresented: $showBrowseOffers) {
+                BrowseOffersView()
+            }
+            .sheet(isPresented: $showCreateMission) {
+                MissionAddView(onMissionCreated: {})
+            }
+            .sheet(isPresented: $showMyOffers) {
+                MyOffersView()
+            }
             .animation(.easeInOut(duration: 0.3), value: showProfileDrawer)
         }
     }
@@ -150,6 +166,14 @@ struct MessagesView: View {
                             case .chatBot:
                                 // TODO: Implement chatbot later
                                 break
+                            case .createOffer:
+                                showCreateOffer = true
+                            case .myOffers:
+                                showMyOffers = true
+                            case .browseOffers:
+                                showBrowseOffers = true
+                            case .createMission:
+                                showCreateMission = true
                             }
                         }
                     }
