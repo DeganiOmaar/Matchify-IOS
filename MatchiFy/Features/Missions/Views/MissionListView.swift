@@ -54,8 +54,7 @@ struct MissionListView: View {
                     // MARK: - AppBar
                     CustomAppBar(
                         title: "Missions",
-                        profileImageURL: auth.user?.profileImageURL,
-                        onProfileTap: {
+                        onMenuTap: {
                             vm.showProfileDrawer = true
                         },
                         rightButton: isRecruiter ? {

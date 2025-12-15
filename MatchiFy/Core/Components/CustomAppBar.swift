@@ -2,45 +2,22 @@ import SwiftUI
 
 struct CustomAppBar: View {
     let title: String
-    let profileImageURL: URL?
-    var onProfileTap: (() -> Void)? = nil
+    var onMenuTap: (() -> Void)? = nil
     var rightButton: (() -> AnyView)? = nil
     
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
-            // Profile Image (Left)
+            // Menu Icon (Left)
             Button {
-                onProfileTap?()
+                onMenuTap?()
             } label: {
-                Group {
-                    if let url = profileImageURL {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .success(let img):
-                                img
-                                    .resizable()
-                                    .scaledToFill()
-                            case .failure, .empty:
-                                Image("avatar")
-                                    .resizable()
-                                    .scaledToFill()
-                            @unknown default:
-                                Image("avatar")
-                                    .resizable()
-                                    .scaledToFill()
-                            }
-                        }
-                    } else {
-                        Image("avatar")
-                            .resizable()
-                            .scaledToFill()
-                    }
-                }
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(AppTheme.Colors.textPrimary)
+                    .frame(width: 40, height: 40)
             }
             .buttonStyle(PlainButtonStyle())
-            .disabled(onProfileTap == nil)
+            .disabled(onMenuTap == nil)
             
             // Centered Title
             Spacer()
@@ -70,7 +47,7 @@ struct CustomAppBar: View {
     VStack {
         CustomAppBar(
             title: "Messages",
-            profileImageURL: nil
+            onMenuTap: { print("Menu tapped") }
         )
         Spacer()
     }

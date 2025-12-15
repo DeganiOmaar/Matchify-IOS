@@ -25,8 +25,7 @@ struct AlertsView: View {
                     // MARK: - AppBar
                     CustomAppBar(
                         title: "Alerts",
-                        profileImageURL: AuthManager.shared.user?.profileImageURL,
-                        onProfileTap: {
+                        onMenuTap: {
                             showProfileDrawer = true
                         },
                         rightButton: (!viewModel.alerts.isEmpty && viewModel.unreadCount > 0) ? {

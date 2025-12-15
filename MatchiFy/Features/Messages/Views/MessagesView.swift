@@ -27,8 +27,7 @@ struct MessagesView: View {
                     // MARK: - AppBar
                     CustomAppBar(
                         title: "Messages",
-                        profileImageURL: auth.user?.profileImageURL,
-                        onProfileTap: {
+                        onMenuTap: {
                             showProfileDrawer = true
                         }
                     )

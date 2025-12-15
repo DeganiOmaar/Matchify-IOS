@@ -23,8 +23,7 @@ struct ProposalsView: View {
                     // MARK: - AppBar
                     CustomAppBar(
                         title: "Proposals",
-                        profileImageURL: AuthManager.shared.user?.profileImageURL,
-                        onProfileTap: {
+                        onMenuTap: {
                             showProfileDrawer = true
                         }
                     )
