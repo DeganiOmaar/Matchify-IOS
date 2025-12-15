@@ -7,13 +7,83 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                // MARK: - Account Section
+                // MARK: - Settings Section
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Compte")
+                    Text("Settings")
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(AppTheme.Colors.textPrimary)
                     
-                    Text("Gérez votre session et assurez-vous de sécuriser vos données.")
+                    Text("Manage your preferences and account settings.")
+                        .font(.system(size: 15))
+                        .foregroundColor(AppTheme.Colors.textSecondary)
+                }
+                .padding(.top, 8)
+                
+                // Settings Menu Items
+                VStack(spacing: 0) {
+                    SettingsMenuItem(
+                        icon: "person.fill",
+                        title: "Contact Info",
+                        subtitle: "Manage your contact details",
+                        onClick: { /* TODO: Navigate to Contact Info */ }
+                    )
+                    
+                    SettingsDivider()
+                    
+                    SettingsMenuItem(
+                        icon: "person.3.fill",
+                        title: "My Teams",
+                        subtitle: "Manage your teams",
+                        onClick: { /* TODO: Navigate to My Teams */ }
+                    )
+                    
+                    SettingsDivider()
+                    
+                    SettingsMenuItem(
+                        icon: "lock.fill",
+                        title: "Password & Security",
+                        subtitle: "Secure your account",
+                        onClick: { /* TODO: Navigate to Password & Security */ }
+                    )
+                    
+                    SettingsDivider()
+                    
+                    SettingsMenuItem(
+                        icon: "bell.fill",
+                        title: "Notifications Settings",
+                        subtitle: "Manage your notifications",
+                        onClick: { /* TODO: Navigate to Notifications Settings */ }
+                    )
+                    
+                    SettingsDivider()
+                    
+                    SettingsMenuItem(
+                        icon: "questionmark.circle.fill",
+                        title: "App Support",
+                        subtitle: "Get help",
+                        onClick: { /* TODO: Navigate to App Support */ }
+                    )
+                    
+                    SettingsDivider()
+                    
+                    SettingsMenuItem(
+                        icon: "message.fill",
+                        title: "Feedback",
+                        subtitle: "Share your feedback",
+                        onClick: { /* TODO: Navigate to Feedback */ }
+                    )
+                }
+                .background(AppTheme.Colors.cardBackground)
+                .cornerRadius(20)
+                .shadow(color: AppTheme.Colors.cardShadow, radius: 12, x: 0, y: 6)
+                
+                // MARK: - Account Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Account")
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(AppTheme.Colors.textPrimary)
+                    
+                    Text("Manage your session and ensure your data is secure.")
                         .font(.system(size: 15))
                         .foregroundColor(AppTheme.Colors.textSecondary)
                 }
@@ -83,6 +153,52 @@ struct SettingsView: View {
                 dismiss()
             }
         }
+    }
+}
+
+// MARK: - Helper Components
+struct SettingsMenuItem: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    let onClick: () -> Void
+    
+    var body: some View {
+        Button(action: onClick) {
+            HStack(spacing: 16) {
+                Image(systemName: icon)
+                    .foregroundColor(AppTheme.Colors.primary)
+                    .font(.system(size: 20))
+                    .frame(width: 24, height: 24)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(AppTheme.Colors.textPrimary)
+                    
+                    Text(subtitle)
+                        .font(.system(size: 13))
+                        .foregroundColor(AppTheme.Colors.textSecondary)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .foregroundColor(AppTheme.Colors.textSecondary.opacity(0.6))
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct SettingsDivider: View {
+    var body: some View {
+        Divider()
+            .background(AppTheme.Colors.textSecondary.opacity(0.2))
+            .padding(.horizontal, 16)
     }
 }
 
