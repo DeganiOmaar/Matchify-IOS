@@ -144,7 +144,7 @@ final class TalentProfileService {
         
         // Add skills as JSON array string
         if let skills = skills, !skills.isEmpty {
-            // Ensure all skill names are valid strings
+            // Ensure all skill IDs are valid strings
             let validSkills = skills.compactMap { skill in
                 let trimmed = skill.trimmingCharacters(in: .whitespacesAndNewlines)
                 return trimmed.isEmpty ? nil : trimmed
@@ -154,7 +154,7 @@ final class TalentProfileService {
                 if let skillsJSON = try? JSONEncoder().encode(validSkills),
                    let skillsString = String(data: skillsJSON, encoding: .utf8) {
                     addField("skills", skillsString)
-                    print("📤 Envoi des skills: \(validSkills)")
+                    print("📤 Envoi des skill IDs: \(validSkills)")
                 } else {
                     print("❌ Erreur lors de l'encodage JSON des skills")
                 }

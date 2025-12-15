@@ -58,11 +58,23 @@ final class TalentProfileViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 let skills = try await skillService.getSkillsByIds(skillIds)
-                self.skillNames = skills.map { $0.name }
+                // Filter out skills where the name looks like an ID (24-character hex string)
+                let validSkills = skills.filter { skill in
+                    let name = skill.name
+                    // Check if name is a valid skill name (not an ID)
+                    // MongoDB IDs are 24-character hex strings
+                    let isMongoId = name.count == 24 && name.allSatisfy { $0.isHexDigit }
+                    return !isMongoId
+                }
+                self.skillNames = validSkills.map { $0.name }
+                
+                if validSkills.count < skills.count {
+                    print("⚠️ Filtered out \(skills.count - validSkills.count) skills with invalid names (IDs)")
+                }
             } catch {
-                print("Failed to load skill names: \(error.localizedDescription)")
-                // Fallback: use IDs if loading names fails
-                self.skillNames = skillIds
+                print("❌ Failed to load skill names: \(error.localizedDescription)")
+                // Don't show IDs as fallback - just show empty
+                self.skillNames = []
             }
         }
     }

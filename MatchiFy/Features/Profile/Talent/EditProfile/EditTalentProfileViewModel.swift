@@ -100,14 +100,14 @@ final class EditTalentProfileViewModel: ObservableObject {
 
         Task { @MainActor in
             do {
-                // Send skill names (backend will find or create them and convert to IDs)
+                // Send skill IDs (backend expects skill IDs, not names)
                 let response = try await service.updateTalentProfile(
                     fullName: name,
                     email: email,
                     phone: phone.isEmpty ? nil : phone,
                     location: location.isEmpty ? nil : location,
                     talent: talents.isEmpty ? nil : talents,
-                    skills: skillNames.isEmpty ? nil : skillNames,
+                    skills: skillIds.isEmpty ? nil : skillIds,
                     description: description.isEmpty ? nil : description,
                     profileImage: selectedImage
                 )
