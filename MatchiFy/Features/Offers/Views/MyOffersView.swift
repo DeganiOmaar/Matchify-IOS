@@ -23,7 +23,7 @@ struct MyOffersView: View {
                     offersList
                 }
             }
-            .background(Color.black)
+            .background(AppTheme.Colors.background)
             .navigationTitle("My Offers")
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
