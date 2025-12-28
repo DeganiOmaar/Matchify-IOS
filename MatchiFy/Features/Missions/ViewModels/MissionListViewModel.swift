@@ -74,9 +74,9 @@ final class MissionListViewModel: ObservableObject {
             
             // Enrich best matches with full mission data from missions array
             for (index, bestMatch) in self.bestMatchMissions.enumerated() {
-                if let fullMission = missions.first(where: { $0.missionId == bestMatch.missionId }) {
-                    // Update the mission in missions array to include best match info
-                    // This ensures filteredMissions can access the full data
+                if let _ = missions.first(where: { $0.missionId == bestMatch.missionId }) {
+                    // Could update or merge if needed
+                    _ = index // keep loop usage to avoid warning
                 }
             }
             
@@ -144,6 +144,9 @@ final class MissionListViewModel: ObservableObject {
                             hasApplied: existingMission.hasApplied,
                             isFavorite: true,
                             status: existingMission.status,
+                            paymentStatus: existingMission.paymentStatus,
+                            assignedTalentId: existingMission.assignedTalentId,
+                            completedAt: existingMission.completedAt,
                             createdAt: existingMission.createdAt,
                             updatedAt: existingMission.updatedAt
                         )
@@ -350,6 +353,9 @@ final class MissionListViewModel: ObservableObject {
                     hasApplied: mission.hasApplied,
                     isFavorite: isFavorite,
                     status: mission.status,
+                    paymentStatus: mission.paymentStatus,
+                    assignedTalentId: mission.assignedTalentId,
+                    completedAt: mission.completedAt,
                     createdAt: mission.createdAt,
                     updatedAt: mission.updatedAt
                 )
@@ -379,6 +385,9 @@ final class MissionListViewModel: ObservableObject {
                     hasApplied: existingFavorite.hasApplied,
                     isFavorite: isFavorite,
                     status: existingFavorite.status,
+                    paymentStatus: existingFavorite.paymentStatus,
+                    assignedTalentId: existingFavorite.assignedTalentId,
+                    completedAt: existingFavorite.completedAt,
                     createdAt: existingFavorite.createdAt,
                     updatedAt: existingFavorite.updatedAt
                 )
@@ -465,4 +474,3 @@ final class MissionListViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 }
-

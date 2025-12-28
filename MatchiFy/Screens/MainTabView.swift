@@ -31,13 +31,20 @@ struct MainTabView: View {
                 .badge(badgeViewModel.conversationsWithUnreadCount > 0 ? badgeViewModel.conversationsWithUnreadCount : 0)
                 .tag(2)
             
+            // MARK: - Wallet Tab
+            WalletView()
+                .tabItem {
+                    Label("Wallet", systemImage: "creditcard.fill")
+                }
+                .tag(3)
+            
             // MARK: - Alerts Tab
             AlertsView()
                 .tabItem {
                     Label("Alerts", systemImage: "bell.fill")
                 }
                 .badge(badgeViewModel.alertsUnreadCount > 0 ? badgeViewModel.alertsUnreadCount : 0)
-                .tag(3)
+                .tag(4)
         }
         .accentColor(AppTheme.Colors.primary)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AlertsDidUpdate"))) { _ in

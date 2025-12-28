@@ -184,5 +184,10 @@ final class ProposalDetailsViewModel: ObservableObject {
             }
         }
     }
+    
+    // MARK: - Mission Details for Completion
+    // MARK: - Mission Details for Completion
+    // Removed: Talent now completes mission via Chat
+    
 }
 

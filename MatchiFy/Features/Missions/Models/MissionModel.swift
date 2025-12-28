@@ -16,6 +16,9 @@ struct MissionModel: Codable, Identifiable, Hashable {
     let hasApplied: Bool?
     let isFavorite: Bool?
     let status: String?
+    let paymentStatus: String?
+    let assignedTalentId: String?
+    let completedAt: String?
     let createdAt: String?
     let updatedAt: String?
     
@@ -35,6 +38,9 @@ struct MissionModel: Codable, Identifiable, Hashable {
         case hasApplied
         case isFavorite
         case status
+        case paymentStatus
+        case assignedTalentId
+        case completedAt
         case createdAt
         case updatedAt
     }
@@ -110,13 +116,29 @@ enum MissionStatus: String, Codable {
     case inProgress = "in_progress"
     case started = "started"
     case completed = "completed"
+    case paid = "paid"
     
     var displayName: String {
         switch self {
         case .inProgress: return "En cours"
         case .started: return "Démarrée"
         case .completed: return "Terminée"
+        case .paid: return "Payée"
         }
     }
+}
+
+
+struct ApproveCompletionResponse: Codable {
+    let mission: MissionModel
+    let transaction: TransactionModel?
+}
+
+struct TransactionModel: Codable {
+    let id: String
+    let amount: Int
+    let currency: String
+    let status: String
+    let createdAt: String
 }
 

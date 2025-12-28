@@ -67,6 +67,24 @@ struct CreateContractView: View {
             .sheet(isPresented: $showSignaturePad) {
                 SignaturePadView(image: $signatureImage)
             }
+            .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
+                Button("OK") {
+                    viewModel.errorMessage = nil
+                }
+            } message: {
+                Text(viewModel.errorMessage ?? "")
+            }
+            .overlay {
+                if viewModel.isLoading {
+                    ZStack {
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .tint(.white)
+                    }
+                }
+            }
         }
     }
 }
@@ -101,12 +119,18 @@ final class CreateContractViewModel: ObservableObject {
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withFullDate]
         
+        // Combine scope and budget into content field
+        let content = """
+        Scope: \(scope)
+        
+        Budget: \(budget)
+        """
+        
         let request = CreateContractRequest(
             missionId: missionId,
             talentId: talentId,
             title: title,
-            scope: scope,
-            budget: budget,
+            content: content,
             startDate: dateFormatter.string(from: startDate),
             endDate: dateFormatter.string(from: endDate),
             paymentDetails: paymentDetails,

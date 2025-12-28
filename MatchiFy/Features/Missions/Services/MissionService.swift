@@ -61,5 +61,23 @@ final class MissionService {
             requiresAuth: true
         )
     }
+    
+    // MARK: - Mark as Completed (Talent)
+    func markAsCompleted(id: String) async throws -> MissionResponse {
+        return try await ApiClient.shared.post(
+            url: Endpoints.missionComplete(id: id),
+            body: nil as String?, // No body needed
+            requiresAuth: true
+        )
+    }
+    
+    // MARK: - Approve Completion (Recruiter)
+    func approveCompletion(id: String) async throws -> ApproveCompletionResponse {
+        return try await ApiClient.shared.post(
+            url: Endpoints.missionApproveCompletion(id: id),
+            body: nil as String?, // No body needed
+            requiresAuth: true
+        )
+    }
 }
 

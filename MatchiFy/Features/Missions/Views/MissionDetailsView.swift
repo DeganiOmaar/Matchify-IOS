@@ -6,6 +6,7 @@ struct MissionDetailsView: View {
     @ObservedObject private var auth = AuthManager.shared
     @State private var showCreateProposal = false
     @State private var showMissionFitAnalysis = false
+    @State private var showPaymentFlow = false
     
     init(viewModel: MissionDetailsViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -33,6 +34,8 @@ struct MissionDetailsView: View {
             
             if shouldShowApplyButton {
                 applyButton
+            } else if shouldShowPaymentButton {
+                paymentButton
             }
         }
         .background(AppTheme.Colors.groupedBackground.ignoresSafeArea())
@@ -57,6 +60,11 @@ struct MissionDetailsView: View {
                 MissionFitAnalysisView(missionId: missionId)
             }
         }
+        .sheet(isPresented: $showPaymentFlow) {
+            if let mission = viewModel.mission {
+                MissionPaymentView(mission: mission, userRole: auth.role ?? "talent")
+            }
+        }
         .onAppear {
             viewModel.loadMission()
         }
@@ -75,7 +83,19 @@ struct MissionDetailsView: View {
     }
     
     private var shouldShowApplyButton: Bool {
-        auth.role?.lowercased() == "talent"
+        auth.role?.lowercased() == "talent" && viewModel.mission?.missionStatus == .inProgress
+    }
+    
+    private var shouldShowPaymentButton: Bool {
+        guard let mission = viewModel.mission else { return false }
+        let role = auth.role?.lowercased() ?? ""
+        
+        // Recruiter can approve payment when mission is completed
+        if role == "recruiter" && mission.missionStatus == .completed {
+            return true
+        }
+        
+        return false
     }
     
     private var canApply: Bool {
@@ -243,6 +263,38 @@ struct MissionDetailsView: View {
         )
     }
     
+    private var paymentButton: some View {
+        VStack(spacing: 12) {
+            Button {
+                showPaymentFlow = true
+            } label: {
+                Text(paymentButtonText)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(paymentButtonColor)
+                    .cornerRadius(16)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(
+            AppTheme.Colors.groupedBackground
+                .shadow(color: AppTheme.Colors.cardShadow.opacity(0.3), radius: 6, x: 0, y: -2)
+        )
+    }
+    
+    private var paymentButtonText: String {
+        return "Approve & Pay"
+    }
+    
+    private var paymentButtonColor: Color {
+        let role = auth.role?.lowercased() ?? ""
+        return role == "talent" ? .green : AppTheme.Colors.primary
+    }
+    
     @ViewBuilder
     private var loadingOverlay: some View {
         if viewModel.isLoading && viewModel.mission == nil {
@@ -313,11 +365,12 @@ private struct FlexibleSkillsView: View {
                 hasApplied: false,
                 isFavorite: false,
                 status: "in_progress",
+                paymentStatus: "pending",
+                assignedTalentId: nil,
+                completedAt: nil,
                 createdAt: ISO8601DateFormatter().string(from: Date().addingTimeInterval(-1800)),
                 updatedAt: ISO8601DateFormatter().string(from: Date())
             )
         )
     )
 }
-
-

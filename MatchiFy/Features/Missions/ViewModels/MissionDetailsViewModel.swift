@@ -128,10 +128,11 @@ final class MissionDetailsViewModel: ObservableObject {
             hasApplied: currentMission.hasApplied,
             isFavorite: isFavorite,
             status: currentMission.status,
+            paymentStatus: currentMission.paymentStatus,
+            assignedTalentId: currentMission.assignedTalentId,
+            completedAt: currentMission.completedAt,
             createdAt: currentMission.createdAt,
             updatedAt: currentMission.updatedAt
         )
     }
 }
-
-

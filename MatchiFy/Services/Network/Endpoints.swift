@@ -1,7 +1,7 @@
 import Foundation
 
 struct Endpoints {
-    static let baseURL = "http://192.168.1.126:3000"
+    static let baseURL = "http://localhost:3000"
     static let base = baseURL + "/auth"
     static let apiBase = baseURL
 
@@ -21,6 +21,12 @@ struct Endpoints {
     static let missionStream = apiBase + "/missions/stream"
     static func mission(id: String) -> String {
         return apiBase + "/missions/\(id)"
+    }
+    static func missionComplete(id: String) -> String {
+        return apiBase + "/missions/\(id)/complete"
+    }
+    static func missionApproveCompletion(id: String) -> String {
+        return apiBase + "/missions/\(id)/approve-completion"
     }
     
     // Proposal endpoints
@@ -76,6 +82,18 @@ struct Endpoints {
     }
     static func conversationDelete(id: String) -> String {
         return apiBase + "/conversations/\(id)"
+    }
+    
+    static func uploadDeliverable(id: String) -> String {
+        return apiBase + "/conversations/\(id)/deliverables"
+    }
+    
+    static func updateDeliverableStatus(id: String) -> String {
+        return apiBase + "/conversations/deliverables/\(id)/status"
+    }
+    
+    static func submitDeliverableLink(id: String) -> String {
+        return apiBase + "/conversations/\(id)/deliverables/link"
     }
     
     // Favorites endpoints

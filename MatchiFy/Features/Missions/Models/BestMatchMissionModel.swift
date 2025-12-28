@@ -31,6 +31,9 @@ struct BestMatchMissionModel: Codable, Identifiable, Hashable {
             hasApplied: nil,
             isFavorite: nil,
             status: nil,
+            paymentStatus: nil,
+            assignedTalentId: nil,
+            completedAt: nil,
             createdAt: nil,
             updatedAt: nil
         )

@@ -271,7 +271,7 @@ struct ProposalDetailsView: View {
             refusedIndicator
         }
     }
-    
+
     private var acceptRefuseButtons: some View {
         HStack(spacing: 12) {
             Button {

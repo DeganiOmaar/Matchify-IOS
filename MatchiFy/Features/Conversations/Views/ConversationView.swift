@@ -1,10 +1,15 @@
 import SwiftUI
 import Foundation
+import UniformTypeIdentifiers
 
 struct ConversationView: View {
     @StateObject private var viewModel: ConversationViewModel
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isInputFocused: Bool
+    @State private var showDeliverableSheet = false
+    @State private var requestChangesDeliverableId: String? = nil
+    @State private var showPaymentSheet = false
+    @State private var paymentDeliverableId: String? = nil
     
     init(viewModel: ConversationViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -23,6 +28,10 @@ struct ConversationView: View {
             return nil
         }
         return conversation.getOtherUserProfileImageURL(isRecruiter: viewModel.isRecruiter)
+    }
+    
+    private var isTalent: Bool {
+        return viewModel.isTalent
     }
     
     var body: some View {
@@ -65,7 +74,7 @@ struct ConversationView: View {
         }
         .background(AppTheme.Colors.groupedBackground.ignoresSafeArea())
         .navigationBarHidden(true)
-        .onAppear {
+        .task {
             viewModel.loadConversation()
             viewModel.loadMessages()
             // Mark conversation as read when opened
@@ -145,9 +154,15 @@ struct ConversationView: View {
             
             VStack(alignment: viewModel.isMessageFromCurrentUser(message) ? .trailing : .leading, spacing: 4) {
                 // Check if this is a contract message
+                // Check if this is a contract message
                 if message.isContractMessage == true, let contractId = message.contractId {
                     contractMessageView(contractId: contractId, pdfUrl: message.pdfUrl, message: message)
-                } else {
+                } 
+                // Check if this is a deliverable message
+                else if let deliverable = message.deliverable {
+                   deliverableMessageView(deliverable: deliverable, message: message)
+                }
+                else {
                     Text(message.text)
                         .font(.system(size: 16))
                         .foregroundColor(viewModel.isMessageFromCurrentUser(message) ? .white : AppTheme.Colors.textPrimary)
@@ -275,6 +290,123 @@ struct ConversationView: View {
         }
     }
     
+    // MARK: - Deliverable Message View
+    private func deliverableMessageView(deliverable: DeliverableModel, message: ConversationMessageModel) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Content
+            Button {
+                if let urlString = deliverable.url ?? deliverable.fileUrl as String?,
+                   let url = URL(string: urlString) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: deliverable.type == "link" ? "link.circle.fill" : "doc.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(viewModel.isMessageFromCurrentUser(message) ? .white : AppTheme.Colors.primary)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(deliverable.fileName ?? (deliverable.type == "link" ? "External Link" : "File"))
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(viewModel.isMessageFromCurrentUser(message) ? .white : AppTheme.Colors.textPrimary)
+                            .lineLimit(1)
+                        
+                        HStack {
+                            Text(deliverable.status.replacingOccurrences(of: "_", with: " ").capitalized)
+                                .font(.system(size: 12))
+                                .foregroundColor(viewModel.isMessageFromCurrentUser(message) ? .white.opacity(0.8) : AppTheme.Colors.textSecondary)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(
+                                    Capsule()
+                                        .fill(statusColor(for: deliverable.status).opacity(0.2))
+                                )
+                            
+                            if deliverable.type == "link" {
+                                Text("Link")
+                                    .font(.system(size: 10))
+                                    .padding(.horizontal, 4)
+                                    .background(Color.blue.opacity(0.2))
+                                    .cornerRadius(4)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Actions (Recruiter Only)
+            if viewModel.isRecruiter && deliverable.status == "pending_review" {
+                HStack(spacing: 8) {
+                    Button {
+                        requestChangesDeliverableId = deliverable.id
+                    } label: {
+                        Text("Request Changes")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(AppTheme.Colors.primary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(AppTheme.Colors.secondaryBackground)
+                            .cornerRadius(8)
+                    }
+                    
+                    Button {
+                        // viewModel.updateDeliverableStatus(deliverableId: deliverable.id, status: "approved")
+                        let missionId = deliverable.missionId
+                        paymentDeliverableId = deliverable.id
+                        Task {
+                            await viewModel.preparePayment(missionId: missionId)
+                            if viewModel.paymentMission != nil {
+                                showPaymentSheet = true
+                            }
+                        }
+                    } label: {
+                        Text("Approve & Pay")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(AppTheme.Colors.primary)
+                            .cornerRadius(8)
+                    }
+                }
+                .disabled(viewModel.isLoading)
+            }
+            
+            // Show Rejection Reason if any
+            if let reason = deliverable.rejectionReason, !reason.isEmpty, deliverable.status == "revision_requested" {
+                Text("Revision requested: \(reason)")
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(8)
+                    .background(Color.red.opacity(0.1))
+                    .cornerRadius(8)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(viewModel.isMessageFromCurrentUser(message) ? AppTheme.Colors.primary : AppTheme.Colors.secondaryBackground)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(
+                    viewModel.isMessageFromCurrentUser(message) ? Color.clear : AppTheme.Colors.messageBubbleBorder,
+                    lineWidth: 0.5
+                )
+        )
+    }
+    
+    private func statusColor(for status: String) -> Color {
+        switch status {
+        case "approved": return .green
+        case "rejected": return .red
+        case "pending_review": return .orange
+        case "revision_requested": return .red
+        case "pending": return .orange // legacy
+        default: return .gray
+        }
+    }
+
     // MARK: - Input Section
     private var inputSection: some View {
         VStack(spacing: 0) {
@@ -284,7 +416,10 @@ struct ConversationView: View {
                 .frame(height: 0.5)
             
             // Contract button (Recruiter only)
-            if viewModel.isRecruiter {
+            // Show "Approve & Pay" button for Recruiters if mission is started or completed
+            if let mission = viewModel.mission,
+               mission.status == "started" || mission.status == "completed",
+               !isTalent {
                 HStack {
                     Button {
                         viewModel.showContractSheet = true
@@ -308,7 +443,19 @@ struct ConversationView: View {
             }
             
             HStack(spacing: 12) {
-                TextField("Type a message...", text: $viewModel.messageText, axis: .vertical)
+                // Attach button (Talent only)
+                // Attach button (Talent only)
+                if !viewModel.isRecruiter {
+                    Button {
+                        showDeliverableSheet = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(AppTheme.Colors.textSecondary)
+                    }
+                }
+                
+                TextField("Type a message (Debug)...", text: $viewModel.messageText, axis: .vertical)
                     .font(.system(size: 16))
                     .foregroundColor(AppTheme.Colors.textPrimary)
                     .padding(.horizontal, 16)
@@ -348,6 +495,36 @@ struct ConversationView: View {
                 )
             }
         }
+        .sheet(isPresented: $showDeliverableSheet) {
+            DeliverableInputSheet(viewModel: viewModel)
+        }
+        .sheet(item: Binding(
+            get: { requestChangesDeliverableId.map { SheetItem(id: $0) } },
+            set: { requestChangesDeliverableId = $0?.id }
+        )) { item in
+            RequestChangesSheet(viewModel: viewModel, deliverableId: item.id)
+        }
+        .sheet(isPresented: $showPaymentSheet) {
+            // Use safe computed property to avoid compiler type confusion
+            if let mission = viewModel.safePaymentMission {
+                MissionPaymentView(
+                    mission: mission,
+                    userRole: viewModel.isRecruiter ? "recruiter" : "talent",
+                    onPaymentSuccess: {
+                        showPaymentSheet = false
+                        if let deliverableId = paymentDeliverableId {
+                            viewModel.updateDeliverableStatus(deliverableId: deliverableId, status: "approved")
+                        }
+                    }
+                )
+            } else {
+                ProgressView()
+            }
+        }
     }
 }
 
+// Helper for sheet item
+struct SheetItem: Identifiable {
+    let id: String
+}
