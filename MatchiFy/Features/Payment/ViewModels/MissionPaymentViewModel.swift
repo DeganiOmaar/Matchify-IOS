@@ -37,7 +37,8 @@ class MissionPaymentViewModel: ObservableObject {
         
         Task {
             do {
-                // 0. Biometric Authentication
+                // 0. Biometric Authentication (Disabled for testing)
+                /*
                 do {
                     try await BiometricAuthManager.shared.authenticate()
                 } catch BiometricError.canceled {
@@ -48,6 +49,7 @@ class MissionPaymentViewModel: ObservableObject {
                     self.isLoading = false
                     return
                 }
+                */
                 
                 // 1. Create Payment Intent
                 let response = try await paymentService.createPaymentIntent(missionId: missionId)

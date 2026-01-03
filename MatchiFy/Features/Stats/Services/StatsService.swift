@@ -4,6 +4,7 @@ struct TalentStatsResponse: Codable {
     let totalProposalsSent: Int
     let totalProposalsAccepted: Int
     let totalProposalsRefused: Int
+    let totalEarnings: Double
 }
 
 final class StatsService {

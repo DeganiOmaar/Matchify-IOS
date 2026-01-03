@@ -35,7 +35,7 @@ final class StatsViewModel: ObservableObject {
                 // Update stats model, preserving existing earnings and job success score
                 let currentStats = self.stats
                 self.stats = StatsModel(
-                    twelveMonthEarnings: currentStats.twelveMonthEarnings, // Keep existing earnings
+                    twelveMonthEarnings: statsResponse.totalEarnings, // Use real earnings from API
                     jobSuccessScore: currentStats.jobSuccessScore, // Keep existing score
                     proposalsSent: statsResponse.totalProposalsSent,
                     proposalsAccepted: statsResponse.totalProposalsAccepted,
