@@ -15,7 +15,7 @@ struct DrawerMenuItem: Identifiable {
         case myOffers
         case browseOffers
         case createMission
-        case chatBot
+
         case settings
         case theme
     }
@@ -25,7 +25,7 @@ struct DrawerMenuItem: Identifiable {
             DrawerMenuItem(title: "Profile", iconName: "person.fill", type: .profile),
             DrawerMenuItem(title: "Browse Offers", iconName: "square.grid.2x2.fill", type: .browseOffers),
             DrawerMenuItem(title: "Create Mission", iconName: "plus.circle.fill", type: .createMission),
-            DrawerMenuItem(title: "Chat Bot", iconName: "message.fill", type: .chatBot),
+
             DrawerMenuItem(title: "Settings", iconName: "gearshape.fill", type: .settings),
             DrawerMenuItem(title: "Theme", iconName: "paintbrush.fill", type: .theme)
         ]
@@ -37,7 +37,7 @@ struct DrawerMenuItem: Identifiable {
             DrawerMenuItem(title: "My stats", iconName: "chart.bar.fill", type: .myStats),
             DrawerMenuItem(title: "Create Offer", iconName: "plus.circle.fill", type: .createOffer),
             DrawerMenuItem(title: "My Offers", iconName: "square.stack.fill", type: .myOffers),
-            DrawerMenuItem(title: "Chat Bot", iconName: "message.fill", type: .chatBot),
+
             DrawerMenuItem(title: "Settings", iconName: "gearshape.fill", type: .settings),
             DrawerMenuItem(title: "Theme", iconName: "paintbrush.fill", type: .theme)
         ]

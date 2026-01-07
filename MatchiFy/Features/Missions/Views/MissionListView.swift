@@ -221,9 +221,7 @@ struct MissionListView: View {
                                 showSettings = true
                             case .theme:
                                 showTheme = true
-                            case .chatBot:
-                                // TODO: Implémenter les autres actions plus tard
-                                break
+
                             case .createOffer:
                                 showCreateOffer = true
                             case .myOffers:

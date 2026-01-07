@@ -151,9 +151,7 @@ struct AlertsView: View {
                                 showSettings = true
                             case .theme:
                                 showTheme = true
-                            case .chatBot:
-                                // TODO: Implement chatbot later
-                                break
+
                             case .createOffer:
                                 showCreateOffer = true
                             case .myOffers:
